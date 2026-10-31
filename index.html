@@ -1,0 +1,1172 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mein Revier – Prototyp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css">
+<style>
+  :root { --bg:#14181c; --panel:#1e252b; --line:#33404a; --text:#e9eef2; --accent:#f5c518; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  header { padding:12px 16px; background:var(--panel); border-bottom:1px solid var(--line); display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  header h1 { font-size:16px; margin:0 12px 0 0; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); }
+  input[type=text] { background:#10151a; border:1px solid var(--line); color:var(--text); padding:8px 10px; border-radius:6px; font-size:14px; min-width:200px; }
+  button { background:#2a343c; border:1px solid var(--line); color:var(--text); padding:8px 12px; border-radius:6px; font-size:14px; cursor:pointer; }
+  button:hover { background:#34414b; }
+  button.on { background:var(--accent); color:#111; border-color:var(--accent); font-weight:600; }
+  button.primary { background:var(--accent); color:#111; border-color:var(--accent); font-weight:600; }
+  .tools { padding:10px 16px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; border-bottom:1px solid var(--line); }
+  .tools label, .panel label { font-size:13px; color:#aab6bf; display:flex; align-items:center; gap:6px; }
+  #status { font-size:13px; color:#aab6bf; padding:6px 16px; min-height:28px; }
+  main { display:flex; flex-direction:column; align-items:center; padding:8px 16px 24px; }
+  .wrap { display:flex; gap:20px; justify-content:center; align-items:flex-start; flex-wrap:wrap; width:100%; }
+  .poster { flex:none; width:min(92vw, calc((100vh - 230px) * 5 / 7)); min-width:280px; aspect-ratio:5 / 7; position:relative; container-type:inline-size;
+            border:8px solid #f3ead0; box-shadow:0 10px 40px rgba(0,0,0,.6); background:#222; overflow:hidden; }
+  #map { position:absolute; inset:0; isolation:isolate; background:#1f2327; }
+  /* GTA-ähnlicher Look per Farbfilter (Prototyp) */
+  #map canvas.maplibregl-canvas { filter: grayscale(1) brightness(1.7); outline:none; }
+  #map.osm canvas.maplibregl-canvas { filter: grayscale(1) contrast(1.1) brightness(.7); }
+  #fog { position:absolute; inset:0; width:100%; height:100%; z-index:5; pointer-events:none; touch-action:none; }
+  #fog.paint { pointer-events:auto; cursor:crosshair; }
+  .legend { position:absolute; top:3cqw; right:0; z-index:7; display:flex; flex-direction:column; align-items:flex-end; gap:.7cqw; pointer-events:none; }
+  .legend .row { display:flex; align-items:center; gap:1.4cqw; background:rgba(0,0,0,.74); color:#fff; padding:.6cqw 1.6cqw .6cqw 2.4cqw; font-size:2.5cqw; line-height:1; white-space:nowrap; }
+  .legend .row svg { width:3.6cqw; height:3.6cqw; display:block; }
+  .titlebar { position:absolute; left:0; right:0; bottom:0; z-index:8; padding:14cqw 4cqw 4cqw; text-align:center;
+              background:linear-gradient(to top, rgba(0,0,0,.92) 35%, rgba(0,0,0,0)); pointer-events:none; }
+  .titlebar h2 { margin:0; font-family:Impact, "Arial Black", "Helvetica Neue", sans-serif; font-weight:900; text-transform:uppercase;
+                 letter-spacing:.03em; line-height:1; font-size:calc(11cqw * var(--f, 1)); color:#f3ead0;
+                 text-shadow:-.35cqw -.35cqw 0 #000, .35cqw -.35cqw 0 #000, -.35cqw .35cqw 0 #000, .35cqw .35cqw 0 #000, 0 .8cqw 0 #000; }
+  .titlebar p { margin:1.5cqw 0 0; font-size:2.6cqw; letter-spacing:.35em; color:#c9bf9f; text-transform:uppercase; }
+  .watermark { position:absolute; inset:0; z-index:9; pointer-events:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='280' height='170'><text x='140' y='95' text-anchor='middle' font-family='Arial Black, Arial' font-weight='900' font-size='34' fill='white' fill-opacity='0.38' stroke='black' stroke-opacity='0.25' stroke-width='1' transform='rotate(-25 140 85)'>VORSCHAU</text></svg>"); }
+  .panel { flex:none; width:300px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px; }
+  .panel h3 { margin:0 0 8px; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); }
+  .palette { display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; margin-bottom:8px; }
+  .palette button { padding:4px; display:flex; justify-content:center; border-radius:8px; }
+  .palette button.sel { background:var(--accent); border-color:var(--accent); }
+  .palette svg { width:34px; height:34px; display:block; }
+  .palette.letters { grid-template-columns:repeat(9, minmax(0, 1fr)); gap:3px; }
+  .palette.letters button { padding:1px; min-width:0; border-radius:6px; }
+  .palette.letters svg { width:100%; height:auto; }
+  #selLabel { font-size:13px; color:#aab6bf; margin-bottom:8px; }
+  .panel input[type=text] { width:100%; min-width:0; margin-bottom:8px; }
+  .panel .opts { display:flex; flex-direction:column; gap:6px; margin:10px 0; }
+  .plist { max-height:260px; overflow:auto; margin-top:6px; display:flex; flex-direction:column; gap:6px; }
+  .plist .item { display:flex; align-items:center; gap:6px; }
+  .plist .item svg { width:26px; height:26px; flex:none; }
+  .plist .item input { margin:0; padding:5px 8px; font-size:13px; }
+  .plist .item button { padding:4px 8px; }
+  .empty { font-size:13px; color:#8393a0; }
+  .fogbox { border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin:10px 0; }
+  .fogbox summary { cursor:pointer; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); }
+  .fogin { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+  .fogin label { justify-content:space-between; }
+  .fogin input[type=range] { width:140px; }
+  .fogtools { display:flex; gap:6px; flex-wrap:wrap; }
+  .fogtools button { padding:6px 10px; font-size:13px; }
+  .colorpick { width:30px; height:30px; padding:0; border:1px solid var(--line); background:none; border-radius:6px; flex:none; cursor:pointer; }
+  .plist .item span.ico { display:flex; flex:none; }
+  .buy { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; justify-content:center; }
+  .note { font-size:12px; color:#8393a0; margin-top:12px; text-align:center; max-width:560px; }
+  /* ---- Design v2: moderner Kopfbereich und Vorschau ---- */
+  body { font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         background: radial-gradient(1200px 600px at 12% -10%, #243040 0%, rgba(20,24,28,0) 60%),
+                     radial-gradient(900px 500px at 100% 0%, #3a2a14 0%, rgba(20,24,28,0) 55%), var(--bg);
+         background-attachment: fixed; }
+  header { position:sticky; top:0; z-index:50; padding:12px clamp(12px, 3vw, 28px); gap:18px;
+           background:rgba(16,20,24,.72); backdrop-filter:blur(14px) saturate(1.4); -webkit-backdrop-filter:blur(14px) saturate(1.4);
+           border-bottom:1px solid rgba(255,255,255,.08); }
+  .brand { display:flex; align-items:center; gap:12px; text-decoration:none; color:inherit; }
+  .brand svg { flex:none; filter:drop-shadow(0 4px 14px rgba(255,160,0,.35)); }
+  .brand .word { display:block; font-family:"Barlow Condensed", Impact, "Arial Narrow", sans-serif; font-weight:800; font-size:28px; letter-spacing:.06em; line-height:.9; text-transform:uppercase; }
+  .brand .word b { color:var(--accent); font-weight:800; }
+  .brand .tag { display:block; font-size:10.5px; font-weight:500; letter-spacing:.22em; text-transform:uppercase; color:#8fa0ad; margin-top:5px; }
+  .searchbar { display:flex; align-items:center; gap:8px; flex:1 1 320px; max-width:540px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:999px; padding:4px 4px 4px 14px; }
+  .searchbar:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px rgba(245,197,24,.18); }
+  .searchbar input { flex:1; min-width:0 !important; background:transparent !important; border:0 !important; outline:none; padding:8px 4px !important; color:var(--text); font-size:14px; }
+  .searchbar svg { flex:none; opacity:.6; }
+  .searchbar button { border-radius:999px; padding:9px 18px; }
+  .titlefield { display:flex; flex-direction:column; gap:3px; }
+  .titlefield span { font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#8fa0ad; padding-left:14px; }
+  .titlefield input { border-radius:999px !important; background:rgba(255,255,255,.06) !important; border-color:rgba(255,255,255,.12) !important; padding:8px 14px !important; }
+  .tools { border-bottom:0; padding:14px clamp(12px,3vw,28px) 4px; }
+  .tools button { border-radius:999px; padding:8px 16px; }
+  button.primary { background:linear-gradient(135deg,#ffd84a,#ff9f1a); border-color:transparent; }
+  .panel { background:rgba(30,37,43,.82); }
+  .mock { width:100%; max-width:1180px; margin-top:30px; }
+  .mock h2 { margin:0 0 4px; font-family:"Barlow Condensed", Impact, sans-serif; font-weight:800; font-size:28px; letter-spacing:.06em; text-transform:uppercase; }
+  .mock h2 b { color:var(--accent); }
+  .mock p { margin:0 0 14px; font-size:13px; color:#8fa0ad; }
+  .mockgrid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px; }
+  .mockgrid figure { margin:0; }
+  .mockgrid canvas { width:100%; height:auto; display:block; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.45); background:#1b2026; }
+  .mockgrid figcaption { font-size:12px; color:#8fa0ad; margin-top:8px; letter-spacing:.1em; text-transform:uppercase; }
+  /* An/Aus-Schalter */
+  .tools { gap:22px; }
+  .switch { position:relative; display:inline-flex; align-items:center; gap:10px; cursor:pointer; user-select:none; font-size:14px; color:var(--text); }
+  .switch input { position:absolute; opacity:0; width:0; height:0; }
+  .switch .track { width:44px; height:25px; border-radius:999px; background:#3a4650; position:relative; transition:background .2s; flex:none; }
+  .switch .track::after { content:''; position:absolute; top:3px; left:3px; width:19px; height:19px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.4); transition:transform .2s, background .2s; }
+  .switch input:checked + .track { background:linear-gradient(135deg,#ffd84a,#ff9f1a); }
+  .switch input:checked + .track::after { transform:translateX(19px); background:#111; }
+  .switch input:focus-visible + .track { outline:2px solid var(--accent); outline-offset:3px; }
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="#" onclick="return false" aria-label="Mein Revier">
+    <svg width="44" height="44" viewBox="0 0 40 40" aria-hidden="true">
+      <rect width="40" height="40" rx="8" fill="#0d1114"/>
+      <rect x="1" y="1" width="38" height="38" rx="7" fill="none" stroke="#ff9f1a" stroke-width="1.4"/>
+      <!-- R als Silhouette, Umrandung gestrichelt wie eine Stadtgrenze (Strich-Punkt) -->
+      <path id="logoR" d="M11 31V9h10.5c4.6 0 7.5 2.6 7.5 6.5 0 3.2-2 5.4-5 6.2L30 31h-6.4l-4.8-8.4H17V31z M17 14v4.6h4.2c1.7 0 2.7-.9 2.7-2.3s-1-2.3-2.7-2.3z" fill="#ffb21f" fill-rule="evenodd"/>
+      <path d="M11 31V9h10.5c4.6 0 7.5 2.6 7.5 6.5 0 3.2-2 5.4-5 6.2L30 31h-6.4l-4.8-8.4H17V31z M17 14v4.6h4.2c1.7 0 2.7-.9 2.7-2.3s-1-2.3-2.7-2.3z" fill="none" stroke="#0d1114" stroke-width="1.1" stroke-dasharray="3.2 1.4 0.6 1.4" stroke-linejoin="round" fill-rule="evenodd"/>
+    </svg>
+    <span class="word">Mein <b>Revier</b></span>
+  </a>
+  <div class="searchbar">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="q" type="text" placeholder="Stadt, Ort oder Postleitzahl" value="Berlin">
+    <button id="go" class="primary">Karte laden</button>
+  </div>
+  <label class="titlefield"><span>Poster-Titel</span><input id="titleIn" type="text" placeholder="Titel auf dem Poster"></label>
+</header>
+<div class="tools">
+  <label class="switch"><input type="checkbox" id="tPlaces" checked><span class="track"></span><span class="lbl">Ortsnamen</span></label>
+  <label class="switch"><input type="checkbox" id="tStreets"><span class="track"></span><span class="lbl">Straßennamen</span></label>
+</div>
+<div id="status"></div>
+<main>
+  <div class="wrap">
+    <div class="poster" id="poster">
+      <div id="map"></div>
+      <canvas id="fog"></canvas>
+      <div class="legend" id="legend"></div>
+      <div class="titlebar"><h2 id="title">BERLIN</h2><p id="coords"></p></div>
+      <div class="watermark"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Orte (Icons)</h3>
+      <div class="empty" style="margin:-2px 0 8px">Icon antippen, dann auf die Karte klicken. Esc beendet.</div>
+      <div class="palette" id="palette"></div>
+      <div class="empty" style="margin:4px 0 6px">Buchstaben (z. B. für Freunde)</div>
+      <div class="palette letters" id="paletteL"></div>
+      <label style="justify-content:space-between; margin-bottom:8px">Farbe für neue Buchstaben <input type="color" id="letterColor" value="#dfe5e8"></label>
+      <div id="selLabel"></div>
+      <input id="poiName" type="text" placeholder="Name des Ortes (optional)">
+      <button id="placeCross" style="width:100%">Am Fadenkreuz platzieren</button>
+      <div class="opts">
+        <label><input type="checkbox" id="optCross" checked> Fadenkreuz anzeigen</label>
+        <label><input type="checkbox" id="optLegend" checked> Legende auf dem Poster</label>
+      </div>
+      <details class="fogbox" id="fogBox">
+        <summary>Vignette</summary>
+        <div class="fogin">
+          <label><input type="checkbox" id="optFog"> Vignette aktivieren</label>
+          <label>Stärke <input id="fogWidth" type="range" min="0" max="100" value="45"></label>
+          <label>Weichheit <input id="fogSoft" type="range" min="0" max="80" value="30"></label>
+          <label>Struktur <input id="fogSmoke" type="range" min="0" max="100" value="60"></label>
+          <label>Deckkraft <input id="fogOpacity" type="range" min="40" max="100" value="100"></label>
+          <label>Farbe <input id="fogColor" type="color" value="#0a0c0e"></label>
+        </div>
+      </details>
+      <h3>Deine Orte</h3>
+      <div class="plist" id="plist"></div>
+    </div>
+  </div>
+  <section class="mock" id="mock">
+    <h2>Live-<b>Vorschau</b></h2>
+    <p>So könnte dein Poster bei dir aussehen. Die Bilder aktualisieren sich bei jeder Änderung.</p>
+    <div class="mockgrid">
+      <figure><canvas id="mkWall" width="960" height="600"></canvas><figcaption>Im Wohnzimmer</figcaption></figure>
+      <figure><canvas id="mkGallery" width="960" height="600"></canvas><figcaption>Im Gamer-Zimmer</figcaption></figure>
+      <figure><canvas id="mkPhone" width="960" height="600"></canvas><figcaption>Handy-Hintergrund</figcaption></figure>
+    </div>
+  </section>
+  <div class="buy">
+    <select id="expSize" aria-label="Bildgröße" style="padding:0 12px;border-radius:10px;border:1px solid #2b343c;background:#12171b;color:#e8edf0;font:inherit">
+      <option value="1500">Klein · 1500×2100 px (Handy, Social)</option>
+      <option value="2500">Mittel · 2500×3500 px</option>
+      <option value="3300" selected>Groß · 3300×4620 px (ca. 28×39 cm, 300 dpi)</option>
+    </select>
+    <button id="buyImg" class="primary">Als Bild kaufen</button>
+    <button id="buyPoster" class="primary">Als Poster bestellen</button>
+  </div>
+  <div class="note">Karte © OpenStreetMap-Mitwirkende. Kartenkacheln und Suche sind in diesem Prototyp nur für Tests gedacht. Das Wasserzeichen erscheint nur in der Bearbeitung.</div>
+  <div class="note" id="tileNote"></div>
+</main>
+
+<script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+<script>
+(function () {
+  // ---- Rauch von außen: Nebel am Posterrand, unabhängig von der Kartenbewegung ----
+  var fogRGB = [10, 12, 14], fogAlpha = 1, fogWidth = 0.45, fogSoft = 0.3, fogSmoke = 0.6;
+  var fogCache = null;
+
+  function hash2(ix, iy) {
+    var h = Math.imul(ix, 374761393) ^ Math.imul(iy, 668265263);
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    h ^= h >>> 16;
+    return (h >>> 0) / 4294967295;
+  }
+  function vnoise(x, y) {
+    var x0 = Math.floor(x), y0 = Math.floor(y);
+    var fx = x - x0, fy = y - y0;
+    var u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy);
+    var a = hash2(x0, y0), b = hash2(x0 + 1, y0), c = hash2(x0, y0 + 1), d = hash2(x0 + 1, y0 + 1);
+    return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+  }
+  function fbm(x, y) {
+    return (vnoise(x, y) * 0.5 + vnoise(x * 2, y * 2) * 0.25 + vnoise(x * 4, y * 4) * 0.125 + vnoise(x * 8, y * 8) * 0.0625) / 0.9375;
+  }
+  function smooth(e0, e1, x) {
+    var t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)));
+    return t * t * (3 - 2 * t);
+  }
+
+  function buildFog() {
+    var W = cv.clientWidth, H = cv.clientHeight;
+    if (!W || !H) return;
+    var sc = 0.5;
+    var w = Math.max(2, Math.round(W * sc)), h = Math.max(2, Math.round(H * sc));
+    if (!fogCache) fogCache = document.createElement('canvas');
+    fogCache.width = w; fogCache.height = h;
+    var c2 = fogCache.getContext('2d');
+    var img = c2.createImageData(w, h);
+    // Kreisförmig von außen: u = 0 in der Mitte, 1 in den Ecken
+    var cx = (w - 1) / 2, cy = (h - 1) / 2;
+    var rMax = Math.sqrt(cx * cx + cy * cy);
+    var rIn = 1 - 0.8 * fogWidth;                   // ab hier beginnt der Randverlauf
+    var feather = 0.06 + fogSoft * 0.5;             // Breite des weichen Übergangs
+    var e1 = Math.max(rIn + 0.02, Math.min(rIn + feather, 1));
+    var turb = 0.06 + fogSmoke * 0.3;               // Unruhe der Kante
+    for (var y = 0; y < h; y++) {
+      for (var x = 0; x < w; x++) {
+        var dx = x - cx, dy = y - cy;
+        var u = Math.sqrt(dx * dx + dy * dy) / rMax;
+        var n = fbm(x / w * 4.5 + 3.1, y / w * 4.5 + 7.7);
+        var v = u + (n - 0.5) * turb;
+        var a = fogWidth <= 0.001 ? 0 : smooth(rIn, e1, v);
+        var i = (y * w + x) * 4;
+        img.data[i] = fogRGB[0];
+        img.data[i + 1] = fogRGB[1];
+        img.data[i + 2] = fogRGB[2];
+        img.data[i + 3] = Math.round(a * fogAlpha * 255);
+      }
+    }
+    c2.putImageData(img, 0, 0);
+  }
+
+  function textOn(hex) {
+    var r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+    return (0.299 * r + 0.587 * g + 0.114 * b) > 150 ? '#111' : '#fff';
+  }
+
+  // Eigene Icons (24x24-Raster), weiße Symbole auf farbigem Rund-Badge
+  var ICONS = [
+    { id: 'home',     label: 'Zuhause',        color: '#43a047', d: 'M12 3 2 12h3v9h5v-6h4v6h5v-9h3z' },
+    { id: 'work',     label: 'Arbeit',         color: '#8d6e63', d: 'M9 4h6a1 1 0 0 1 1 1v2h4a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h4V5a1 1 0 0 1 1-1zm1 2v1h4V6z' },
+    { id: 'school',   label: 'Uni / Schule',   color: '#5c6bc0', d: 'M12 3 1 9l11 6 9-4.9V17h2V9zM5 13.2V17c0 1.7 3.1 3 7 3s7-1.3 7-3v-3.8l-7 3.8z' },
+    { id: 'cafe',     label: 'Café',           color: '#c97b3a', d: 'M4 6h13v7a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM17 8h2a3 3 0 0 1 0 6h-2v-2h2a1 1 0 0 0 0-2h-2zM4 20h14v2H4z' },
+    { id: 'food',     label: 'Restaurant',     color: '#ff7043', d: 'M6 2h1.5v6H9V2h1.5v6a3 3 0 0 1-2 2.8V22H7.5V10.8A3 3 0 0 1 6 8zM16 2c-2 1-3 4-3 7s1 4 2.5 4.2V22H17V2z' },
+    { id: 'bar',      label: 'Bar',            color: '#d81b60', d: 'M3 3h18l-8 9v7h4v2H7v-2h4v-7z' },
+    { id: 'music',    label: 'Club / Konzert', color: '#8e24aa', d: 'M9 3v11.3a3.5 3.5 0 1 0 2 3.2V7h8V3z' },
+    { id: 'shop',     label: 'Einkaufen',      color: '#7cb342', d: 'M3 3h3l.6 3H21l-2 8H8.5l.4 2H19v2H7.4L5 5H3zM9 19.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM17 19.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z' },
+    { id: 'gym',      label: 'Sport / Gym',    color: '#fb8c00', d: 'M2 9h2V7h2v10H4v-2H2zM20 9h2v6h-2v2h-2V7h2zM6 11h12v2H6z' },
+    { id: 'park',     label: 'Park',           color: '#2e9d57', d: 'M12 2a6 6 0 0 0-5 9.3 4.5 4.5 0 0 0 4 6.2V22h2v-4.5a4.5 4.5 0 0 0 4-6.2A6 6 0 0 0 12 2z' },
+    { id: 'water',    label: 'See / Fluss',    color: '#29b6f6', d: 'M12 2s7 7.5 7 12a7 7 0 0 1-14 0c0-4.5 7-12 7-12z' },
+    { id: 'train',    label: 'Bahn / ÖPNV',    color: '#607d8b', d: 'M7 2h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3l2 3h-2.5l-1.5-2h-6l-1.5 2H5l2-3a3 3 0 0 1-3-3V5a3 3 0 0 1 3-3zm0 3v5h10V5zm1.5 7a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm7 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z' },
+    { id: 'plane',    label: 'Flughafen',      color: '#26a69a', d: 'M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z' },
+    { id: 'parking',  label: 'Parken',         color: '#1e88e5', d: 'M7 3h6a5 5 0 0 1 0 10H10v8H7zM10 6v4h3a2 2 0 0 0 0-4z' },
+    { id: 'hospital', label: 'Arzt / Klinik',  color: '#ef5350', d: 'M9 3h6v6h6v6h-6v6H9v-6H3V9h6z' },
+    { id: 'garage',   label: 'Garage',         color: '#757575', d: 'M12 2 2 8v14h20V8zM6 11h12v2H6zM6 15h12v2H6zM6 19h12v2H6z' },
+    { id: 'cinema',   label: 'Kino',           color: '#5e35b1', d: 'M3 5h18v14H3zM10 8.5v7l6-3.5z' },
+    { id: 'camera',   label: 'Fotospot',       color: '#00897b', d: 'M9 4 7.5 6H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-3.5L15 4zM12 9a4 4 0 1 1 0 8 4 4 0 0 1 0-8z' },
+    { id: 'heart',    label: 'Freunde / Familie', color: '#e91e63', d: 'M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z' },
+    { id: 'star',     label: 'Lieblingsort',   color: '#f5b800', d: 'M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.5 5.8 21.1l1.4-7L2 9.3l7-.8z' }
+  ];
+  var ICON_BY = {};
+  ICONS.forEach(function (ic) { ic.p = new Path2D(ic.d); ICON_BY[ic.id] = ic; });
+
+  // Buchstaben A–Z, z. B. für die Häuser von Freunden
+  var LETTERS = [];
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function (c) {
+    var ic = { id: 'L' + c, label: 'Buchstabe ' + c, color: '#dfe5e8', letter: c };
+    LETTERS.push(ic);
+    ICON_BY[ic.id] = ic;
+  });
+
+  function iconSVG(ic, size, color) {
+    var col = color || ic.color;
+    var fg = color ? textOn(color) : (ic.letter ? '#111' : '#fff');
+    if (ic.letter) {
+      return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 32 32">' +
+        '<circle cx="16" cy="16" r="14" fill="' + col + '" stroke="#111" stroke-width="2"/>' +
+        '<text x="16" y="22.5" text-anchor="middle" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="19" fill="' + fg + '">' + ic.letter + '</text></svg>';
+    }
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 32 32">' +
+      '<circle cx="16" cy="16" r="14" fill="' + col + '" stroke="#111" stroke-width="2"/>' +
+      '<path transform="translate(6 6) scale(0.8333)" fill="' + fg + '" fill-rule="evenodd" d="' + ic.d + '"/></svg>';
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+  }
+
+  var BLANK_STYLE = { version: 8, sources: {}, layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#1f2327' } }] };
+  var map = new maplibregl.Map({
+    container: 'map', style: BLANK_STYLE, center: [13.405, 52.52], zoom: 11,
+    attributionControl: false, dragRotate: false, pitchWithRotate: false, fadeDuration: 0,
+    preserveDrawingBuffer: true, canvasContextAttributes: { preserveDrawingBuffer: true }   // nötig für die Live-Vorschau
+  });
+  map.touchZoomRotate.disableRotation();
+  // ===== KARTEN-EINSTELLUNG =====
+  // Hier deinen MapTiler-Key zwischen die Anführungszeichen einfügen (kostenloses Konto auf maptiler.com).
+  var MAPTILER_KEY = 't7NRFJqgGF2r5if2zLfq';
+  // Kartenstil, z. B. 'streets-v4-dark' oder ruhiger 'dataviz-v4-dark'
+  var MAP_ID = 'streets-v4-dark';
+  // ==============================
+  // Namen-Ebenen: Orts- und Straßennamen sind aus, bis man sie per Knopf einschaltet
+  var labelIds = { place: [], street: [] };
+  var showLabels = { place: true, street: false };
+  function labelKind(l) {
+    var sl = l['source-layer'] || '', id = l.id || '';
+    if (sl === 'place' || /(^|[-_ ])(place|city|town|village|suburb|hamlet|neighbo|state|country|island)/i.test(id)) return 'place';
+    if (sl === 'transportation_name' || /(road|street|highway|motorway|path|transport).*(label|name)|(label|name).*(road|street|highway|motorway)/i.test(id)) return 'street';
+    return null;
+  }
+  function applyLabels() {
+    ['place', 'street'].forEach(function (k) {
+      labelIds[k].forEach(function (id) {
+        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', showLabels[k] ? 'visible' : 'none');
+      });
+    });
+  }
+  function setLabels(kind, on, nameDe) {
+    showLabels[kind] = on;
+    if (on && labelIds[kind].length === 0 && !mapLoading) status('Für diesen Kartenstil wurden keine ' + nameDe + ' gefunden.');
+    applyLabels();
+  }
+  var mapLoading = true;   // wird false, sobald der Kartenstil geladen ist
+  document.getElementById('tPlaces').addEventListener('change', function (e) { setLabels('place', e.target.checked, 'Ortsnamen'); });
+  document.getElementById('tStreets').addEventListener('change', function (e) { setLabels('street', e.target.checked, 'Straßennamen'); });
+
+  var mapWarned = false;
+  function mapWarn(t) { if (!mapWarned) { mapWarned = true; status(t); } }
+  map.on('error', function (e) {
+    if (e && e.error && e.error.status) mapWarn('Kartendaten konnten nicht geladen werden (Fehler ' + e.error.status + '). Key und Internetverbindung prüfen.');
+  });
+  if (MAPTILER_KEY) {
+    fetch('https://api.maptiler.com/maps/' + MAP_ID + '/style.json?key=' + MAPTILER_KEY)
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (st) {
+        // Symbole (Haltestellen usw.) entfernen, Orts- und Straßennamen behalten, aber ausgeblendet
+        labelIds = { place: [], street: [] };
+        st.layers = st.layers.filter(function (l) {
+          if (l.type !== 'symbol') return true;
+          var k = labelKind(l);
+          if (!k) return false;
+          l.layout = l.layout || {};
+          l.layout.visibility = showLabels[k] ? 'visible' : 'none';
+          labelIds[k].push(l.id);
+          return true;
+        });
+        // Flache Karte erzwingen, die Umrechnung für den Nebel setzt Mercator voraus
+        delete st.projection;
+        map.setStyle(st);
+        mapLoading = false;
+      })
+      .catch(function () { mapWarn('Kartenstil konnte nicht geladen werden. Key, Kartenstil und Internetverbindung prüfen.'); });
+    document.getElementById('tileNote').textContent = 'Kartendaten © MapTiler © OpenStreetMap-Mitwirkende.';
+  } else {
+    // Ersatzkarte ohne Key (nur zum Ausprobieren)
+    map.setStyle({ version: 8,
+      sources: { osm: { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 19 } },
+      layers: [{ id: 'osm', type: 'raster', source: 'osm' }] });
+    document.getElementById('map').classList.add('osm');
+    document.getElementById('tileNote').textContent = 'Ersatzkarte aktiv. Für den dunklen Spiel-Look trägst du oben im Skript bei MAPTILER_KEY deinen MapTiler-Key ein.';
+  }
+
+  var cv = document.getElementById('fog');
+  var ctx = cv.getContext('2d');
+  var ops = [];            // {lat,lng,r (Meter),erase,id}
+  var strokeId = 0;
+  var pois = [];           // {id,lat,lng,icon,name}
+  var poiId = 0;
+  var selIcon = 'home';
+  var showCross = true;
+  var showFog = false;
+  var letterColor = '#dfe5e8';
+  var mode = 'move';
+  var painting = false;
+  var last = null;
+
+  function status(t) { document.getElementById('status').textContent = t || ''; }
+
+  function metersPerPixel() {
+    var c = map.getCenter();
+    return 40075016.686 * Math.cos(c.lat * Math.PI / 180) / (512 * Math.pow(2, map.getZoom()));
+  }
+
+  function resizeCanvas() {
+    var dpr = window.devicePixelRatio || 1;
+    cv.width = Math.round(cv.clientWidth * dpr);
+    cv.height = Math.round(cv.clientHeight * dpr);
+    if (showFog) buildFog();
+  }
+
+  function drawPois(w, h) {
+    var s = Math.max(10, w * 0.028);
+    for (var i = 0; i < pois.length; i++) {
+      var o = pois[i];
+      var ic = ICON_BY[o.icon];
+      var p = map.project([o.lng, o.lat]);
+      if (p.x + s < 0 || p.y + s < 0 || p.x - s > w || p.y - s > h) continue;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.shadowColor = 'rgba(0,0,0,.55)';
+      ctx.shadowBlur = s * 0.4;
+      var fg = o.color ? textOn(o.color) : (ic.letter ? '#111' : '#fff');
+      ctx.fillStyle = o.color || ic.color;
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = s * 0.16;
+      ctx.beginPath();
+      ctx.arc(0, 0, s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowColor = 'transparent';
+      ctx.stroke();
+      if (ic.letter) {
+        ctx.fillStyle = fg;
+        ctx.font = '900 ' + (s * 1.3) + 'px Impact, "Arial Black", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(ic.letter, 0, s * 0.08);
+      } else {
+        ctx.translate(-s * 0.625, -s * 0.625);
+        ctx.scale(s * 1.25 / 24, s * 1.25 / 24);
+        ctx.fillStyle = fg;
+        ctx.fill(ic.p, 'evenodd');
+      }
+      ctx.restore();
+    }
+  }
+
+  function drawCrosshair(w, h) {
+    if (!showCross) return;
+    var cx = w / 2, cy = h / 2;
+    var gap = w * 0.02, len = w * 0.14;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+    ctx.lineWidth = Math.max(1, w * 0.003);
+    ctx.shadowColor = 'rgba(0,0,0,.7)';
+    ctx.shadowBlur = 3;
+    ctx.beginPath();
+    ctx.moveTo(cx - gap - len, cy); ctx.lineTo(cx - gap, cy);
+    ctx.moveTo(cx + gap, cy);       ctx.lineTo(cx + gap + len, cy);
+    ctx.moveTo(cx, cy - gap - len); ctx.lineTo(cx, cy - gap);
+    ctx.moveTo(cx, cy + gap);       ctx.lineTo(cx, cy + gap + len);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // ---- Live-Vorschau: Poster als Bild zusammensetzen und in Szenen zeigen ----
+  var mockTimer = null;
+  function scheduleMockups() {
+    clearTimeout(mockTimer);
+    mockTimer = setTimeout(updateMockups, 130);
+  }
+
+  function roundRect(g, x, y, w, h, r) {
+    g.beginPath();
+    g.moveTo(x + r, y);
+    g.arcTo(x + w, y, x + w, y + h, r);
+    g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r);
+    g.arcTo(x, y, x + w, y, r);
+    g.closePath();
+  }
+
+  // Bild so zeichnen, dass es die Zielfläche ausfüllt (mittig zugeschnitten)
+  function coverDraw(g, src, dx, dy, dw, dh) {
+    var sw = src.width, sh = src.height;
+    if (!sw || !sh) return;
+    var s = Math.max(dw / sw, dh / sh);
+    var vw = dw / s, vh = dh / s;
+    g.drawImage(src, (sw - vw) / 2, (sh - vh) / 2, vw, vh, dx, dy, dw, dh);
+  }
+
+  // Icon-Badge am Ursprung zeichnen (für die Legende im Vorschaubild)
+  function drawBadge(g, o, ic, s) {
+    var fg = o.color ? textOn(o.color) : (ic.letter ? '#111' : '#fff');
+    g.save();
+    g.fillStyle = o.color || ic.color;
+    g.strokeStyle = '#111';
+    g.lineWidth = s * 0.16;
+    g.beginPath();
+    g.arc(0, 0, s, 0, Math.PI * 2);
+    g.fill();
+    g.stroke();
+    if (ic.letter) {
+      g.fillStyle = fg;
+      g.font = '900 ' + (s * 1.3) + 'px Impact, "Arial Black", sans-serif';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.fillText(ic.letter, 0, s * 0.08);
+    } else {
+      g.translate(-s * 0.625, -s * 0.625);
+      g.scale(s * 1.25 / 24, s * 1.25 / 24);
+      g.fillStyle = fg;
+      g.fill(ic.p, 'evenodd');
+    }
+    g.restore();
+  }
+
+  // Text mit Buchstabenabstand
+  function spaced(g, text, cx, y, spacing) {
+    var chars = text.split('');
+    var widths = chars.map(function (c) { return g.measureText(c).width; });
+    var total = widths.reduce(function (a, b) { return a + b; }, 0) + spacing * Math.max(0, chars.length - 1);
+    var x = cx - total / 2;
+    g.textAlign = 'left';
+    chars.forEach(function (c, i) { g.fillText(c, x, y); x += widths[i] + spacing; });
+  }
+
+  // opts (optional): { mapSrc: hochauflösender Karten-Canvas, hq: Overlay neu in voller Auflösung zeichnen,
+  //                    cssW/cssH: Postergröße am Bildschirm, watermark: false für den Export }
+  function composePoster(CW, opts) {
+    opts = opts || {};
+    var CH = Math.round(CW * 7 / 5), cw = CW / 100;
+    var c = document.createElement('canvas');
+    c.width = CW; c.height = CH;
+    var g = c.getContext('2d');
+    g.fillStyle = '#1f2327';
+    g.fillRect(0, 0, CW, CH);
+
+    // 1. Karte (Grau- und Helligkeitsfilter von Hand, damit es in jedem Browser klappt)
+    try { coverDraw(g, opts.mapSrc || map.getCanvas(), 0, 0, CW, CH); } catch (e) {}
+    try {
+      var im = g.getImageData(0, 0, CW, CH), d = im.data, osm = !MAPTILER_KEY;
+      for (var i = 0; i < d.length; i += 4) {
+        var v = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+        v = osm ? ((v - 127.5) * 1.1 + 127.5) * 0.7 : v * 1.7;
+        v = v < 0 ? 0 : (v > 255 ? 255 : v);
+        d[i] = d[i + 1] = d[i + 2] = v;
+      }
+      g.putImageData(im, 0, 0);
+    } catch (e) {}
+
+    // 2. Rauch, Orte und Fadenkreuz kommen fertig aus dem Zeichen-Canvas
+    if (opts.hq) {
+      // Export: Vignette, Icons und Fadenkreuz frisch in voller Auflösung zeichnen
+      if (showFog && fogCache) {
+        g.imageSmoothingEnabled = true;
+        g.imageSmoothingQuality = 'high';
+        g.drawImage(fogCache, 0, 0, CW, CH);
+      }
+      var savedCtx = ctx;
+      ctx = g;
+      try {
+        g.save();
+        g.scale(CW / opts.cssW, CW / opts.cssW);
+        drawPois(opts.cssW, opts.cssH);
+        drawCrosshair(opts.cssW, opts.cssH);
+        g.restore();
+      } finally { ctx = savedCtx; }
+    } else if (cv.width) {
+      coverDraw(g, cv, 0, 0, CW, CH);
+    }
+
+    // 3. Legende
+    if (document.getElementById('optLegend').checked) {
+      var named = pois.filter(function (p) { return p.name && p.name.trim(); }).slice(0, 10);
+      var rowH = 4.8 * cw, y = 3 * cw;
+      g.font = '600 ' + (2.5 * cw) + 'px Inter, -apple-system, Helvetica, Arial, sans-serif';
+      g.textBaseline = 'middle';
+      named.forEach(function (p) {
+        var txt = p.name.trim();
+        g.textAlign = 'left';
+        var tw = g.measureText(txt).width;
+        var rowW = 2.4 * cw + tw + 1.4 * cw + 3.6 * cw + 1.6 * cw;
+        var x = CW - rowW;
+        g.fillStyle = 'rgba(0,0,0,.74)';
+        g.fillRect(x, y, rowW, rowH);
+        g.fillStyle = '#fff';
+        g.fillText(txt, x + 2.4 * cw, y + rowH / 2);
+        g.save();
+        g.translate(CW - 1.6 * cw - 1.8 * cw, y + rowH / 2);
+        drawBadge(g, p, ICON_BY[p.icon], 1.6 * cw);
+        g.restore();
+        y += rowH + 0.7 * cw;
+      });
+    }
+
+    // 4. Titelleiste
+    var title = (document.getElementById('title').textContent || '').toUpperCase();
+    var coords = (document.getElementById('coords').textContent || '').toUpperCase();
+    var gh = 34 * cw;
+    var gr = g.createLinearGradient(0, CH - gh, 0, CH);
+    gr.addColorStop(0, 'rgba(0,0,0,0)');
+    gr.addColorStop(0.65, 'rgba(0,0,0,.92)');
+    gr.addColorStop(1, 'rgba(0,0,0,.92)');
+    g.fillStyle = gr;
+    g.fillRect(0, CH - gh, CW, gh);
+    var f = Math.min(1, 13 / Math.max(title.length, 1));
+    g.textBaseline = 'alphabetic';
+    g.textAlign = 'center';
+    g.lineJoin = 'round';
+    g.font = '900 ' + (11 * cw * f) + 'px Impact, "Arial Black", "Helvetica Neue", sans-serif';
+    var ty = CH - 9.8 * cw;
+    g.fillStyle = '#000';
+    g.fillText(title, CW / 2, ty + 0.8 * cw);
+    g.strokeStyle = '#000';
+    g.lineWidth = 0.7 * cw;
+    g.strokeText(title, CW / 2, ty);
+    g.fillStyle = '#f3ead0';
+    g.fillText(title, CW / 2, ty);
+    g.font = '500 ' + (2.6 * cw) + 'px Inter, -apple-system, Helvetica, Arial, sans-serif';
+    g.fillStyle = '#c9bf9f';
+    spaced(g, coords, CW / 2, CH - 4 * cw, 0.35 * 2.6 * cw);
+    // Quellenangabe (Lizenzpflicht für OpenStreetMap-Daten)
+    g.font = '400 ' + (1.5 * cw) + 'px Inter, -apple-system, Helvetica, Arial, sans-serif';
+    g.fillStyle = 'rgba(201,191,159,.7)';
+    g.fillText(MAPTILER_KEY ? '© OpenStreetMap-Mitwirkende · © MapTiler' : '© OpenStreetMap-Mitwirkende', CW / 2, CH - 1.5 * cw);
+
+    // 5. Wasserzeichen (nur in der Bearbeitung, nicht im Export)
+    if (opts.watermark === false) return c;
+    g.save();
+    g.rotate(-25 * Math.PI / 180);
+    var k = CW / 500;
+    g.font = '900 ' + (34 * k) + 'px "Arial Black", Arial, sans-serif';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillStyle = 'rgba(255,255,255,.38)';
+    g.strokeStyle = 'rgba(0,0,0,.25)';
+    g.lineWidth = k;
+    for (var yy = -CH; yy < CH * 1.2; yy += 170 * k) {
+      for (var xx = -CW; xx < CW * 1.4; xx += 280 * k) {
+        g.strokeText('VORSCHAU', xx, yy);
+        g.fillText('VORSCHAU', xx, yy);
+      }
+    }
+    g.restore();
+    return c;
+  }
+
+  // Echte Raumfotos: wohnzimmer.jpg und gamerzimmer.jpg neben index.html ablegen.
+  // Das Poster lässt sich per Ziehen verschieben und per Mausrad skalieren (wird im Browser gemerkt).
+  var ROOMS = {
+    mkWall:    { src: 'wohnzimmer.jpg',  img: null, ok: false, x: 0.5, y: 0.38, w: 0.2 },
+    mkGallery: { src: 'gamerzimmer.jpg', img: null, ok: false, x: 0.5, y: 0.4,  w: 0.2 }
+  };
+  Object.keys(ROOMS).forEach(function (k) {
+    var r = ROOMS[k];
+    try {
+      var s = JSON.parse(localStorage.getItem('revier-room-' + k) || 'null');
+      if (s && isFinite(s.x) && isFinite(s.y) && isFinite(s.w)) { r.x = s.x; r.y = s.y; r.w = s.w; }
+    } catch (e) {}
+    var im = new Image();
+    im.onload = function () { r.img = im; r.ok = true; document.getElementById(k).style.cursor = 'grab'; scheduleMockups(); };
+    im.onerror = function () { r.ok = false; };
+    im.src = r.src;
+  });
+  function saveRoom(k) {
+    var r = ROOMS[k];
+    try { localStorage.setItem('revier-room-' + k, JSON.stringify({ x: r.x, y: r.y, w: r.w })); } catch (e) {}
+  }
+  function roomRect(k, p) {
+    var r = ROOMS[k], c = document.getElementById(k);
+    var pw = r.w * c.width, ph = pw * (p.height / p.width);
+    return { x: r.x * c.width - pw / 2, y: r.y * c.height - ph / 2, w: pw, h: ph };
+  }
+  function drawRoomPhoto(k, p) {
+    var r = ROOMS[k];
+    if (!r.ok) return false;
+    var c = document.getElementById(k), g = c.getContext('2d'), W = c.width, H = c.height;
+    g.clearRect(0, 0, W, H);
+    coverDraw(g, r.img, 0, 0, W, H);
+    var b = roomRect(k, p);
+    g.save();
+    g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 24; g.shadowOffsetY = 10;
+    g.fillStyle = '#16161a'; g.fillRect(b.x - 7, b.y - 7, b.w + 14, b.h + 14);
+    g.restore();
+    g.drawImage(p, b.x, b.y, b.w, b.h);
+    return true;
+  }
+  Object.keys(ROOMS).forEach(function (k) {
+    var c = document.getElementById(k), drag = null;
+    c.style.touchAction = 'none';
+    c.addEventListener('pointerdown', function (e) {
+      if (!ROOMS[k].ok) return;
+      drag = { x: e.clientX, y: e.clientY, rx: ROOMS[k].x, ry: ROOMS[k].y };
+      c.setPointerCapture(e.pointerId); c.style.cursor = 'grabbing';
+    });
+    c.addEventListener('pointermove', function (e) {
+      if (!drag) return;
+      var bb = c.getBoundingClientRect();
+      ROOMS[k].x = Math.max(0.05, Math.min(0.95, drag.rx + (e.clientX - drag.x) / bb.width));
+      ROOMS[k].y = Math.max(0.05, Math.min(0.95, drag.ry + (e.clientY - drag.y) / bb.height));
+      scheduleMockups();
+    });
+    function end() { if (drag) { drag = null; c.style.cursor = 'grab'; saveRoom(k); } }
+    c.addEventListener('pointerup', end);
+    c.addEventListener('pointercancel', end);
+    c.addEventListener('wheel', function (e) {
+      if (!ROOMS[k].ok) return;
+      e.preventDefault();
+      ROOMS[k].w = Math.max(0.06, Math.min(0.6, ROOMS[k].w * (e.deltaY < 0 ? 1.06 : 0.94)));
+      saveRoom(k); scheduleMockups();
+    }, { passive: false });
+  });
+
+  function drawWall(p) {
+    if (drawRoomPhoto('mkWall', p)) return;
+    var c = document.getElementById('mkWall'), g = c.getContext('2d'), W = c.width, H = c.height;
+    g.clearRect(0, 0, W, H);
+    var wg = g.createLinearGradient(0, 0, 0, H);
+    wg.addColorStop(0, '#efece7'); wg.addColorStop(1, '#d9d4cc');
+    g.fillStyle = wg; g.fillRect(0, 0, W, H);
+    var lx = W * 0.15, fy = Math.round(H * 0.8);
+    // Lichtschein der Stehlampe auf der Wand
+    var gl = g.createRadialGradient(lx, fy - 320, 4, lx, fy - 320, 330);
+    gl.addColorStop(0, 'rgba(255,225,160,.55)'); gl.addColorStop(1, 'rgba(255,225,160,0)');
+    g.fillStyle = gl; g.fillRect(0, 0, W, H);
+    // Boden und Fußleiste
+    var fg = g.createLinearGradient(0, fy, 0, H);
+    fg.addColorStop(0, '#bc9a6e'); fg.addColorStop(1, '#977350');
+    g.fillStyle = fg; g.fillRect(0, fy, W, H - fy);
+    g.fillStyle = '#f5f2ed'; g.fillRect(0, fy - 14, W, 14);
+    g.fillStyle = 'rgba(0,0,0,.10)'; g.fillRect(0, fy, W, 4);
+    // Sofa
+    var cx = W / 2, sw = 540;
+    g.fillStyle = 'rgba(0,0,0,.16)';
+    g.beginPath(); g.ellipse(cx, fy + 8, sw * 0.52, 12, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#2a2a2c';
+    g.fillRect(cx - sw / 2 + 24, fy - 18, 10, 18);
+    g.fillRect(cx + sw / 2 - 34, fy - 18, 10, 18);
+    g.fillStyle = '#5b6b80'; roundRect(g, cx - sw / 2 + 28, fy - 150, sw - 56, 112, 24); g.fill();
+    g.fillStyle = '#6c7d94'; roundRect(g, cx - sw / 2, fy - 96, sw, 80, 22); g.fill();
+    g.fillStyle = '#566579';
+    roundRect(g, cx - sw / 2 - 6, fy - 128, 58, 112, 22); g.fill();
+    roundRect(g, cx + sw / 2 - 52, fy - 128, 58, 112, 22); g.fill();
+    g.fillStyle = '#7a8ca4';
+    roundRect(g, cx - sw / 2 + 62, fy - 134, (sw - 124) / 2 - 4, 66, 16); g.fill();
+    roundRect(g, cx + 4, fy - 134, (sw - 124) / 2 - 4, 66, 16); g.fill();
+    // Gerahmtes Poster
+    var pw = 176, ph = 246, px = cx - pw / 2, py = fy - 150 - ph - 40;
+    g.save();
+    g.shadowColor = 'rgba(0,0,0,.38)'; g.shadowBlur = 28; g.shadowOffsetY = 14;
+    g.fillStyle = '#1b1b1d'; g.fillRect(px - 16, py - 16, pw + 32, ph + 32);
+    g.restore();
+    g.fillStyle = '#f7f5f0'; g.fillRect(px - 10, py - 10, pw + 20, ph + 20);
+    g.drawImage(p, px, py, pw, ph);
+    g.fillStyle = 'rgba(0,0,0,.12)'; g.fillRect(px, py, pw, 3);
+    // Stehlampe
+    g.fillStyle = '#2c2c2e';
+    g.fillRect(lx - 2, fy - 300, 4, 300);
+    g.fillRect(lx - 24, fy - 6, 48, 6);
+    g.fillStyle = '#f3d9a0';
+    g.beginPath(); g.moveTo(lx - 34, fy - 300); g.lineTo(lx + 34, fy - 300); g.lineTo(lx + 22, fy - 352); g.lineTo(lx - 22, fy - 352); g.closePath(); g.fill();
+    // Pflanze
+    var rx = W * 0.85;
+    var greens = ['#3f7d4e', '#4a8f5a', '#356d44', '#52a064', '#3b7a4c'];
+    [-0.75, -0.38, 0, 0.38, 0.75].forEach(function (a, i) {
+      g.save(); g.translate(rx, fy - 70); g.rotate(a);
+      g.fillStyle = greens[i];
+      g.beginPath(); g.ellipse(0, -62, 18, 64, 0, 0, Math.PI * 2); g.fill();
+      g.restore();
+    });
+    g.fillStyle = '#e9e4da';
+    g.beginPath(); g.moveTo(rx - 34, fy - 70); g.lineTo(rx + 34, fy - 70); g.lineTo(rx + 26, fy); g.lineTo(rx - 26, fy); g.closePath(); g.fill();
+  }
+
+  function drawGallery(p) {
+    if (drawRoomPhoto('mkGallery', p)) return;
+    var c =document.getElementById('mkGallery'), g = c.getContext('2d'), W = c.width, H = c.height;
+    g.clearRect(0, 0, W, H);
+    var wg = g.createLinearGradient(0, 0, 0, H);
+    wg.addColorStop(0, '#1b2026'); wg.addColorStop(1, '#101317');
+    g.fillStyle = wg; g.fillRect(0, 0, W, H);
+    var sp = g.createRadialGradient(W / 2, -60, 10, W / 2, H * 0.5, H * 0.9);
+    sp.addColorStop(0, 'rgba(255,236,200,.38)'); sp.addColorStop(1, 'rgba(255,236,200,0)');
+    g.fillStyle = sp; g.fillRect(0, 0, W, H);
+    var pw = 290, ph = 406, px = (W - pw) / 2, py = 64;
+    g.save();
+    g.shadowColor = 'rgba(0,0,0,.6)'; g.shadowBlur = 40; g.shadowOffsetY = 20;
+    g.fillStyle = '#f4f4f2'; g.fillRect(px - 10, py - 10, pw + 20, ph + 20);
+    g.restore();
+    g.drawImage(p, px, py, pw, ph);
+    g.fillStyle = '#0b0d10'; g.fillRect(0, H - 56, W, 56);
+    g.fillStyle = 'rgba(255,255,255,.07)'; g.fillRect(0, H - 56, W, 2);
+    var t = (document.getElementById('title').textContent || '').toUpperCase();
+    g.font = '500 13px Inter, Helvetica, Arial, sans-serif';
+    g.textBaseline = 'alphabetic';
+    g.fillStyle = '#8fa0ad';
+    spaced(g, 'MEIN REVIER  ·  ' + t, W / 2, H - 22, 3);
+  }
+
+  function drawPhone(p) {
+    var c = document.getElementById('mkPhone'), g = c.getContext('2d'), W = c.width, H = c.height;
+    g.clearRect(0, 0, W, H);
+    var bg = g.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, '#2d3b56'); bg.addColorStop(1, '#1a2030');
+    g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    var gl = g.createRadialGradient(W / 2, H / 2, 20, W / 2, H / 2, 360);
+    gl.addColorStop(0, 'rgba(255,170,40,.28)'); gl.addColorStop(1, 'rgba(255,170,40,0)');
+    g.fillStyle = gl; g.fillRect(0, 0, W, H);
+    var pw = 268, ph = 552, x = (W - pw) / 2, y = (H - ph) / 2;
+    g.save();
+    g.shadowColor = 'rgba(0,0,0,.55)'; g.shadowBlur = 50; g.shadowOffsetY = 24;
+    g.fillStyle = '#0c0d10'; roundRect(g, x, y, pw, ph, 46); g.fill();
+    g.restore();
+    g.strokeStyle = '#2a2d33'; g.lineWidth = 2;
+    roundRect(g, x + 1, y + 1, pw - 2, ph - 2, 45); g.stroke();
+    g.fillStyle = '#1a1c20';
+    g.fillRect(x - 3, y + 110, 3, 34);
+    g.fillRect(x - 3, y + 160, 3, 56);
+    g.fillRect(x + pw, y + 140, 3, 80);
+    var sx = x + 9, sy = y + 9, sw = pw - 18, sh = ph - 18;
+    g.save();
+    roundRect(g, sx, sy, sw, sh, 38);
+    g.clip();
+    coverDraw(g, p, sx, sy, sw, sh);
+    var tg = g.createLinearGradient(0, sy, 0, sy + 210);
+    tg.addColorStop(0, 'rgba(0,0,0,.5)'); tg.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = tg; g.fillRect(sx, sy, sw, 210);
+    var now = new Date();
+    var time = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    var date = now.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
+    g.fillStyle = '#fff';
+    g.textAlign = 'center';
+    g.textBaseline = 'alphabetic';
+    g.font = '600 15px Inter, -apple-system, Helvetica, Arial, sans-serif';
+    g.fillText(date, x + pw / 2, sy + 82);
+    g.font = '700 68px "Helvetica Neue", Helvetica, Arial, sans-serif';
+    g.fillText(time, x + pw / 2, sy + 146);
+    g.fillStyle = '#000';
+    roundRect(g, x + pw / 2 - 40, sy + 12, 80, 24, 12); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.85)';
+    roundRect(g, x + pw / 2 - 50, sy + sh - 14, 100, 5, 2.5); g.fill();
+    g.restore();
+  }
+
+  function updateMockups() {
+    var poster;
+    try { poster = composePoster(600); } catch (e) { return; }
+    drawWall(poster);
+    drawGallery(poster);
+    drawPhone(poster);
+  }
+
+  var pending = false;
+  function render() {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(function () {
+      pending = false;
+      var dpr = window.devicePixelRatio || 1;
+      var w = cv.clientWidth, h = cv.clientHeight;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.clearRect(0, 0, w, h);
+      if (showFog && fogCache) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(fogCache, 0, 0, w, h);
+      }
+      drawPois(w, h);
+      drawCrosshair(w, h);
+      scheduleMockups();
+    });
+  }
+
+  // ---- Orte: Liste und Legende ----
+  function updateLegend() {
+    var named = pois.filter(function (p) { return p.name && p.name.trim(); }).slice(0, 10);
+    document.getElementById('legend').innerHTML = named.map(function (p) {
+      return '<div class="row"><span>' + esc(p.name.trim()) + '</span>' + iconSVG(ICON_BY[p.icon], 24, p.color) + '</div>';
+    }).join('');
+    scheduleMockups();
+  }
+
+  function refreshList() {
+    var box = document.getElementById('plist');
+    box.innerHTML = '';
+    if (!pois.length) {
+      var e = document.createElement('div');
+      e.className = 'empty';
+      e.textContent = 'Noch keine Orte gesetzt.';
+      box.appendChild(e);
+    }
+    pois.forEach(function (p) {
+      var row = document.createElement('div');
+      row.className = 'item';
+      var ico = document.createElement('span');
+      ico.className = 'ico';
+      ico.innerHTML = iconSVG(ICON_BY[p.icon], 26, p.color);
+      var inp = document.createElement('input');
+      inp.type = 'text';
+      inp.value = p.name;
+      inp.placeholder = ICON_BY[p.icon].label;
+      inp.addEventListener('input', function () { p.name = inp.value; updateLegend(); });
+      var col = document.createElement('input');
+      col.type = 'color';
+      col.className = 'colorpick';
+      col.title = 'Farbe ändern';
+      col.value = p.color || ICON_BY[p.icon].color;
+      col.addEventListener('input', function () {
+        p.color = col.value;
+        ico.innerHTML = iconSVG(ICON_BY[p.icon], 26, p.color);
+        updateLegend();
+        render();
+      });
+      var del = document.createElement('button');
+      del.textContent = '✕';
+      del.title = 'Ort löschen';
+      del.addEventListener('click', function () {
+        pois = pois.filter(function (q) { return q.id !== p.id; });
+        refreshList(); updateLegend(); render();
+      });
+      row.appendChild(ico);
+      row.appendChild(inp);
+      row.appendChild(col);
+      row.appendChild(del);
+      box.appendChild(row);
+    });
+    updateLegend();
+  }
+
+  function addPoi(lat, lng) {
+    var nameEl = document.getElementById('poiName');
+    pois.push({ id: ++poiId, lat: lat, lng: lng, icon: selIcon, name: nameEl.value.trim(), color: ICON_BY[selIcon].letter ? letterColor : null });
+    nameEl.value = '';
+    refreshList();
+    render();
+  }
+
+  function buildPalette() {
+    function fill(el, list, size, color) {
+      el.innerHTML = '';
+      list.forEach(function (ic) {
+        var b = document.createElement('button');
+        b.title = ic.label;
+        b.innerHTML = iconSVG(ic, size, color);
+        b.className = (armed && ic.id === selIcon) ? 'sel' : '';
+        b.addEventListener('click', function () {
+          if (armed && selIcon === ic.id) { setArmed(false); return; }
+          selIcon = ic.id;
+          setArmed(true);
+        });
+        el.appendChild(b);
+      });
+    }
+    fill(document.getElementById('palette'), ICONS, 34);
+    fill(document.getElementById('paletteL'), LETTERS, 26, letterColor);
+    document.getElementById('selLabel').textContent = 'Ausgewählt: ' + ICON_BY[selIcon].label;
+  }
+
+  document.getElementById('placeCross').onclick = function () {
+    var c = map.getCenter();
+    addPoi(c.lat, c.lng);
+    status('Ort am Fadenkreuz gesetzt. Karte verschieben und erneut platzieren oder Namen in der Liste ändern.');
+  };
+  document.getElementById('optCross').addEventListener('change', function (e) { showCross = e.target.checked; render(); });
+  document.getElementById('optFog').addEventListener('change', function (e) {
+    showFog = e.target.checked;
+    if (showFog) buildFog();
+    render();
+  });
+  // Jeder Regler schaltet den Rauch automatisch ein und baut ihn neu auf
+  function fogInput(id, fn) {
+    document.getElementById(id).addEventListener('input', function (e) {
+      fn(e.target.value);
+      if (!showFog) { showFog = true; document.getElementById('optFog').checked = true; }
+      buildFog();
+      render();
+    });
+  }
+  fogInput('fogWidth', function (v) { fogWidth = v / 100; });
+  fogInput('fogSoft', function (v) { fogSoft = v / 100; });
+  fogInput('fogSmoke', function (v) { fogSmoke = v / 100; });
+  fogInput('fogOpacity', function (v) { fogAlpha = v / 100; });
+  fogInput('fogColor', function (h) {
+    fogRGB = [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+  });
+  document.getElementById('letterColor').addEventListener('input', function (e) {
+    letterColor = e.target.value;
+    buildPalette();
+  });
+  document.getElementById('optLegend').addEventListener('change', function (e) {
+    document.getElementById('legend').style.display = e.target.checked ? '' : 'none';
+    scheduleMockups();
+  });
+
+  // ---- Zeichnen und Platzieren ----
+  // Platzieren: Icon antippen, dann auf die Karte klicken. Verschieben und Zoomen bleiben dabei möglich.
+  var armed = false;
+  function setArmed(on) {
+    armed = on;
+    map.getCanvasContainer().style.cursor = on ? 'crosshair' : '';
+    buildPalette();
+    status(on
+      ? 'Klicke auf die Karte, um "' + ICON_BY[selIcon].label + '" zu setzen. Esc oder das Icon nochmal antippen beendet das Platzieren.'
+      : 'Karte mit der Maus verschieben, mit dem Mausrad zoomen. Icon antippen, um Orte zu setzen.');
+  }
+  map.on('click', function (e) {
+    if (!armed) return;
+    addPoi(e.lngLat.lat, e.lngLat.lng);
+    status('Ort gesetzt. Namen und Farbe kannst du rechts in der Liste ändern.');
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && armed) setArmed(false);
+  });
+
+  // ---- Titel und Suche ----
+  function fmt(v, pos, neg) { return Math.abs(v).toFixed(4) + '° ' + (v >= 0 ? pos : neg); }
+
+  function setTitle(t, lat, lon) {
+    var el = document.getElementById('title');
+    el.textContent = t;
+    el.style.setProperty('--f', Math.min(1, 13 / Math.max(t.length, 1)));
+    document.getElementById('titleIn').value = t;
+    if (lat !== undefined) document.getElementById('coords').textContent = fmt(lat, 'N', 'S') + '  ' + fmt(lon, 'E', 'W');
+    scheduleMockups();
+  }
+
+  document.getElementById('titleIn').addEventListener('input', function (e) {
+    var t = e.target.value;
+    var el = document.getElementById('title');
+    el.textContent = t;
+    el.style.setProperty('--f', Math.min(1, 13 / Math.max(t.length, 1)));
+    scheduleMockups();
+  });
+
+  function search() {
+    var q = document.getElementById('q').value.trim();
+    if (!q) return;
+    status('Suche …');
+    var isPlz = /^\d{4,5}$/.test(q);
+    var base = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&addressdetails=1&accept-language=de&';
+    function nom(params) { return fetch(base + params).then(function (r) { return r.json(); }); }
+    var first;
+    if (isPlz) {
+      // Reine Postleitzahl: zuerst im passenden Land suchen (5 Stellen = Deutschland), sonst weltweit
+      var cc = q.length === 5 ? '&countrycodes=de' : '&countrycodes=at,ch,be,lu,dk';
+      first = nom('postalcode=' + encodeURIComponent(q) + cc)
+        .then(function (j) { return j.length ? j : nom('postalcode=' + encodeURIComponent(q)); });
+    } else {
+      first = nom('q=' + encodeURIComponent(q));
+    }
+    first
+      .then(function (j) {
+        if (!j.length) { status('Ort nicht gefunden. Bei Postleitzahlen hilft oft der Zusatz mit Stadt, z. B. "1010 Wien".'); return; }
+        var it = j[0];
+        var bb = it.boundingbox.map(Number);
+        ops = []; pois = [];
+        map.fitBounds([[bb[2], bb[0]], [bb[3], bb[1]]], { animate: false, padding: 10, maxZoom: 15 });
+        var name = it.name || it.display_name.split(',')[0];
+        if (isPlz) {
+          var a = it.address || {};
+          name = a.city || a.town || a.village || a.municipality || a.county || name;
+        }
+        setTitle(name, parseFloat(it.lat), parseFloat(it.lon));
+        refreshList();
+        setArmed(false);
+        render();
+      })
+      .catch(function () { status('Suche fehlgeschlagen. Internetverbindung prüfen.'); });
+  }
+  document.getElementById('go').onclick = search;
+  document.getElementById('q').addEventListener('keydown', function (e) { if (e.key === 'Enter') search(); });
+
+  // ---- Export in hoher Auflösung ----
+  // TESTMODUS: Der Download ist noch kostenlos. Später kommt hier die Bezahlung (Stripe) davor,
+  // und die Datei wird erst nach erfolgreicher Zahlung auf dem Server erzeugt.
+  function maxGlSize() {
+    try {
+      var gl = document.createElement('canvas').getContext('webgl');
+      return Math.min(gl.getParameter(gl.MAX_RENDERBUFFER_SIZE), gl.getParameter(gl.MAX_TEXTURE_SIZE));
+    } catch (e) { return 4096; }
+  }
+  function exportPoster(EW) {
+    var posterEl = document.getElementById('poster');
+    var cssW = posterEl.clientWidth, cssH = posterEl.clientHeight;
+    var maxS = maxGlSize();
+    var limit = Math.floor(maxS / (cssH / cssW));
+    var capped = EW > limit;
+    if (capped) EW = Math.max(800, limit);
+    var ratio = EW / cssW;
+    var host = document.createElement('div');
+    host.style.cssText = 'position:fixed;left:-99999px;top:0;width:' + cssW + 'px;height:' + cssH + 'px;';
+    document.body.appendChild(host);
+    return new Promise(function (resolve, reject) {
+      var em;
+      var timer = setTimeout(function () { cleanup(); reject(new Error('Zeitüberschreitung beim Laden der Kartenkacheln.')); }, 40000);
+      function cleanup() {
+        clearTimeout(timer);
+        try { if (em) em.remove(); } catch (e) {}
+        if (host.parentNode) host.parentNode.removeChild(host);
+      }
+      try {
+        em = new maplibregl.Map({
+          container: host, style: map.getStyle(), center: map.getCenter(), zoom: map.getZoom(),
+          interactive: false, attributionControl: false, fadeDuration: 0, pixelRatio: ratio,
+          preserveDrawingBuffer: true, canvasContextAttributes: { preserveDrawingBuffer: true }
+        });
+      } catch (err) { cleanup(); reject(err); return; }
+      var done = false;
+      em.on('idle', function () {
+        if (done || !em.loaded()) return;
+        done = true;
+        try {
+          var out = composePoster(EW, { mapSrc: em.getCanvas(), hq: true, cssW: cssW, cssH: cssH, watermark: false });
+          cleanup();
+          resolve({ canvas: out, width: EW, capped: capped });
+        } catch (err2) { cleanup(); reject(err2); }
+      });
+    });
+  }
+  document.getElementById('buyImg').onclick = function () {
+    var btn = this, sel = document.getElementById('expSize');
+    var label = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Bild wird erzeugt …';
+    status('Bild wird in hoher Auflösung erzeugt, das kann einige Sekunden dauern.');
+    exportPoster(parseInt(sel.value, 10)).then(function (r) {
+      r.canvas.toBlob(function (blob) {
+        btn.disabled = false; btn.textContent = label;
+        if (!blob) { status('Das Bild konnte nicht erzeugt werden. Bitte wähle eine kleinere Größe.'); return; }
+        var name = (document.getElementById('title').textContent || 'poster').trim().toLowerCase()
+          .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+          .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'poster';
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'mein-revier-' + name + '-' + r.width + 'px.png';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 20000);
+        status('Fertig: ' + r.width + '×' + r.canvas.height + ' px' + (r.capped ? ' (Größe wurde auf das Maximum deines Geräts begrenzt).' : '.'));
+      }, 'image/png');
+    }).catch(function (err) {
+      btn.disabled = false; btn.textContent = label;
+      status('Export fehlgeschlagen: ' + (err && err.message ? err.message : err) + ' Versuche eine kleinere Größe.');
+    });
+  };
+  document.getElementById('buyPoster').onclick = function () { alert('Platzhalter: Hier folgt später die Poster-Bestellung über einen Druckdienst.'); };
+
+  ['move', 'zoom', 'resize'].forEach(function (ev) { map.on(ev, render); });
+  map.on('idle', scheduleMockups);
+  window.addEventListener('resize', function () { map.resize(); resizeCanvas(); render(); });
+
+  resizeCanvas();
+  buildPalette();
+  refreshList();
+  setArmed(false);
+  setTitle('Berlin', 52.52, 13.405);
+  render();
+  setTimeout(search, 200);
+})();
+</script>
+</body>
+</html>
