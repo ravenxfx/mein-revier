@@ -136,6 +136,36 @@
   body.locked .lockbadge { display:grid; }
   body.locked .panel, body.locked .finder, body.locked .tools .switch { pointer-events:none; opacity:.45; }
   body.locked .panel { filter:grayscale(.5); }
+  /* ---- Kaufseite ---- */
+  .shop { position:fixed; inset:0; z-index:200; overflow:auto; background:radial-gradient(1000px 520px at 10% -10%, #243040 0%, rgba(20,24,28,0) 60%), radial-gradient(800px 480px at 100% 0%, #3a2a14 0%, rgba(20,24,28,0) 55%), var(--bg); }
+  .shop[hidden] { display:none; }
+  .shop-top { position:sticky; top:0; z-index:2; display:flex; align-items:center; gap:16px; padding:12px clamp(12px,3vw,28px); background:rgba(16,20,24,.8); backdrop-filter:blur(14px); border-bottom:1px solid rgba(255,255,255,.08); }
+  .shop-back { border-radius:999px; padding:8px 16px; }
+  .shop-brand { font-family:"Barlow Condensed", Impact, sans-serif; font-weight:800; font-size:24px; letter-spacing:.06em; text-transform:uppercase; }
+  .shop-brand b { color:var(--accent); }
+  .shop-test { margin-left:auto; font-size:12px; color:#8fa0ad; }
+  .shop-grid { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(300px,.8fr); gap:clamp(20px,3vw,44px); max-width:1260px; margin:0 auto; padding:clamp(18px,3vw,40px) clamp(12px,3vw,28px) 48px; align-items:start; }
+  .shop-view canvas { width:100%; height:auto; display:block; border-radius:18px; box-shadow:0 20px 60px rgba(0,0,0,.55); background:#1b2026; }
+  .shop-rooms { display:flex; gap:8px; justify-content:center; margin-top:14px; }
+  .shop-rooms button { border-radius:999px; padding:7px 16px; }
+  .shop-info { background:rgba(30,37,43,.82); border:1px solid rgba(255,255,255,.1); border-radius:18px; padding:clamp(18px,2.4vw,28px); position:sticky; top:84px; }
+  .shop-info h2 { margin:0 0 4px; font-family:"Barlow Condensed", Impact, sans-serif; font-weight:800; font-size:32px; letter-spacing:.04em; text-transform:uppercase; }
+  .shop-sub { margin:0 0 18px; color:#8fa0ad; font-size:14px; }
+  .shop-tabs { display:flex; gap:6px; background:rgba(255,255,255,.05); border-radius:999px; padding:4px; margin-bottom:18px; }
+  .shop-tabs button { flex:1; border:0; background:transparent; border-radius:999px; padding:9px 8px; font-size:13px; }
+  .shop-tabs button.on { background:linear-gradient(135deg,#ffd84a,#ff9f1a); color:#111; font-weight:600; }
+  .shop-field { margin-bottom:16px; } .shop-field label { display:block; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#8fa0ad; margin-bottom:6px; }
+  .shop-field select { width:100%; padding:11px 12px; border-radius:10px; border:1px solid var(--line); background:#12171b; color:var(--text); font:inherit; }
+  .shop-price { display:flex; align-items:baseline; gap:10px; margin:6px 0 14px; }
+  .shop-price span { font-size:38px; font-weight:700; }
+  .shop-price small { color:#8fa0ad; font-size:13px; }
+  .shop-facts { list-style:none; margin:0 0 20px; padding:0; display:flex; flex-direction:column; gap:10px; }
+  .shop-facts li { display:flex; justify-content:space-between; gap:16px; font-size:14px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,.08); }
+  .shop-facts li span:first-child { color:#8fa0ad; } .shop-facts li span:last-child { text-align:right; }
+  .shop-pay { width:100%; padding:14px; font-size:16px; border-radius:999px; opacity:.6; cursor:not-allowed; }
+  .shop-hint { font-size:12px; color:#8fa0ad; margin:12px 0 0; text-align:center; }
+  body.shop-open { overflow:hidden; }
+  @media (max-width: 860px) { .shop-grid { grid-template-columns:1fr; } .shop-info { position:static; } .shop-test { display:none; } }
   /* ---- Hero ---- */
   html { scroll-behavior:smooth; }
   #tool { scroll-margin-top:84px; }
@@ -293,10 +323,10 @@
       <option value="2500">Mittel · 2500×3500 px</option>
       <option value="3300" selected>Groß · 3300×4620 px (ca. 28×39 cm, 300 dpi)</option>
     </select>
-    <button id="buyImg" class="primary soon" disabled aria-disabled="true">Als Bild kaufen <small>Bald verfügbar</small></button>
-    <button id="buyPoster" class="primary soon" disabled aria-disabled="true">Als Poster bestellen <small>Bald verfügbar</small></button>
+    <button id="buyImg" class="primary">Als Bild kaufen</button>
+    <button id="buyPoster" class="primary">Als Poster bestellen</button>
     <button id="testDl" class="testdl" hidden>Testphase: Bild kostenlos herunterladen</button>
-    <p class="soonnote">Der Kauf als Bild oder gedrucktes Poster startet bald. Bis dahin kannst du alles ausprobieren.</p>
+    <p class="soonnote">Die Bezahlung startet bald. Du kannst schon sehen, wie dein Kauf aussehen wird.</p>
   </div>
   <section class="mock" id="mock">
     <h2>Live-<b>Vorschau</b></h2>
@@ -310,6 +340,37 @@
   <div class="note">Karte © OpenStreetMap-Mitwirkende. Kartenkacheln und Suche sind in diesem Prototyp nur für Tests gedacht. Das Wasserzeichen erscheint nur in der Bearbeitung.</div>
   <div class="note" id="tileNote"></div>
 </main>
+<div class="shop" id="shop" role="dialog" aria-modal="true" aria-labelledby="shopTitle" hidden>
+  <div class="shop-top">
+    <button type="button" class="shop-back" id="shopBack">← Zurück zum Editor</button>
+    <span class="shop-brand">Mein <b>Revier</b></span>
+    <span class="shop-test">Testphase · Preise und Zeiten sind Beispielwerte</span>
+  </div>
+  <div class="shop-grid">
+    <div class="shop-view">
+      <canvas id="shopCv" width="960" height="600"></canvas>
+      <div class="shop-rooms" id="shopRooms">
+        <button type="button" class="on" data-room="wall">Wohnzimmer</button>
+        <button type="button" data-room="gallery">Gamer-Zimmer</button>
+      </div>
+    </div>
+    <aside class="shop-info">
+      <h2 id="shopTitle">Dein Poster</h2>
+      <p class="shop-sub" id="shopSub"></p>
+      <div class="shop-tabs" id="shopTabs" role="tablist">
+        <button type="button" role="tab" data-prod="poster">Poster</button>
+        <button type="button" role="tab" data-prod="phone">Handybild</button>
+        <button type="button" role="tab" data-prod="file">Druckdatei</button>
+      </div>
+      <div id="shopSizeBox" class="shop-field"><label for="shopSize">Größe</label><select id="shopSize"></select></div>
+      <div class="shop-price"><span id="shopPrice"></span><small id="shopTax"></small></div>
+      <ul class="shop-facts" id="shopFacts"></ul>
+      <button type="button" class="primary shop-pay" id="shopPay" disabled>Bezahlung startet bald</button>
+      <p class="shop-hint">Die Bezahlung wird in Kürze freigeschaltet. Dein Poster ist bis dahin gesperrt und bleibt so, wie du es gestaltet hast.</p>
+    </aside>
+  </div>
+</div>
+
 
 <script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
 <script>
@@ -795,18 +856,18 @@
     var r = ROOMS[k];
     try { localStorage.setItem('revier-room-' + k, JSON.stringify({ x: r.x, y: r.y, w: r.w })); } catch (e) {}
   }
-  function roomRect(k, p) {
-    var r = ROOMS[k], c = document.getElementById(k);
+  function roomRect(k, p, c) {
+    var r = ROOMS[k];
     var pw = r.w * c.width, ph = pw * (p.height / p.width);
     return { x: r.x * c.width - pw / 2, y: r.y * c.height - ph / 2, w: pw, h: ph };
   }
-  function drawRoomPhoto(k, p) {
+  function drawRoomPhoto(k, p, target) {
     var r = ROOMS[k];
     if (!r.ok) return false;
-    var c = document.getElementById(k), g = c.getContext('2d'), W = c.width, H = c.height;
+    var c = target || document.getElementById(k), g = c.getContext('2d'), W = c.width, H = c.height;
     g.clearRect(0, 0, W, H);
     coverDraw(g, r.img, 0, 0, W, H);
-    var b = roomRect(k, p);
+    var b = roomRect(k, p, c);
     g.save();
     g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 24; g.shadowOffsetY = 10;
     g.fillStyle = '#16161a'; g.fillRect(b.x - 7, b.y - 7, b.w + 14, b.h + 14);
@@ -840,9 +901,9 @@
     }, { passive: false });
   });
 
-  function drawWall(p) {
-    if (drawRoomPhoto('mkWall', p)) return;
-    var c = document.getElementById('mkWall'), g = c.getContext('2d'), W = c.width, H = c.height;
+  function drawWall(p, target) {
+    if (drawRoomPhoto('mkWall', p, target)) return;
+    var c = target || document.getElementById('mkWall'), g = c.getContext('2d'), W = c.width, H = c.height;
     g.clearRect(0, 0, W, H);
     var wg = g.createLinearGradient(0, 0, 0, H);
     wg.addColorStop(0, '#efece7'); wg.addColorStop(1, '#d9d4cc');
@@ -901,9 +962,9 @@
     g.beginPath(); g.moveTo(rx - 34, fy - 70); g.lineTo(rx + 34, fy - 70); g.lineTo(rx + 26, fy); g.lineTo(rx - 26, fy); g.closePath(); g.fill();
   }
 
-  function drawGallery(p) {
-    if (drawRoomPhoto('mkGallery', p)) return;
-    var c =document.getElementById('mkGallery'), g = c.getContext('2d'), W = c.width, H = c.height;
+  function drawGallery(p, target) {
+    if (drawRoomPhoto('mkGallery', p, target)) return;
+    var c = target || document.getElementById('mkGallery'), g = c.getContext('2d'), W = c.width, H = c.height;
     g.clearRect(0, 0, W, H);
     var wg = g.createLinearGradient(0, 0, 0, H);
     wg.addColorStop(0, '#1b2026'); wg.addColorStop(1, '#101317');
@@ -926,8 +987,8 @@
     spaced(g, 'MEIN REVIER  ·  ' + t, W / 2, H - 22, 3);
   }
 
-  function drawPhone(p) {
-    var c = document.getElementById('mkPhone'), g = c.getContext('2d'), W = c.width, H = c.height;
+  function drawPhone(p, target) {
+    var c = target || document.getElementById('mkPhone'), g = c.getContext('2d'), W = c.width, H = c.height;
     g.clearRect(0, 0, W, H);
     var bg = g.createLinearGradient(0, 0, W, H);
     bg.addColorStop(0, '#2d3b56'); bg.addColorStop(1, '#1a2030');
@@ -1217,6 +1278,92 @@
     status(on ? 'Poster gesperrt. Karte, Orte und Titel lassen sich nicht mehr versehentlich ändern. Zum Weiterbearbeiten entsperren.' : 'Poster entsperrt. Du kannst weiter bearbeiten.');
   }
   document.getElementById('lockBtn').addEventListener('click', function () { setLocked(!locked); });
+
+  // ---- Kaufseite: Vorschau in groß, Preis und Lieferzeit ----
+  // Preise und Zeiten sind BEISPIELWERTE für die Testphase. Hier anpassen, sobald sie feststehen.
+  var SHOP = {
+    tax: 'inkl. MwSt.',
+    posters: [
+      { label: '21 × 30 cm (A4)', price: 19.9, ship: 4.9, days: '4 bis 7 Werktage' },
+      { label: '30 × 42 cm',      price: 27.9, ship: 4.9, days: '4 bis 7 Werktage' },
+      { label: '50 × 70 cm',      price: 39.9, ship: 5.9, days: '4 bis 8 Werktage' }
+    ],
+    phone: { price: 4.9 },
+    file:  { price: 9.9 }
+  };
+  function eur(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
+  var shopProd = 'poster', shopRoom = 'wall', shopWasLocked = false;
+  function shopFacts(rows) {
+    document.getElementById('shopFacts').innerHTML = rows.map(function (r) {
+      return '<li><span>' + r[0] + '</span><span>' + r[1] + '</span></li>';
+    }).join('');
+  }
+  function shopRender() {
+    var title = (document.getElementById('title').textContent || 'Dein Poster').trim();
+    var cv2 = document.getElementById('shopCv');
+    var p;
+    try { p = composePoster(900); } catch (e) { return; }
+    var isPhone = shopProd === 'phone';
+    document.getElementById('shopRooms').style.display = isPhone ? 'none' : 'flex';
+    document.getElementById('shopSizeBox').style.display = shopProd === 'poster' ? 'block' : 'none';
+    Array.prototype.forEach.call(document.querySelectorAll('#shopTabs button'), function (b) { b.classList.toggle('on', b.getAttribute('data-prod') === shopProd); });
+    Array.prototype.forEach.call(document.querySelectorAll('#shopRooms button'), function (b) { b.classList.toggle('on', b.getAttribute('data-room') === shopRoom); });
+    cv2.getContext('2d').clearRect(0, 0, cv2.width, cv2.height);
+    if (isPhone) drawPhone(p, cv2);
+    else if (shopRoom === 'gallery') drawGallery(p, cv2);
+    else drawWall(p, cv2);
+    var tx = SHOP.tax;
+    document.getElementById('shopTax').textContent = tx;
+    if (shopProd === 'poster') {
+      var o = SHOP.posters[parseInt(document.getElementById('shopSize').value, 10) || 0];
+      document.getElementById('shopTitle').textContent = title + ' · Poster';
+      document.getElementById('shopSub').textContent = 'Gedruckt und direkt zu dir geliefert.';
+      document.getElementById('shopPrice').textContent = eur(o.price);
+      shopFacts([['Größe', o.label], ['Lieferzeit', 'ca. ' + o.days], ['Versand', eur(o.ship) + ' innerhalb Deutschlands'], ['Gesamt', eur(o.price + o.ship)]]);
+    } else if (isPhone) {
+      document.getElementById('shopTitle').textContent = title + ' · Handybild';
+      document.getElementById('shopSub').textContent = 'Als Hintergrund für Sperr- und Startbildschirm.';
+      document.getElementById('shopPrice').textContent = eur(SHOP.phone.price);
+      shopFacts([['Lieferung', 'Sofort nach der Zahlung als Download'], ['Format', 'Bild für dein Handy'], ['Versand', 'Entfällt']]);
+    } else {
+      document.getElementById('shopTitle').textContent = title + ' · Druckdatei';
+      document.getElementById('shopSub').textContent = 'Hochauflösend, zum Selbstdrucken oder Verschenken.';
+      document.getElementById('shopPrice').textContent = eur(SHOP.file.price);
+      shopFacts([['Lieferung', 'Sofort nach der Zahlung als Download'], ['Auflösung', 'bis 3300 × 4620 px (ca. 28 × 39 cm, 300 dpi)'], ['Versand', 'Entfällt']]);
+    }
+  }
+  function openShop(prod) {
+    shopProd = prod;
+    var sel = document.getElementById('shopSize');
+    if (!sel.options.length) {
+      SHOP.posters.forEach(function (o, i) { var op = document.createElement('option'); op.value = i; op.textContent = o.label + ' · ' + eur(o.price); sel.appendChild(op); });
+      sel.value = '1';
+    }
+    shopWasLocked = locked;
+    if (!locked) setLocked(true);
+    document.getElementById('shop').hidden = false;
+    document.body.classList.add('shop-open');
+    document.getElementById('shop').scrollTop = 0;
+    shopRender();
+  }
+  function closeShop() {
+    document.getElementById('shop').hidden = true;
+    document.body.classList.remove('shop-open');
+    if (!shopWasLocked) setLocked(false);
+  }
+  document.getElementById('buyPoster').addEventListener('click', function () { openShop('poster'); });
+  document.getElementById('buyImg').addEventListener('click', function () { openShop('phone'); });
+  document.getElementById('shopBack').addEventListener('click', closeShop);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !document.getElementById('shop').hidden) closeShop(); });
+  document.getElementById('shopTabs').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-prod]'); if (!b) return;
+    shopProd = b.getAttribute('data-prod'); shopRender();
+  });
+  document.getElementById('shopRooms').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-room]'); if (!b) return;
+    shopRoom = b.getAttribute('data-room'); shopRender();
+  });
+  document.getElementById('shopSize').addEventListener('change', shopRender);
 
   // Testphase: auf false setzen, um den kostenlosen Download auszublenden
   var TEST_DOWNLOAD = true;
