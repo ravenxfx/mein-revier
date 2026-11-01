@@ -141,18 +141,20 @@
          background:linear-gradient(135deg,#ffd84a,#ff9f1a); box-shadow:0 10px 30px rgba(255,160,0,.28); transition:transform .15s, box-shadow .15s; }
   .cta:hover { transform:translateY(-2px); box-shadow:0 14px 36px rgba(255,160,0,.4); }
   .hero-art { display:flex; justify-content:center; }
-  .art-poster { position:relative; width:min(100%,330px); aspect-ratio:5/7; border:7px solid #f3ead0; transform:rotate(3deg); overflow:hidden; background:#1b1f23;
+  .art-poster { container-type:inline-size; position:relative; width:min(100%,330px); aspect-ratio:5/7; border:7px solid #f3ead0; transform:rotate(3deg); overflow:hidden; background:#1b1f23;
                 box-shadow:0 30px 70px rgba(0,0,0,.6), 0 0 90px rgba(255,160,0,.12); }
-  .art-map { position:absolute; inset:0;
-    background:
-      radial-gradient(circle at 50% 50%, rgba(10,12,14,0) 38%, rgba(10,12,14,.92) 88%),
-      repeating-linear-gradient(32deg, transparent 0 22px, rgba(255,255,255,.1) 22px 24px),
-      repeating-linear-gradient(-58deg, transparent 0 30px, rgba(255,255,255,.07) 30px 32px),
-      repeating-linear-gradient(90deg, transparent 0 46px, rgba(255,255,255,.05) 46px 47px),
-      #2a2f34; }
+  .art-map { position:absolute; inset:0; }
+  .art-map svg { width:100%; height:100%; display:block; }
+  .art-map::after { content:''; position:absolute; inset:0; background:radial-gradient(circle at 50% 50%, rgba(10,12,14,0) 38%, rgba(10,12,14,.92) 90%); }
+  .dot svg { width:58%; height:58%; display:block; }
+  .dot { display:grid; place-items:center; }
+  .art-legend { position:absolute; top:4.5cqw; right:0; z-index:3; display:flex; flex-direction:column; align-items:flex-end; gap:1.2cqw; }
+  .lrow { display:flex; align-items:center; gap:2.4cqw; background:rgba(0,0,0,.78); color:#fff; padding:1.2cqw 2.6cqw 1.2cqw 3.6cqw; font-size:4.2cqw; line-height:1; font-weight:600; white-space:nowrap; }
+  .lrow b { width:7cqw; height:7cqw; border-radius:50%; border:.5cqw solid #111; display:grid; place-items:center; flex:none; }
+  .lrow b svg { width:58%; height:58%; display:block; }
   .dot { position:absolute; width:11%; aspect-ratio:1; border-radius:50%; border:2px solid #111; box-shadow:0 4px 10px rgba(0,0,0,.5); }
-  .d1 { left:24%; top:30%; background:#4fc3f7; } .d2 { left:62%; top:24%; background:#ffd84a; }
-  .d3 { left:56%; top:56%; background:#ef5350; } .d4 { left:30%; top:62%; background:#66bb6a; }
+  .d1 { left:24%; top:30%; background:#4fc3f7; } .d2 { left:10%; top:50%; background:#ffd84a; }
+  .d3 { left:56%; top:56%; } .d5 { left:74%; top:63%; } .d4 { left:30%; top:62%; background:#66bb6a; }
   .art-cross { position:absolute; left:50%; top:46%; width:34%; height:0; transform:translate(-50%,-50%); }
   .art-cross::before, .art-cross::after { content:''; position:absolute; background:rgba(255,255,255,.9); }
   .art-cross::before { left:0; right:0; top:-1px; height:2px; -webkit-mask:linear-gradient(90deg,#000 0 38%,transparent 38% 62%,#000 62%); mask:linear-gradient(90deg,#000 0 38%,transparent 38% 62%,#000 62%); }
@@ -179,7 +181,7 @@
   <div class="hero-text">
     <span class="eyebrow">Dein Poster · Dein Viertel</span>
     <h1 id="heroTitle">Dein <em>Revier</em>.<br>Dein Poster.</h1>
-    <p class="lead">Gib Stadt, Ort oder <strong>Postleitzahl</strong> ein, setz die Orte, die dir etwas bedeuten, und bring deine Karte im dunklen Spiel-Look an die Wand. Als Download oder gedrucktes Poster.</p>
+    <p class="lead">Gib Stadt, Ort oder Postleitzahl ein, setz die Orte, die dir etwas bedeuten, und bring deine Karte im dunklen Spiel-Look an die Wand. Als Download oder gedrucktes Poster.</p>
     <div class="steps">
       <div class="step"><b>1</b><span>Ort oder PLZ eingeben</span></div>
       <div class="step"><b>2</b><span>Lieblingsorte markieren und benennen</span></div>
@@ -191,8 +193,26 @@
   </div>
   <div class="hero-art" aria-hidden="true">
     <div class="art-poster">
-      <div class="art-map"></div>
-      <i class="dot d1"></i><i class="dot d2"></i><i class="dot d3"></i><i class="dot d4"></i>
+      <div class="art-map"><svg viewBox="0 0 100 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <rect width="100" height="140" fill="#2a2f34"/>
+        <path d="M-5 96 C20 84 34 104 56 92 S92 70 108 78" fill="none" stroke="#1a1f23" stroke-width="9" stroke-linecap="round"/>
+        <path d="M-5 96 C20 84 34 104 56 92 S92 70 108 78" fill="none" stroke="#3c444b" stroke-width="10.6" stroke-linecap="round" opacity=".35"/>
+        <path d="M-5 96 C20 84 34 104 56 92 S92 70 108 78" fill="none" stroke="#1a1f23" stroke-width="8.6" stroke-linecap="round"/>
+        <path d="M60 14 h26 q4 0 4 4 v20 q0 4 -4 4 h-26 q-4 0 -4 -4 v-20 q0 -4 4 -4z" fill="#353c40"/>
+        <g fill="none" stroke="#454d54" stroke-linecap="round">
+          <path d="M-5 30 H105" stroke-width="1.1"/><path d="M-5 58 H105" stroke-width="1.1"/>
+          <path d="M-5 120 H105" stroke-width="1.1"/>
+          <path d="M22 -5 V145" stroke-width="1.1"/><path d="M48 -5 V145" stroke-width="1.1"/><path d="M76 -5 V145" stroke-width="1.1"/>
+          <path d="M-5 44 H105 M-5 72 H40 M62 62 H105 M-5 132 H105" stroke-width=".6"/>
+          <path d="M35 -5 V80 M62 -5 V30 M90 40 V145 M10 100 V145 M35 106 V145" stroke-width=".6"/>
+        </g>
+        <g fill="none" stroke="#6a737b" stroke-linecap="round">
+          <path d="M-5 20 L40 56 L70 110 L108 138" stroke-width="2.4"/>
+          <path d="M100 -5 L58 50 L30 145" stroke-width="2"/>
+        </g>
+      </svg></div>
+      <i class="dot d1" style="background:#29b6f6"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 2s7 7.5 7 12a7 7 0 0 1-14 0c0-4.5 7-12 7-12z"/></svg></i><i class="dot d2" style="background:#f5b800"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#111" d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.5 5.8 21.1l1.4-7L2 9.3l7-.8z"/></svg></i><i class="dot d3" style="background:#dfe5e8"><svg viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="19" text-anchor="middle" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="21" fill="#111">F</text></svg></i><i class="dot d4" style="background:#43a047"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 3 2 12h3v9h5v-6h4v6h5v-9h3z"/></svg></i><i class="dot d5" style="background:#fb8c00"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#111" d="M2 9h2V7h2v10H4v-2H2zM20 9h2v6h-2v2h-2V7h2zM6 11h12v2H6z"/></svg></i>
+      <div class="art-legend"><div class="lrow"><span>Mein Zuhause</span><b style="background:#43a047"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 3 2 12h3v9h5v-6h4v6h5v-9h3z"/></svg></b></div><div class="lrow"><span>Felix Haus</span><b style="background:#dfe5e8"><svg viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="19" text-anchor="middle" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="21" fill="#111">F</text></svg></b></div><div class="lrow"><span>TSV Fußball</span><b style="background:#fb8c00"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#111" d="M2 9h2V7h2v10H4v-2H2zM20 9h2v6h-2v2h-2V7h2zM6 11h12v2H6z"/></svg></b></div><div class="lrow"><span>Unser See</span><b style="background:#29b6f6"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 2s7 7.5 7 12a7 7 0 0 1-14 0c0-4.5 7-12 7-12z"/></svg></b></div><div class="lrow"><span>Lieblingsplatz</span><b style="background:#f5b800"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#111" d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.5 5.8 21.1l1.4-7L2 9.3l7-.8z"/></svg></b></div></div>
       <div class="art-cross"></div>
       <div class="art-title">DEIN VIERTEL</div>
     </div>
@@ -702,9 +722,9 @@
     g.fillStyle = '#c9bf9f';
     spaced(g, coords, CW / 2, CH - 4 * cw, 0.35 * 2.6 * cw);
     // Quellenangabe (Lizenzpflicht für OpenStreetMap-Daten)
-    g.font = '400 ' + (1.5 * cw) + 'px Inter, -apple-system, Helvetica, Arial, sans-serif';
-    g.fillStyle = 'rgba(201,191,159,.7)';
-    g.fillText(MAPTILER_KEY ? '© OpenStreetMap-Mitwirkende · © MapTiler' : '© OpenStreetMap-Mitwirkende', CW / 2, CH - 1.5 * cw);
+    g.font = '400 ' + (0.95 * cw) + 'px Inter, -apple-system, Helvetica, Arial, sans-serif';
+    g.fillStyle = 'rgba(201,191,159,.5)';
+    g.fillText(MAPTILER_KEY ? '© OpenStreetMap-Mitwirkende · © MapTiler' : '© OpenStreetMap-Mitwirkende', CW / 2, CH - 1.3 * cw);
 
     // 5. Wasserzeichen (nur in der Bearbeitung, nicht im Export)
     if (opts.watermark === false) return c;
