@@ -185,6 +185,11 @@
   .dlg-card .dlg-check input { margin-top:3px; }
   .dlg-card button.primary { width:100%; padding:13px; border-radius:999px; font-size:15px; }
   .dlg-x { position:absolute; top:12px; right:12px; border-radius:50% !important; width:34px; height:34px; padding:0 !important; }
+  .dlg-thanks { margin-top:14px; padding:14px; border:1px solid #2b343c; border-radius:12px; text-align:center; }
+  .dlg-thanks[hidden] { display:none; }
+  .dlg-thanks small { display:block; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#8a97a1; }
+  .dlg-thanks p { margin:6px 0 10px; }
+  .dlg-thanks a { display:inline-block; padding:10px 16px; border-radius:10px; background:#e8edf0; color:#0b0e11; font-weight:600; text-decoration:none; }
   .dlg-msg { min-height:20px; font-size:13px !important; }
   .dlg-msg.ok { color:#7ddc8c !important; } .dlg-msg.err { color:#ff8a80 !important; }
   /* ---- Hero ---- */
@@ -368,8 +373,14 @@
         <label>Nachricht<textarea id="fMsg" rows="3" maxlength="600" placeholder="Zum Beispiel Wünsche oder Hinweise"></textarea></label>
         <input type="text" id="fWeb" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0">
         <label class="dlg-check"><input type="checkbox" id="fOk" required> Ich willige ein, dass meine Angaben und mein Design zur Bearbeitung meiner Bestellung per E-Mail übermittelt werden. *</label>
+        <label class="dlg-check"><input type="checkbox" id="fTips"> Optional: Ich möchte Tipps und Angebote rund ums Drucken meines Posters per E-Mail erhalten. Die Einwilligung kann ich jederzeit widerrufen.</label>
         <p class="dlg-msg" id="fMsgOut" role="status"></p>
         <button type="submit" class="primary" id="fSend">Design einreichen</button>
+        <div class="dlg-thanks" id="fThanks" hidden>
+          <small>Werbung</small>
+          <p>Dein Poster drucken lassen?</p>
+          <a id="fThanksLink" href="#" target="_blank" rel="sponsored noopener">Zum Druckanbieter</a>
+        </div>
       </form>
     </div>
   </div>
@@ -1603,6 +1614,8 @@
     key: '0389e255-c09c-481b-9443-80c1aa0b00cd',                                   // Web3Forms-Zugangsschlüssel (öffentlich vorgesehen)
     ownerUrl: 'http://localhost:3000/'         // Adresse, unter der die Seite bei dir lokal läuft
   };
+  // Affiliate-Link zum Druckanbieter. Leer lassen = der Werbe-Hinweis nach dem Einreichen erscheint nicht.
+  var AFFILIATE = { url: '' };
   function b64enc(str) { return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
   function b64dec(b) { b = b.replace(/-/g, '+').replace(/_/g, '/'); while (b.length % 4) b += '='; return decodeURIComponent(escape(atob(b))); }
   function posterW() { return document.getElementById('map').clientWidth || 600; }
@@ -1709,7 +1722,9 @@
     var enc = b64enc(JSON.stringify(getState()));
     var pub = location.origin + location.pathname + '#d=' + enc, loc = SUBMIT.ownerUrl + '#d=' + enc;
     var title = document.getElementById('title').textContent;
-    var msg = 'Neue Design-Einreichung\n\nEtsy-Bestellnummer: ' + order + '\nE-Mail: ' + mail + '\nName: ' + (name || '-') + '\nPoster-Titel: ' + title +
+    var tips = document.getElementById('fTips').checked;
+    var msg = 'Neue Design-Einreichung\n\nWerbe-Einwilligung (Druck-Tipps per E-Mail): ' + (tips ? 'JA, erteilt am ' + new Date().toLocaleString('de-DE') : 'NEIN, keine Werbung senden') +
+      '\n\nEtsy-Bestellnummer: ' + order + '\nE-Mail: ' + mail + '\nName: ' + (name || '-') + '\nPoster-Titel: ' + title +
       '\nNachricht: ' + (note || '-') + '\n\nLink zum Design (öffentlich):\n' + pub + '\n\nLink zum Exportieren (lokal bei dir):\n' + loc + '\n';
     sending = true; document.getElementById('fSend').disabled = true; say('Wird gesendet …');
     fetch(SUBMIT.url, {
@@ -1720,6 +1735,10 @@
         say('Danke! Dein Design ist bei uns angekommen. Wir melden uns über deine Etsy-Bestellung.', 'ok');
         if (!locked) setLocked(true);
         document.getElementById('fSend').textContent = 'Eingereicht ✓';
+        if (/^https:\/\//.test(AFFILIATE.url)) {
+          document.getElementById('fThanksLink').href = AFFILIATE.url;
+          document.getElementById('fThanks').hidden = false;
+        }
       })
       .catch(function (err) {
         sending = false; document.getElementById('fSend').disabled = false;
