@@ -342,12 +342,7 @@
     <button id="shareBtn" type="button">Link zum Design kopieren</button>
     <button id="submitBtn" type="button" class="primary">Design einreichen</button>
     <span id="ownerTools" class="ownertools" hidden>
-      <select id="expSize" aria-label="Bildgröße">
-        <option value="1500">Klein · 1500×2100 px (Handy, Social)</option>
-        <option value="2500">Mittel · 2500×3500 px</option>
-        <option value="3300" selected>Groß · 3300×4620 px (ca. 28×39 cm, 300 dpi)</option>
-      </select>
-      <button id="testDl" type="button" class="testdl">Export in hoher Auflösung (nur lokal)</button>
+      <button id="testDl" type="button" class="testdl">Alle 3 Größen exportieren (nur lokal)</button>
     </span>
     <button id="buyImg" type="button" class="primary" hidden>Als Bild kaufen</button>
     <button id="buyPoster" type="button" class="primary" hidden>Als Poster bestellen</button>
@@ -376,103 +371,6 @@
         <button type="submit" class="primary" id="fSend">Design einreichen</button>
       </form>
     </div>
-  </div>
-    <div class="hero-cta">
-      <a class="cta" href="#tool">Jetzt Poster gestalten <span aria-hidden="true">↓</span></a>
-    </div>
-  </div>
-  <div class="hero-art" aria-hidden="true">
-    <div class="art-poster">
-      <div class="art-map"><svg viewBox="0 0 100 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-        <rect width="100" height="140" fill="#2a2f34"/>
-        <path d="M-5 96 C20 84 34 104 56 92 S92 70 108 78" fill="none" stroke="#1a1f23" stroke-width="9" stroke-linecap="round"/>
-        <path d="M-5 96 C20 84 34 104 56 92 S92 70 108 78" fill="none" stroke="#3c444b" stroke-width="10.6" stroke-linecap="round" opacity=".35"/>
-        <path d="M-5 96 C20 84 34 104 56 92 S92 70 108 78" fill="none" stroke="#1a1f23" stroke-width="8.6" stroke-linecap="round"/>
-        <path d="M60 14 h26 q4 0 4 4 v20 q0 4 -4 4 h-26 q-4 0 -4 -4 v-20 q0 -4 4 -4z" fill="#353c40"/>
-        <g fill="none" stroke="#454d54" stroke-linecap="round">
-          <path d="M-5 30 H105" stroke-width="1.1"/><path d="M-5 58 H105" stroke-width="1.1"/>
-          <path d="M-5 120 H105" stroke-width="1.1"/>
-          <path d="M22 -5 V145" stroke-width="1.1"/><path d="M48 -5 V145" stroke-width="1.1"/><path d="M76 -5 V145" stroke-width="1.1"/>
-          <path d="M-5 44 H105 M-5 72 H40 M62 62 H105 M-5 132 H105" stroke-width=".6"/>
-          <path d="M35 -5 V80 M62 -5 V30 M90 40 V145 M10 100 V145 M35 106 V145" stroke-width=".6"/>
-        </g>
-        <g fill="none" stroke="#6a737b" stroke-linecap="round">
-          <path d="M-5 20 L40 56 L70 110 L108 138" stroke-width="2.4"/>
-          <path d="M100 -5 L58 50 L30 145" stroke-width="2"/>
-        </g>
-      </svg></div>
-      <i class="dot d1" style="background:#29b6f6"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 2s7 7.5 7 12a7 7 0 0 1-14 0c0-4.5 7-12 7-12z"/></svg></i><i class="dot d2" style="background:#f5b800"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#111" d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.5 5.8 21.1l1.4-7L2 9.3l7-.8z"/></svg></i><i class="dot d3" style="background:#dfe5e8"><svg viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="19" text-anchor="middle" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="21" fill="#111">F</text></svg></i><i class="dot d4" style="background:#43a047"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 3 2 12h3v9h5v-6h4v6h5v-9h3z"/></svg></i><i class="dot d5" style="background:#fb8c00"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#111" d="M2 9h2V7h2v10H4v-2H2zM20 9h2v6h-2v2h-2V7h2zM6 11h12v2H6z"/></svg></i>
-      <div class="art-legend"><div class="lrow"><span>Mein Zuhause</span><b style="background:#43a047"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 3 2 12h3v9h5v-6h4v6h5v-9h3z"/></svg></b></div><div class="lrow"><span>Felix Haus</span><b style="background:#dfe5e8"><svg viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="19" text-anchor="middle" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="21" fill="#111">F</text></svg></b></div><div class="lrow"><span>TSV Fußball</span><b style="background:#fb8c00"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#111" d="M2 9h2V7h2v10H4v-2H2zM20 9h2v6h-2v2h-2V7h2zM6 11h12v2H6z"/></svg></b></div><div class="lrow"><span>Unser See</span><b style="background:#29b6f6"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 2s7 7.5 7 12a7 7 0 0 1-14 0c0-4.5 7-12 7-12z"/></svg></b></div><div class="lrow"><span>Lieblingsplatz</span><b style="background:#f5b800"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#111" d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.5 5.8 21.1l1.4-7L2 9.3l7-.8z"/></svg></b></div></div>
-      <div class="art-cross"></div>
-      <div class="art-title">DEIN VIERTEL</div>
-    </div>
-  </div>
-</section>
-<section class="finder" id="tool" aria-label="Ort suchen">
-  <div class="searchbar">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-    <input id="q" type="text" placeholder="Stadt, Ort oder PLZ, z. B. 40213" value="Berlin" aria-label="Stadt, Ort oder Postleitzahl">
-    <button id="go" class="primary">Karte laden</button>
-  </div>
-  <label class="titlefield"><span>Poster-Titel</span><input id="titleIn" type="text" placeholder="Titel auf dem Poster"></label>
-</section>
-<div class="tools">
-  <label class="switch"><input type="checkbox" id="tPlaces" checked><span class="track"></span><span class="lbl">Ortsnamen</span></label>
-  <label class="switch"><input type="checkbox" id="tStreets"><span class="track"></span><span class="lbl">Straßennamen</span></label>
-  <button type="button" id="lockBtn" class="lockbtn" aria-pressed="false"><svg class="lk-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg><svg class="lk-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span id="lockTxt">Fertig – Poster sperren</span></button>
-</div>
-<div id="status"></div>
-<main>
-  <div class="wrap">
-    <div class="poster" id="poster">
-      <div id="map"></div>
-      <canvas id="fog"></canvas>
-      <div id="selRing" hidden></div>
-      <div class="legend" id="legend"></div>
-      <div class="titlebar"><h2 id="title">BERLIN</h2><p id="coords"></p></div>
-      <div class="watermark"></div>
-      <div class="lockbadge" id="lockBadge" aria-hidden="true"><svg class="lk-closed"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
-    </div>
-
-    <div class="panel">
-      <h3>Orte (Icons)</h3>
-      <div class="empty" style="margin:-2px 0 8px">Icon antippen, dann auf die Karte klicken. Gesetzte Orte anklicken und ziehen, um sie zu verschieben.</div>
-      <div class="palette" id="palette"></div>
-      <div class="empty" style="margin:4px 0 6px">Buchstaben (z. B. für Freunde)</div>
-      <div class="palette letters" id="paletteL"></div>
-      <label style="justify-content:space-between; margin-bottom:8px">Farbe für neue Buchstaben <input type="color" id="letterColor" value="#dfe5e8"></label>
-      <div id="selLabel"></div>
-      <input id="poiName" type="text" placeholder="Name des Ortes (optional)">
-      <button id="placeCross" style="width:100%">Am Fadenkreuz platzieren</button>
-      <div class="opts">
-        <label><input type="checkbox" id="optCross" checked> Fadenkreuz anzeigen</label>
-        <label><input type="checkbox" id="optLegend" checked> Legende auf dem Poster</label>
-      </div>
-      <details class="fogbox" id="fogBox">
-        <summary>Vignette</summary>
-        <div class="fogin">
-          <label><input type="checkbox" id="optFog"> Vignette aktivieren</label>
-          <label>Stärke <input id="fogWidth" type="range" min="0" max="100" value="45"></label>
-          <label>Weichheit <input id="fogSoft" type="range" min="0" max="80" value="30"></label>
-          <label>Struktur <input id="fogSmoke" type="range" min="0" max="100" value="60"></label>
-          <label>Deckkraft <input id="fogOpacity" type="range" min="40" max="100" value="100"></label>
-          <label>Farbe <input id="fogColor" type="color" value="#0a0c0e"></label>
-        </div>
-      </details>
-      <h3>Deine Orte</h3>
-      <div class="plist" id="plist"></div>
-    </div>
-  </div>
-  <div class="buy">
-    <select id="expSize" aria-label="Bildgröße" style="padding:0 12px;border-radius:10px;border:1px solid #2b343c;background:#12171b;color:#e8edf0;font:inherit">
-      <option value="1500">Klein · 1500×2100 px (Handy, Social)</option>
-      <option value="2500">Mittel · 2500×3500 px</option>
-      <option value="3300" selected>Groß · 3300×4620 px (ca. 28×39 cm, 300 dpi)</option>
-    </select>
-    <button id="buyImg" class="primary">Als Bild kaufen</button>
-    <button id="buyPoster" class="primary">Als Poster bestellen</button>
-    <button id="testDl" class="testdl" hidden>Testphase: Bild kostenlos herunterladen</button>
-    <p class="soonnote">Die Bezahlung startet bald. Du kannst schon sehen, wie dein Kauf aussehen wird.</p>
   </div>
   <section class="mock" id="mock">
     <h2>Live-<b>Vorschau</b></h2>
@@ -1631,29 +1529,71 @@
       });
     });
   }
-  document.getElementById('testDl').onclick = function () {
-    var btn = this, sel = document.getElementById('expSize');
-    var label = btn.textContent;
-    btn.disabled = true; btn.textContent = 'Bild wird erzeugt …';
-    status('Bild wird in hoher Auflösung erzeugt, das kann einige Sekunden dauern.');
-    exportPoster(parseInt(sel.value, 10)).then(function (r) {
-      r.canvas.toBlob(function (blob) {
-        btn.disabled = false; btn.textContent = label;
-        if (!blob) { status('Das Bild konnte nicht erzeugt werden. Bitte wähle eine kleinere Größe.'); return; }
-        var name = (document.getElementById('title').textContent || 'poster').trim().toLowerCase()
-          .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
-          .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'poster';
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'mein-revier-' + name + '-' + r.width + 'px.png';
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(function () { URL.revokeObjectURL(a.href); }, 20000);
-        status('Fertig: ' + r.width + '×' + r.canvas.height + ' px' + (r.capped ? ' (Größe wurde auf das Maximum deines Geräts begrenzt).' : '.'));
-      }, 'image/png');
-    }).catch(function (err) {
-      btn.disabled = false; btn.textContent = label;
-      status('Export fehlgeschlagen: ' + (err && err.message ? err.message : err) + ' Versuche eine kleinere Größe.');
+  // ---- Export aller drei Größen als ZIP (nur lokal beim Anbieter sichtbar) ----
+  var EXPORT_SIZES = [['klein', 1500], ['mittel', 2500], ['gross', 3300]];
+  var CRC_T = null;
+  function crc32(u8) {
+    if (!CRC_T) { CRC_T = new Uint32Array(256); for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; CRC_T[n] = c >>> 0; } }
+    var crc = 0xFFFFFFFF;
+    for (var i = 0; i < u8.length; i++) crc = CRC_T[(crc ^ u8[i]) & 255] ^ (crc >>> 8);
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+  function makeZip(files) {   // files: [{name, data:Uint8Array}], ohne Kompression (PNG ist schon komprimiert)
+    var enc = new TextEncoder(), parts = [], central = [], offset = 0;
+    files.forEach(function (f) {
+      var name = enc.encode(f.name), crc = crc32(f.data), sz = f.data.length;
+      var h = new DataView(new ArrayBuffer(30));
+      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+      h.setUint16(10, 0, true); h.setUint16(12, 0x21, true); h.setUint32(14, crc, true); h.setUint32(18, sz, true); h.setUint32(22, sz, true);
+      h.setUint16(26, name.length, true); h.setUint16(28, 0, true);
+      parts.push(new Uint8Array(h.buffer), name, f.data);
+      var c = new DataView(new ArrayBuffer(46));
+      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
+      c.setUint16(12, 0, true); c.setUint16(14, 0x21, true); c.setUint32(16, crc, true); c.setUint32(20, sz, true); c.setUint32(24, sz, true);
+      c.setUint16(28, name.length, true); c.setUint32(42, offset, true);
+      central.push(new Uint8Array(c.buffer), name);
+      offset += 30 + name.length + sz;
     });
+    var csize = central.reduce(function (a, p) { return a + p.length; }, 0);
+    var e = new DataView(new ArrayBuffer(22));
+    e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true);
+    e.setUint32(12, csize, true); e.setUint32(16, offset, true);
+    return new Blob(parts.concat(central, [new Uint8Array(e.buffer)]), { type: 'application/zip' });
+  }
+  function canvasPng(c) {
+    return new Promise(function (res, rej) { c.toBlob(function (b) { b ? res(b) : rej(new Error('Bild konnte nicht erzeugt werden')); }, 'image/png'); })
+      .then(function (b) { return b.arrayBuffer(); }).then(function (ab) { return new Uint8Array(ab); });
+  }
+  document.getElementById('testDl').onclick = function () {
+    var btn = this, label = btn.textContent;
+    var slug = (document.getElementById('title').textContent || 'poster').trim().toLowerCase()
+      .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'poster';
+    btn.disabled = true;
+    var files = [], capped = false;
+    function next(i) {
+      if (i >= EXPORT_SIZES.length) return Promise.resolve();
+      btn.textContent = 'Erzeuge ' + (i + 1) + ' von ' + EXPORT_SIZES.length + ' …';
+      status('Größe ' + (i + 1) + ' von ' + EXPORT_SIZES.length + ' wird erzeugt, das dauert einige Sekunden.');
+      return exportPoster(EXPORT_SIZES[i][1]).then(function (r) {
+        capped = capped || r.capped;
+        return canvasPng(r.canvas).then(function (data) {
+          files.push({ name: 'mein-revier-' + slug + '-' + EXPORT_SIZES[i][0] + '-' + r.width + 'px.png', data: data });
+          r.canvas.width = r.canvas.height = 1;   // Speicher freigeben
+        });
+      }).then(function () { return next(i + 1); });
+    }
+    next(0).then(function () {
+      var blob = makeZip(files);
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'mein-revier-' + slug + '.zip';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 30000);
+      status('Fertig: ' + files.length + ' Größen in einer ZIP-Datei' + (capped ? ' (Größen wurden auf das Maximum deines Geräts begrenzt).' : '.'));
+    }).catch(function (err) {
+      status('Export fehlgeschlagen: ' + (err && err.message ? err.message : err));
+    }).then(function () { btn.disabled = false; btn.textContent = label; });
   };
 
   // ---- Design als Link speichern und laden ----
