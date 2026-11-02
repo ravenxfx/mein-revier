@@ -348,7 +348,7 @@
     <button id="shareBtn" type="button">Link zum Design kopieren</button>
     <button id="submitBtn" type="button" class="primary">Design einreichen</button>
     <span id="ownerTools" class="ownertools" hidden>
-      <button id="testDl" type="button" class="testdl">Alle 3 Größen exportieren (nur lokal)</button>
+      <button id="testDl" type="button" class="testdl">Alle Dateien exportieren: A4, A3, A2, Handy (nur lokal)</button>
     </span>
     <button id="buyImg" type="button" class="primary" hidden>Als Bild kaufen</button>
     <button id="buyPoster" type="button" class="primary" hidden>Als Poster bestellen</button>
@@ -1542,7 +1542,9 @@
     });
   }
   // ---- Export aller drei Größen als ZIP (nur lokal beim Anbieter sichtbar) ----
-  var EXPORT_SIZES = [['klein', 1500], ['mittel', 2500], ['gross', 3300]];
+  // Druckgrößen mit 300 dpi auf der langen Seite der Breite (A4 2480, A3 3508, A2 4961 Pixel). Das Poster hat das Seitenverhältnis 5:7.
+  var EXPORT_SIZES = [['A4', 2480], ['A3', 3508], ['A2', 4961], ['handy', 1290]];
+  var PHONE = { w: 1290, h: 2796 };   // Handy-Hintergrund: ganzes Poster mittig auf dunklem Grund
   var CRC_T = null;
   function crc32(u8) {
     if (!CRC_T) { CRC_T = new Uint32Array(256); for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; CRC_T[n] = c >>> 0; } }
@@ -1582,16 +1584,25 @@
       .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
       .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'poster';
     btn.disabled = true;
-    var files = [], capped = false;
+    var files = [], cappedNames = [];
     function next(i) {
       if (i >= EXPORT_SIZES.length) return Promise.resolve();
       btn.textContent = 'Erzeuge ' + (i + 1) + ' von ' + EXPORT_SIZES.length + ' …';
-      status('Größe ' + (i + 1) + ' von ' + EXPORT_SIZES.length + ' wird erzeugt, das dauert einige Sekunden.');
+      status('Datei ' + (i + 1) + ' von ' + EXPORT_SIZES.length + ' (' + EXPORT_SIZES[i][0] + ') wird erzeugt, das dauert einige Sekunden.');
       return exportPoster(EXPORT_SIZES[i][1]).then(function (r) {
-        capped = capped || r.capped;
-        return canvasPng(r.canvas).then(function (data) {
-          files.push({ name: 'mein-revier-' + slug + '-' + EXPORT_SIZES[i][0] + '-' + r.width + 'px.png', data: data });
-          r.canvas.width = r.canvas.height = 1;   // Speicher freigeben
+        if (r.capped) cappedNames.push(EXPORT_SIZES[i][0] + ' (' + r.width + ' px)');
+        var cv = r.canvas;
+        if (EXPORT_SIZES[i][0] === 'handy') {
+          var pc = document.createElement('canvas'); pc.width = PHONE.w; pc.height = PHONE.h;
+          var pg = pc.getContext('2d');
+          pg.fillStyle = 'rgb(' + fogRGB.join(',') + ')'; pg.fillRect(0, 0, PHONE.w, PHONE.h);
+          var ph = Math.round(PHONE.w * cv.height / cv.width);
+          pg.drawImage(cv, 0, Math.round((PHONE.h - ph) / 2), PHONE.w, ph);
+          cv.width = cv.height = 1; cv = pc;
+        }
+        return canvasPng(cv).then(function (data) {
+          files.push({ name: 'mein-revier-' + slug + '-' + EXPORT_SIZES[i][0] + '.png', data: data });
+          cv.width = cv.height = 1;   // Speicher freigeben
         });
       }).then(function () { return next(i + 1); });
     }
@@ -1602,7 +1613,7 @@
       a.download = 'mein-revier-' + slug + '.zip';
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 30000);
-      status('Fertig: ' + files.length + ' Größen in einer ZIP-Datei' + (capped ? ' (Größen wurden auf das Maximum deines Geräts begrenzt).' : '.'));
+      status('Fertig: ' + files.length + ' Dateien in einer ZIP-Datei' + (cappedNames.length ? '. ACHTUNG, auf das Maximum deines Geräts begrenzt, also kleiner als üblich: ' + cappedNames.join(', ') : '.'));
     }).catch(function (err) {
       status('Export fehlgeschlagen: ' + (err && err.message ? err.message : err));
     }).then(function () { btn.disabled = false; btn.textContent = label; });
