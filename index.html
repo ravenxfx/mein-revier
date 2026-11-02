@@ -806,18 +806,13 @@
     g.fillStyle = '#c9bf9f';
     spaced(g, coords, CW / 2, CH - 4 * cw, 0.35 * 2.6 * cw);
     // Quellenangabe (Lizenzpflicht für OpenStreetMap-Daten)
-    // Quellenangabe: kleine schwarze Schrift unten rechts, ohne Hintergrundfläche.
-    // Eine feine helle Kontur sorgt dafür, dass sie auch auf dem schwarzen Titelbalken lesbar bleibt.
+    // Quellenangabe: sehr klein, dezent grau, unten rechts
     var attr = MAPTILER_KEY ? '© OpenStreetMap-Mitwirkende · © MapTiler' : '© OpenStreetMap-Mitwirkende';
     g.save();
-    g.font = '500 ' + (0.9 * cw) + 'px Inter, -apple-system, Helvetica, Arial, sans-serif';
+    g.font = '400 ' + (0.42 * cw) + 'px Inter, -apple-system, Helvetica, Arial, sans-serif';
     g.textAlign = 'right';
     g.textBaseline = 'alphabetic';
-    g.lineJoin = 'round';
-    g.lineWidth = 0.5 * cw;
-    g.strokeStyle = 'rgba(255,255,255,.9)';
-    g.strokeText(attr, CW - 1.4 * cw, CH - 1.2 * cw);
-    g.fillStyle = '#000';
+    g.fillStyle = 'rgba(100,103,107,.9)';
     g.fillText(attr, CW - 1.4 * cw, CH - 1.2 * cw);
     g.restore();
     g.textAlign = 'center';
