@@ -32,6 +32,9 @@
   #map.osm canvas.maplibregl-canvas { filter: grayscale(1) contrast(1.1) brightness(.7); }
   #fog { position:absolute; inset:0; width:100%; height:100%; z-index:5; pointer-events:none; touch-action:none; }
   #fog.paint { pointer-events:auto; cursor:crosshair; }
+  #selRing { position:absolute; z-index:6; pointer-events:none; border:2px dashed #fff; border-radius:50%; box-shadow:0 0 0 2px rgba(0,0,0,.55), 0 0 14px rgba(255,255,255,.35); transform:translate(-50%,-50%); }
+  #selRing[hidden] { display:none; }
+  .plist .item.sel { background:rgba(245,197,24,.1); outline:1px solid rgba(245,197,24,.6); border-radius:8px; }
   .legend { position:absolute; top:3cqw; right:0; z-index:7; display:flex; flex-direction:column; align-items:flex-end; gap:.7cqw; pointer-events:none; }
   .legend .row { display:flex; align-items:center; gap:1.4cqw; background:rgba(0,0,0,.74); color:#fff; padding:.6cqw 1.6cqw .6cqw 2.4cqw; font-size:2.5cqw; line-height:1; white-space:nowrap; }
   .legend .row svg { width:3.6cqw; height:3.6cqw; display:block; }
@@ -282,6 +285,7 @@
     <div class="poster" id="poster">
       <div id="map"></div>
       <canvas id="fog"></canvas>
+      <div id="selRing" hidden></div>
       <div class="legend" id="legend"></div>
       <div class="titlebar"><h2 id="title">BERLIN</h2><p id="coords"></p></div>
       <div class="watermark"></div>
@@ -290,7 +294,7 @@
 
     <div class="panel">
       <h3>Orte (Icons)</h3>
-      <div class="empty" style="margin:-2px 0 8px">Icon antippen, dann auf die Karte klicken. Esc beendet.</div>
+      <div class="empty" style="margin:-2px 0 8px">Icon antippen, dann auf die Karte klicken. Gesetzte Orte anklicken und ziehen, um sie zu verschieben.</div>
       <div class="palette" id="palette"></div>
       <div class="empty" style="margin:4px 0 6px">Buchstaben (z. B. für Freunde)</div>
       <div class="palette letters" id="paletteL"></div>
@@ -1058,6 +1062,7 @@
       }
       drawPois(w, h);
       drawCrosshair(w, h);
+      updateSelRing();
       scheduleMockups();
     });
   }
@@ -1089,7 +1094,9 @@
     }
     pois.forEach(function (p) {
       var row = document.createElement('div');
-      row.className = 'item';
+      row.className = 'item' + (p.id === selPoi ? ' sel' : '');
+      row.setAttribute('data-id', p.id);
+      row.addEventListener('click', function (e) { if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') selectPoi(p.id); });
       var ico = document.createElement('span');
       ico.className = 'ico';
       ico.innerHTML = iconSVG(ICON_BY[p.icon], 26, p.color);
@@ -1128,6 +1135,7 @@
   function addPoi(lat, lng) {
     var nameEl = document.getElementById('poiName');
     pois.push({ id: ++poiId, lat: lat, lng: lng, icon: selIcon, name: nameEl.value.trim(), color: ICON_BY[selIcon].letter ? letterColor : null });
+    selPoi = poiId;
     nameEl.value = '';
     refreshList();
     render();
@@ -1203,13 +1211,74 @@
       ? 'Klicke auf die Karte, um "' + ICON_BY[selIcon].label + '" zu setzen. Esc oder das Icon nochmal antippen beendet das Platzieren.'
       : 'Karte mit der Maus verschieben, mit dem Mausrad zoomen. Icon antippen, um Orte zu setzen.');
   }
+  // ---- Orte auswählen und verschieben ----
+  var selPoi = null, dragPoi = null, poiClickGuard = false;
+  function poiAt(x, y) {
+    var s = Math.max(10, cv.clientWidth * 0.028) + 6;
+    for (var i = pois.length - 1; i >= 0; i--) {
+      var p = map.project([pois[i].lng, pois[i].lat]);
+      var dx = p.x - x, dy = p.y - y;
+      if (dx * dx + dy * dy <= s * s) return pois[i];
+    }
+    return null;
+  }
+  function selectPoi(id) {
+    selPoi = id;
+    Array.prototype.forEach.call(document.querySelectorAll('#plist .item'), function (r) {
+      r.classList.toggle('sel', String(id) === r.getAttribute('data-id'));
+    });
+    render();
+  }
+  function updateSelRing() {
+    var ring = document.getElementById('selRing');
+    var p = null;
+    for (var i = 0; i < pois.length; i++) if (pois[i].id === selPoi) p = pois[i];
+    if (!p || locked) { ring.hidden = true; return; }
+    var q = map.project([p.lng, p.lat]);
+    var d = 2 * (Math.max(10, cv.clientWidth * 0.028) + 5);
+    ring.style.width = d + 'px'; ring.style.height = d + 'px';
+    ring.style.left = q.x + 'px'; ring.style.top = q.y + 'px';
+    ring.hidden = false;
+  }
+  var cc = map.getCanvasContainer();
+  function cpos(e) { var b = cc.getBoundingClientRect(); return { x: e.clientX - b.left, y: e.clientY - b.top }; }
+  cc.addEventListener('pointerdown', function (e) {
+    if (locked || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    var m = cpos(e), hit = poiAt(m.x, m.y);
+    if (!hit) return;
+    var q = map.project([hit.lng, hit.lat]);
+    poiClickGuard = true;
+    dragPoi = { p: hit, ox: q.x - m.x, oy: q.y - m.y };
+    map.dragPan.disable();
+    selectPoi(hit.id);
+  }, true);
+  document.addEventListener('pointermove', function (e) {
+    if (dragPoi) {
+      var m = cpos(e), ll = map.unproject([m.x + dragPoi.ox, m.y + dragPoi.oy]);
+      dragPoi.p.lat = ll.lat; dragPoi.p.lng = ll.lng;
+      render();
+      return;
+    }
+    if (locked || e.target !== cc && !cc.contains(e.target)) return;
+    var h = cpos(e);
+    cc.style.cursor = poiAt(h.x, h.y) ? 'grab' : (armed ? 'crosshair' : '');
+  });
+  function endPoiDrag() {
+    if (!dragPoi) return;
+    dragPoi = null;
+    if (!locked) map.dragPan.enable();
+    setTimeout(function () { poiClickGuard = false; }, 60);
+  }
+  document.addEventListener('pointerup', endPoiDrag);
+  document.addEventListener('pointercancel', endPoiDrag);
   map.on('click', function (e) {
-    if (!armed) return;
+    if (poiClickGuard) return;
+    if (!armed) { if (selPoi !== null) selectPoi(null); return; }
     addPoi(e.lngLat.lat, e.lngLat.lng);
-    status('Ort gesetzt. Namen und Farbe kannst du rechts in der Liste ändern.');
+    status('Ort gesetzt. Zum Verschieben anklicken und ziehen. Namen und Farbe änderst du rechts in der Liste.');
   });
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && armed) setArmed(false);
+    if (e.key === 'Escape') { if (armed) setArmed(false); else if (selPoi !== null) selectPoi(null); }
   });
 
   // ---- Titel und Suche ----
