@@ -806,16 +806,20 @@
     g.fillStyle = '#c9bf9f';
     spaced(g, coords, CW / 2, CH - 4 * cw, 0.35 * 2.6 * cw);
     // Quellenangabe (Lizenzpflicht für OpenStreetMap-Daten)
-    // Klein, dunkle Schrift auf einem schmalen hellen Feld unten rechts (wie bei Standard-Karten)
+    // Quellenangabe: kleine schwarze Schrift unten rechts, ohne Hintergrundfläche.
+    // Eine feine helle Kontur sorgt dafür, dass sie auch auf dem schwarzen Titelbalken lesbar bleibt.
     var attr = MAPTILER_KEY ? '© OpenStreetMap-Mitwirkende · © MapTiler' : '© OpenStreetMap-Mitwirkende';
-    g.font = '400 ' + (0.8 * cw) + 'px Inter, -apple-system, Helvetica, Arial, sans-serif';
-    g.textAlign = 'left';
-    g.textBaseline = 'middle';
-    var aw = g.measureText(attr).width, ah = 1.7 * cw, apx = 0.7 * cw;
-    g.fillStyle = 'rgba(243,234,208,.88)';
-    g.fillRect(CW - aw - 2 * apx, CH - ah, aw + 2 * apx, ah);
-    g.fillStyle = '#2b2b2b';
-    g.fillText(attr, CW - aw - apx, CH - ah / 2 + 0.05 * cw);
+    g.save();
+    g.font = '500 ' + (0.9 * cw) + 'px Inter, -apple-system, Helvetica, Arial, sans-serif';
+    g.textAlign = 'right';
+    g.textBaseline = 'alphabetic';
+    g.lineJoin = 'round';
+    g.lineWidth = 0.5 * cw;
+    g.strokeStyle = 'rgba(255,255,255,.9)';
+    g.strokeText(attr, CW - 1.4 * cw, CH - 1.2 * cw);
+    g.fillStyle = '#000';
+    g.fillText(attr, CW - 1.4 * cw, CH - 1.2 * cw);
+    g.restore();
     g.textAlign = 'center';
 
     // 5. Wasserzeichen (nur in der Bearbeitung, nicht im Export)
@@ -1068,13 +1072,10 @@
   }
 
   // ---- Orte: Liste und Legende ----
-  // Legendeneinträge: benannte Orte, dazu unbenannte Icons mit ihrem Standardnamen (Buchstaben nur mit eigenem Namen)
+  // Legendeneinträge: nur Orte, denen du selbst einen Namen gegeben hast
   function legendItems() {
-    return pois.map(function (p) {
-      var ic = ICON_BY[p.icon];
-      var t = (p.name && p.name.trim()) || (ic.letter ? '' : ic.label);
-      return t ? { p: p, text: t } : null;
-    }).filter(Boolean).slice(0, 10);
+    return pois.filter(function (p) { return p.name && p.name.trim(); })
+      .map(function (p) { return { p: p, text: p.name.trim() }; }).slice(0, 10);
   }
   function updateLegend() {
     document.getElementById('legend').innerHTML = legendItems().map(function (it) {
