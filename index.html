@@ -753,12 +753,12 @@
 
     // 3. Legende
     if (document.getElementById('optLegend').checked) {
-      var named = pois.filter(function (p) { return p.name && p.name.trim(); }).slice(0, 10);
+      var named = legendItems();
       var rowH = 4.8 * cw, y = 3 * cw;
       g.font = '600 ' + (2.5 * cw) + 'px Inter, -apple-system, Helvetica, Arial, sans-serif';
       g.textBaseline = 'middle';
-      named.forEach(function (p) {
-        var txt = p.name.trim();
+      named.forEach(function (it) {
+        var p = it.p, txt = it.text;
         g.textAlign = 'left';
         var tw = g.measureText(txt).width;
         var rowW = 2.4 * cw + tw + 1.4 * cw + 3.6 * cw + 1.6 * cw;
@@ -1063,10 +1063,17 @@
   }
 
   // ---- Orte: Liste und Legende ----
+  // Legendeneinträge: benannte Orte, dazu unbenannte Icons mit ihrem Standardnamen (Buchstaben nur mit eigenem Namen)
+  function legendItems() {
+    return pois.map(function (p) {
+      var ic = ICON_BY[p.icon];
+      var t = (p.name && p.name.trim()) || (ic.letter ? '' : ic.label);
+      return t ? { p: p, text: t } : null;
+    }).filter(Boolean).slice(0, 10);
+  }
   function updateLegend() {
-    var named = pois.filter(function (p) { return p.name && p.name.trim(); }).slice(0, 10);
-    document.getElementById('legend').innerHTML = named.map(function (p) {
-      return '<div class="row"><span>' + esc(p.name.trim()) + '</span>' + iconSVG(ICON_BY[p.icon], 24, p.color) + '</div>';
+    document.getElementById('legend').innerHTML = legendItems().map(function (it) {
+      return '<div class="row"><span>' + esc(it.text) + '</span>' + iconSVG(ICON_BY[it.p.icon], 24, it.p.color) + '</div>';
     }).join('');
     scheduleMockups();
   }
@@ -1124,6 +1131,8 @@
     nameEl.value = '';
     refreshList();
     render();
+    var ins = document.querySelectorAll('#plist input[type=text]');
+    if (ins.length && !nameEl.value && !pois[pois.length - 1].name && window.matchMedia('(pointer:fine)').matches) { ins[ins.length - 1].focus(); }
   }
 
   function buildPalette() {
