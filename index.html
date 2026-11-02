@@ -368,7 +368,7 @@
         <h3 id="dlgTitle2">Design einreichen</h3>
         <p>Wir erstellen aus deinem Design die fertige Datei und schicken sie dir über deine Etsy-Bestellung.</p>
         <label>Etsy-Bestellnummer *<input type="text" id="fOrder" required maxlength="40" autocomplete="off"></label>
-        <label>E-Mail *<input type="email" id="fMail" required maxlength="120" autocomplete="email"></label>
+        <label>E-Mail (optional)<input type="email" id="fMail" maxlength="120" autocomplete="email"></label>
         <label>Name<input type="text" id="fName" maxlength="80" autocomplete="name"></label>
         <label>Nachricht<textarea id="fMsg" rows="3" maxlength="600" placeholder="Zum Beispiel Wünsche oder Hinweise"></textarea></label>
         <input type="text" id="fWeb" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0">
@@ -1722,14 +1722,18 @@
     var enc = b64enc(JSON.stringify(getState()));
     var pub = location.origin + location.pathname + '#d=' + enc, loc = SUBMIT.ownerUrl + '#d=' + enc;
     var title = document.getElementById('title').textContent;
-    var tips = document.getElementById('fTips').checked;
+    var tips = document.getElementById('fTips').checked && !!mail;   // Werbung nur mit E-Mail-Adresse möglich
     var msg = 'Neue Design-Einreichung\n\nWerbe-Einwilligung (Druck-Tipps per E-Mail): ' + (tips ? 'JA, erteilt am ' + new Date().toLocaleString('de-DE') : 'NEIN, keine Werbung senden') +
-      '\n\nEtsy-Bestellnummer: ' + order + '\nE-Mail: ' + mail + '\nName: ' + (name || '-') + '\nPoster-Titel: ' + title +
+      '\n\nEtsy-Bestellnummer: ' + order + '\nE-Mail: ' + (mail || '-') + '\nName: ' + (name || '-') + '\nPoster-Titel: ' + title +
       '\nNachricht: ' + (note || '-') + '\n\nLink zum Design (öffentlich):\n' + pub + '\n\nLink zum Exportieren (lokal bei dir):\n' + loc + '\n';
     sending = true; document.getElementById('fSend').disabled = true; say('Wird gesendet …');
     fetch(SUBMIT.url, {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ access_key: SUBMIT.key, subject: 'Mein Revier: Design zu Bestellung ' + order, from_name: 'Mein Revier', name: name || 'Kunde', email: mail, message: msg })
+      body: JSON.stringify((function () {
+        var o = { access_key: SUBMIT.key, subject: 'Mein Revier: Design zu Bestellung ' + order, from_name: 'Mein Revier', name: name || 'Kunde', message: msg };
+        if (mail) o.email = mail;
+        return o;
+      })())
     }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || j.success === false) throw new Error(j.message || ('Fehler ' + r.status)); }); })
       .then(function () {
         say('Danke! Dein Design ist bei uns angekommen. Wir melden uns über deine Etsy-Bestellung.', 'ok');
