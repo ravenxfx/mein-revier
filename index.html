@@ -86,14 +86,14 @@
   .stage { display:grid; grid-template-columns:auto minmax(320px,440px); gap:clamp(20px,3vw,44px); justify-content:center; align-items:start; }
   .posterbox { position:sticky; top:76px; }
   .poster { position:relative; container-type:inline-size; width:min(46vw, calc((100vh - 130px) * 5 / 7), 540px); min-width:280px; aspect-ratio:5/7; border:8px solid var(--pborder,#fff); background:var(--pbg,#f1efe9); overflow:hidden; box-shadow:0 16px 44px rgba(90,55,10,.28); transition:border-color .2s; }
-  .poster[data-theme=dark] { box-shadow:0 16px 44px rgba(0,0,0,.45); }
+  .poster[data-theme=dark], .poster[data-theme=neon] { box-shadow:0 16px 44px rgba(0,0,0,.45); }
   #map { position:absolute; inset:0; isolation:isolate; background:var(--pbg,#f1efe9); }
   #mapFx { position:absolute; inset:0; width:100%; height:100%; z-index:2; pointer-events:none; display:none; }
   .poster.fx #mapFx { display:block; }
   #frameCv { position:absolute; inset:0; width:100%; height:100%; z-index:6; pointer-events:none; }
   #map canvas.maplibregl-canvas { outline:none; filter:saturate(.5); }
-  .poster[data-theme=dark] #map canvas.maplibregl-canvas { filter:grayscale(1) brightness(1.7); }
-  .poster[data-theme=dark] #map.osm canvas.maplibregl-canvas { filter:grayscale(1) contrast(1.1) brightness(.7); }
+  .poster[data-theme=dark] #map canvas.maplibregl-canvas, .poster[data-theme=neon] #map canvas.maplibregl-canvas { filter:grayscale(1) brightness(1.7); }
+  .poster[data-theme=dark] #map.osm canvas.maplibregl-canvas, .poster[data-theme=neon] #map.osm canvas.maplibregl-canvas { filter:grayscale(1) contrast(1.1) brightness(.7); }
   #fog { position:absolute; inset:0; width:100%; height:100%; z-index:5; pointer-events:none; touch-action:none; }
   #selRing { position:absolute; z-index:6; pointer-events:none; border:3px dashed #fff; border-radius:50%; box-shadow:0 0 0 2px rgba(0,0,0,.55), 0 0 14px rgba(255,255,255,.35); transform:translate(-50%,-50%); }
   #selRing[hidden] { display:none; }
@@ -137,7 +137,7 @@
   .choice .sw.d { background:linear-gradient(135deg,#2b3036 0 55%,#1b2a38 55% 70%,#2b3036 70%); }
   .choice .sw::after { content:''; position:absolute; left:0; right:0; bottom:0; height:40%; }
   .choice .sw.g::after { display:none; }
-  .choice .sw.neon { background:linear-gradient(160deg,#2a0f5c,#ff3d9a 55%,#ff9a3d); }
+  .choice .sw.neon { background:linear-gradient(135deg,#2b3036 0 55%,#1b2a38 55% 70%,#2b3036 70%); box-shadow:inset 0 0 0 6px #ff3d9a, inset 0 0 0 9px #ff9a3d; }
   .choice .sw.l::after { background:linear-gradient(to top,#fff,rgba(255,255,255,0)); }
   .choice .sw.d::after { background:linear-gradient(to top,#000,rgba(0,0,0,0)); }
   .switch { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-top:1px solid #f3eadb; cursor:pointer; user-select:none; font-weight:700; }
@@ -314,7 +314,6 @@
           <button type="button" class="btn" id="zoomOut" aria-label="Zoom −">−</button>
           <span data-i18n="s2.z">Oder mit zwei Fingern / Mausrad</span>
         </div>
-        <label class="switch"><span data-i18n="s2.lock">Ausschnitt fixieren</span><input type="checkbox" id="viewLock"><span class="track"></span></label>
         <details class="more">
           <summary data-i18n="s3.more">Mehr Optionen</summary>
           <label class="switch"><span data-i18n="s2.places">Ortsnamen</span><input type="checkbox" id="tPlaces" checked><span class="track"></span></label>
@@ -328,7 +327,7 @@
         <div class="choices" role="group">
           <button type="button" class="choice" data-theme="light" aria-pressed="true"><span class="sw l"></span><span data-i18n="s3.light">Hell</span><small data-i18n="s3.lightS">Freundlich</small></button>
           <button type="button" class="choice" data-theme="dark" aria-pressed="false"><span class="sw d"></span><span data-i18n="s3.dark">Dunkel</span><small data-i18n="s3.darkS">Gamer-Look</small></button>
-          <button type="button" class="choice" data-theme="neon" aria-pressed="false"><span class="sw g neon"></span><span data-i18n="s3.neon">Neon-Küste</span><small data-i18n="s3.neonS">Sonnenuntergang</small></button>
+          <button type="button" class="choice" data-theme="neon" aria-pressed="false"><span class="sw g neon"></span><span data-i18n="s3.neon">Neon-Rahmen</span><small data-i18n="s3.neonS">Dunkel + Rahmen</small></button>
         </div>
         <details class="more" id="fogBox">
           <summary data-i18n="s3.more">Mehr Optionen</summary>
@@ -365,7 +364,7 @@
           <button type="button" class="btn primary" id="submitBtn" data-i18n="s5.submit">Design einreichen</button>
           <button type="button" class="btn" id="shareBtn" data-i18n="s5.share">Link speichern</button>
         </div>
-        <p class="note" data-i18n="s5.note">Reiche dein Design mit deiner Etsy-Bestellnummer ein. Wir schicken dir die Datei über Etsy.</p>
+        <p class="note" data-i18n="s5.note">Reiche dein Design mit deinem Benutzernamen ein. Wir melden uns bei dir.</p>
         <span id="ownerTools" class="ownertools" hidden>
           <button id="testDl" type="button" class="btn">Alle Dateien exportieren: A4, A3, A2, Handy (nur lokal)</button>
         </span>
@@ -391,13 +390,13 @@
     </div>
     <form id="dlgForm" hidden>
       <h3 id="dlgTitle2" data-i18n="dlg.fh">Design einreichen</h3>
-      <p data-i18n="dlg.fp">Wir erstellen aus deinem Design die fertige Datei und schicken sie dir über deine Etsy-Bestellung.</p>
-      <label><span data-i18n="dlg.order">Etsy-Bestellnummer *</span><input type="text" id="fOrder" required maxlength="40" autocomplete="off"></label>
+      <p data-i18n="dlg.fp">Wir erstellen aus deinem Design die fertige Datei und melden uns bei dir.</p>
+      <label><span data-i18n="dlg.order">Benutzername *</span><input type="text" id="fOrder" required maxlength="60" autocomplete="username"></label>
       <label><span data-i18n="dlg.mail">E-Mail (optional)</span><input type="email" id="fMail" maxlength="120" autocomplete="email"></label>
       <label><span data-i18n="dlg.name">Name</span><input type="text" id="fName" maxlength="80" autocomplete="name"></label>
       <label><span data-i18n="dlg.msg">Nachricht</span><textarea id="fMsg" rows="3" maxlength="600" data-i18n-ph="dlg.msgph" placeholder="Zum Beispiel Wünsche oder Hinweise"></textarea></label>
       <input type="text" id="fWeb" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0">
-      <label class="dlg-check"><input type="checkbox" id="fOk" required> <span data-i18n="dlg.ok">Ich willige ein, dass meine Angaben und mein Design zur Bearbeitung meiner Bestellung per E-Mail übermittelt werden. *</span></label>
+      <label class="dlg-check"><input type="checkbox" id="fOk" required> <span data-i18n="dlg.ok">Ich willige ein, dass meine Angaben und mein Design zur Bearbeitung per E-Mail übermittelt werden. *</span></label>
       <label class="dlg-check"><input type="checkbox" id="fTips"> <span data-i18n="dlg.tips">Optional: Ich möchte Tipps und Angebote rund ums Drucken meines Posters per E-Mail erhalten. Die Einwilligung kann ich jederzeit widerrufen.</span></label>
       <p class="dlg-msg" id="fMsgOut" role="status"></p>
       <button type="submit" class="btn primary" id="fSend" data-i18n="dlg.send">Design einreichen</button>
@@ -440,25 +439,25 @@
       's2.places': 'Ortsnamen', 's2.streets': 'Straßennamen',
       's3.h': 'Titel & Stil', 's3.title': 'Titel auf dem Poster', 's3.ph': 'z. B. Düsseldorf',
       's3.light': 'Hell', 's3.lightS': 'Freundlich', 's3.dark': 'Dunkel', 's3.darkS': 'Gamer-Look',
-      's3.neon': 'Neon-Küste', 's3.neonS': 'Sonnenuntergang',
+      's3.neon': 'Neon-Rahmen', 's3.neonS': 'Dunkel + Rahmen',
       's3.cross': 'Fadenkreuz', 's3.legend': 'Legende', 's3.fog': 'Weicher Rand', 's3.more': 'Mehr Optionen',
       's3.f1': 'Stärke', 's3.f2': 'Weichheit', 's3.f3': 'Struktur', 's3.f4': 'Deckkraft', 's3.f5': 'Farbe',
       's4.h': 'Deine Orte', 's4.p': 'Tipp ein Symbol an, dann auf die Karte.', 's4.letters': 'Buchstaben (z. B. für Freunde)',
       's4.lcol': 'Farbe für neue Buchstaben', 's4.place': 'Am Fadenkreuz setzen',
       's5.h': 'Fertig!', 's5.p': 'Schau dir dein Poster an. Passt alles?', 's5.submit': 'Design einreichen', 's5.share': 'Link speichern',
-      's5.note': 'Reiche dein Design mit deiner Etsy-Bestellnummer ein. Wir schicken dir die Datei über Etsy.',
+      's5.note': 'Reiche dein Design mit deinem Benutzernamen ein. Wir melden uns bei dir.',
       'lock.off': 'Design sperren', 'lock.on': 'Gesperrt · Entsperren',
       'nav.back': '← Zurück', 'nav.next': 'Weiter →',
       'sn1': 'Ort', 'sn2': 'Stil', 'sn3': 'Orte', 'sn4': 'Fertig', 'step.of': 'Schritt {n} von {m}',
       'dlg.lh': 'Link zu deinem Design', 'dlg.lp': 'Mit diesem Link öffnet sich dein Poster genau so, wie du es gestaltet hast.',
       'dlg.copy': 'Link kopieren', 'dlg.copied': 'Kopiert ✓',
-      'dlg.fh': 'Design einreichen', 'dlg.fp': 'Wir erstellen aus deinem Design die fertige Datei und schicken sie dir über deine Etsy-Bestellung.',
-      'dlg.order': 'Etsy-Bestellnummer *', 'dlg.mail': 'E-Mail (optional)', 'dlg.name': 'Name', 'dlg.msg': 'Nachricht', 'dlg.msgph': 'Zum Beispiel Wünsche oder Hinweise',
-      'dlg.ok': 'Ich willige ein, dass meine Angaben und mein Design zur Bearbeitung meiner Bestellung per E-Mail übermittelt werden. *',
+      'dlg.fh': 'Design einreichen', 'dlg.fp': 'Wir erstellen aus deinem Design die fertige Datei und melden uns bei dir.',
+      'dlg.order': 'Benutzername *', 'dlg.mail': 'E-Mail (optional)', 'dlg.name': 'Name', 'dlg.msg': 'Nachricht', 'dlg.msgph': 'Zum Beispiel Wünsche oder Hinweise',
+      'dlg.ok': 'Ich willige ein, dass meine Angaben und mein Design zur Bearbeitung per E-Mail übermittelt werden. *',
       'dlg.tips': 'Optional: Ich möchte Tipps und Angebote rund ums Drucken meines Posters per E-Mail erhalten. Die Einwilligung kann ich jederzeit widerrufen.',
       'dlg.send': 'Design einreichen', 'dlg.sent': 'Eingereicht ✓', 'dlg.sending': 'Wird gesendet …', 'dlg.thx0': 'Danke!',
       'dlg.notyet': 'Das Einreichen ist noch nicht freigeschaltet. Bitte versuche es später noch einmal.',
-      'dlg.done': 'Danke! Dein Design ist bei uns angekommen. Wir melden uns über deine Etsy-Bestellung.',
+      'dlg.done': 'Danke! Dein Design ist bei uns angekommen. Wir melden uns bei dir.',
       'dlg.fail': 'Das hat leider nicht geklappt ({e}). Bitte versuche es noch einmal.', 'dlg.neterr': 'Netzwerkfehler',
       'dlg.ad': 'Werbung', 'dlg.adp': 'Dein Poster drucken lassen?', 'dlg.adl': 'Zum Druckanbieter',
       'mock.h': 'So hängt es bei dir', 'mock.p': 'Die Bilder aktualisieren sich bei jeder Änderung.',
@@ -488,25 +487,25 @@
       's2.places': 'Place names', 's2.streets': 'Street names',
       's3.h': 'Title & style', 's3.title': 'Poster title', 's3.ph': 'e.g. Berlin',
       's3.light': 'Light', 's3.lightS': 'Friendly', 's3.dark': 'Dark', 's3.darkS': 'Gamer look',
-      's3.neon': 'Neon Coast', 's3.neonS': 'Sunset',
+      's3.neon': 'Neon frame', 's3.neonS': 'Dark + frame',
       's3.cross': 'Crosshair', 's3.legend': 'Legend', 's3.fog': 'Soft edge', 's3.more': 'More options',
       's3.f1': 'Strength', 's3.f2': 'Softness', 's3.f3': 'Texture', 's3.f4': 'Opacity', 's3.f5': 'Color',
       's4.h': 'Your places', 's4.p': 'Tap an icon, then tap the map.', 's4.letters': 'Letters (e.g. for friends)',
       's4.lcol': 'Color for new letters', 's4.place': 'Place at crosshair',
       's5.h': 'All done!', 's5.p': 'Take a look at your poster. Everything right?', 's5.submit': 'Submit design', 's5.share': 'Save link',
-      's5.note': 'Submit your design with your Etsy order number. We’ll send you the file via Etsy.',
+      's5.note': 'Submit your design with your username. We’ll get back to you.',
       'lock.off': 'Lock design', 'lock.on': 'Locked · Unlock',
       'nav.back': '← Back', 'nav.next': 'Next →',
       'sn1': 'Place', 'sn2': 'Style', 'sn3': 'Spots', 'sn4': 'Done', 'step.of': 'Step {n} of {m}',
       'dlg.lh': 'Link to your design', 'dlg.lp': 'This link opens your poster exactly the way you made it.',
       'dlg.copy': 'Copy link', 'dlg.copied': 'Copied ✓',
-      'dlg.fh': 'Submit design', 'dlg.fp': 'We’ll turn your design into the final file and send it to you through your Etsy order.',
-      'dlg.order': 'Etsy order number *', 'dlg.mail': 'Email (optional)', 'dlg.name': 'Name', 'dlg.msg': 'Message', 'dlg.msgph': 'For example wishes or notes',
-      'dlg.ok': 'I agree that my details and my design are sent to you by email to process my order. *',
+      'dlg.fh': 'Submit design', 'dlg.fp': 'We’ll turn your design into the final file and get back to you.',
+      'dlg.order': 'Username *', 'dlg.mail': 'Email (optional)', 'dlg.name': 'Name', 'dlg.msg': 'Message', 'dlg.msgph': 'For example wishes or notes',
+      'dlg.ok': 'I agree that my details and my design are sent to you by email for processing. *',
       'dlg.tips': 'Optional: I’d like to receive tips and offers about printing my poster by email. I can withdraw my consent at any time.',
       'dlg.send': 'Submit design', 'dlg.sent': 'Submitted ✓', 'dlg.sending': 'Sending …', 'dlg.thx0': 'Thanks!',
       'dlg.notyet': 'Submitting is not enabled yet. Please try again later.',
-      'dlg.done': 'Thank you! Your design has arrived. We’ll get back to you through your Etsy order.',
+      'dlg.done': 'Thank you! Your design has arrived. We’ll get back to you.',
       'dlg.fail': 'That didn’t work ({e}). Please try again.', 'dlg.neterr': 'network error',
       'dlg.ad': 'Advertisement', 'dlg.adp': 'Want your poster printed?', 'dlg.adl': 'Go to print shop',
       'mock.h': 'How it looks at home', 'mock.p': 'The images update with every change.',
@@ -559,14 +558,13 @@
       cross: { c: 'rgba(255,255,255,0.92)', sh: 'rgba(0,0,0,.7)' },
       badge: { stroke: '#111111', shape: 'circle', mixTo: '#ffffff', mixA: 0, glow: '' },
       attr: 'rgba(100,103,107,.9)', wm: { f: '255,255,255', fa: 0.38, s: '0,0,0', sa: 0.25 } },
-    neon: { base: 'dark', fog: [42, 15, 92], bg: '#1b0f3a', border: '#ff5fae',
-      map: { water: ['#06384a', '#1fd3c8'], green: ['#2a1166', '#7a3fd0'], land: ['#1a0a46', '#c42f8f', '#ffb04a'] },
+    neon: { base: 'dark', fog: [10, 12, 14], bg: '#1f2327', border: '#ff5fae', map: null,
       frame: { type: 'neon', m: 6, r: 1.2 },
-      legend: { bg: 'rgba(26,10,70,.84)', fg: '#ffffff', r: 0.8, bd: '#ff4fa3' },
-      title: { fill: '#ffffff', out: '#ff2f92', sub: '#ffd2ea', grad: '32,10,84', ga: 0.9, fam: FAM_IMPACT, st: 'italic ', glow: '#ff2f92' },
-      cross: { c: 'rgba(255,255,255,.95)', sh: 'rgba(255,47,146,.9)' },
-      badge: { stroke: '#ffffff', shape: 'circle', mixTo: '#ffffff', mixA: 0.1, glow: '#ff4fa3' },
-      attr: 'rgba(255,255,255,.75)', wm: { f: '255,255,255', fa: 0.34, s: '255,47,146', sa: 0.3 } }
+      legend: { bg: 'rgba(0,0,0,.74)', fg: '#ffffff', r: 0, bd: '' },
+      title: { fill: '#f3ead0', out: '#000000', sub: '#c9bf9f', grad: '0,0,0', ga: 0.92, fam: FAM_IMPACT, st: '', glow: '' },
+      cross: { c: 'rgba(255,255,255,0.92)', sh: 'rgba(0,0,0,.7)' },
+      badge: { stroke: '#111111', shape: 'circle', mixTo: '#ffffff', mixA: 0, glow: '' },
+      attr: 'rgba(255,255,255,.75)', wm: { f: '255,255,255', fa: 0.38, s: '0,0,0', sa: 0.25 } }
   };
   function TH() { return THEMES[theme]; }
   function badgeStroke() { return THEMES[theme].badge.stroke; }
@@ -723,16 +721,17 @@
     { id: 'parking',  label: 'Parken',         color: '#1e88e5', d: 'M7 3h6a5 5 0 0 1 0 10H10v8H7zM10 6v4h3a2 2 0 0 0 0-4z' },
     { id: 'hospital', label: 'Arzt / Klinik',  color: '#ef5350', d: 'M9 3h6v6h6v6h-6v6H9v-6H3V9h6z' },
     { id: 'garage',   label: 'Garage',         color: '#757575', d: 'M12 2 2 8v14h20V8zM6 11h12v2H6zM6 15h12v2H6zM6 19h12v2H6z' },
-    { id: 'cinema',   label: 'Kino',           color: '#5e35b1', d: 'M3 5h18v14H3zM10 8.5v7l6-3.5z' },
+    { id: 'soccer',   label: 'Fußball',        color: '#2e7d32', d: 'M12 2a10 10 0 1 0 0 20a10 10 0 1 0 0-20zM12 3.6a8.4 8.4 0 1 1 0 16.8a8.4 8.4 0 1 1 0-16.8zM12.00 8.40L15.42 10.89L14.12 14.91L9.88 14.91L8.58 10.89zM12.55 8.40L12.55 3.60L11.45 3.60L11.45 8.40zM15.59 11.41L20.16 9.93L19.82 8.88L15.25 10.36zM13.67 15.24L16.49 19.12L17.38 18.47L14.56 14.59zM9.44 14.59L6.62 18.47L7.51 19.12L10.33 15.24zM8.75 10.36L4.18 8.88L3.84 9.93L8.41 11.41z' },
     { id: 'camera',   label: 'Fotospot',       color: '#00897b', d: 'M9 4 7.5 6H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-3.5L15 4zM12 9a4 4 0 1 1 0 8 4 4 0 0 1 0-8z' },
     { id: 'heart',    label: 'Freunde / Familie', color: '#e91e63', d: 'M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z' },
     { id: 'star',     label: 'Lieblingsort',   color: '#f5b800', d: 'M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.5 5.8 21.1l1.4-7L2 9.3l7-.8z' }
   ];
   var ICON_BY = {};
   ICONS.forEach(function (ic) { ic.p = new Path2D(ic.d); ICON_BY[ic.id] = ic; });
+  ICON_BY.cinema = ICON_BY.soccer;   // alte Links
   var ICON_EN = { home: 'Home', work: 'Work', school: 'School / Uni', cafe: 'Café', food: 'Restaurant', bar: 'Bar', music: 'Club / Concert', shop: 'Shopping',
     gym: 'Sport / Gym', park: 'Park', water: 'Lake / River', train: 'Train / Transit', plane: 'Airport', parking: 'Parking', hospital: 'Doctor / Clinic',
-    garage: 'Garage', cinema: 'Cinema', camera: 'Photo spot', heart: 'Friends / Family', star: 'Favorite spot' };
+    garage: 'Garage', soccer: 'Soccer', camera: 'Photo spot', heart: 'Friends / Family', star: 'Favorite spot' };
   function iconLabel(ic) {
     if (ic.letter) return t('letter', { x: ic.letter });
     return LANG === 'en' ? (ICON_EN[ic.id] || ic.label) : ic.label;
@@ -1006,7 +1005,7 @@
     try { coverDraw(g, opts.mapSrc || map.getCanvas(), 0, 0, CW, CH); } catch (e) {}
     if (T.map) { try { tintMap(g, CW, CH, T.map, T.base); } catch (e) {} } else try {
       var im = g.getImageData(0, 0, CW, CH), d = im.data, osm = !MAPTILER_KEY;
-      var dark = theme === 'dark';
+      var dark = theme !== 'light';
       function cl(x) { return x < 0 ? 0 : (x > 255 ? 255 : x); }
       for (var i = 0; i < d.length; i += 4) {
         var v = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
@@ -1637,18 +1636,6 @@
   // ---- Poster sperren ("fertig mit der Bearbeitung") ----
   var locked = false;
   function updateLockTxt() {}
-  function setLocked(on, quiet) {
-    locked = on;
-    document.body.classList.toggle('locked', on);
-    var h = ['dragPan', 'scrollZoom', 'doubleClickZoom', 'touchZoomRotate', 'keyboard', 'boxZoom'];
-    h.forEach(function (n) { if (map[n]) { if (on) map[n].disable(); else map[n].enable(); } });
-    if (!on) map.touchZoomRotate.disableRotation();
-    document.getElementById('viewLock').checked = on;
-    document.getElementById('zoomIn').disabled = on;
-    document.getElementById('zoomOut').disabled = on;
-    if (!quiet) status(on ? t('st.locked') : t('st.unlocked'));
-  }
-  document.getElementById('viewLock').addEventListener('change', function (e) { setLocked(e.target.checked); });
 
   // Der Export in voller Auflösung ist nur sichtbar, wenn die Seite lokal bei dir läuft (localhost)
   // Auf anderen Geräten: einmal die Seite mit ?owner=DEIN-CODE öffnen, dann merkt sich der Browser, dass du es bist.
@@ -1913,13 +1900,13 @@
     var title = document.getElementById('title').textContent;
     var tips = document.getElementById('fTips').checked && !!mail;   // Werbung nur mit E-Mail-Adresse möglich
     var msg = 'Neue Design-Einreichung\n\nWerbe-Einwilligung (Druck-Tipps per E-Mail): ' + (tips ? 'JA, erteilt am ' + new Date().toLocaleString('de-DE') : 'NEIN, keine Werbung senden') +
-      '\n\nEtsy-Bestellnummer: ' + order + '\nE-Mail: ' + (mail || '-') + '\nName: ' + (name || '-') + '\nPoster-Titel: ' + title + '\nSprache/Stil: ' + LANG + '/' + theme +
+      '\n\nBenutzername: ' + order + '\nE-Mail: ' + (mail || '-') + '\nName: ' + (name || '-') + '\nPoster-Titel: ' + title + '\nSprache/Stil: ' + LANG + '/' + theme +
       '\nNachricht: ' + (note || '-') + '\n\nLink zum Design (öffentlich):\n' + pub + '\n\nLink zum Exportieren (lokal bei dir):\n' + loc + '\n';
     sending = true; document.getElementById('fSend').disabled = true; say(t('dlg.sending'));
     fetch(SUBMIT.url, {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify((function () {
-        var o = { access_key: SUBMIT.key, subject: 'Mein Revier: Design zu Bestellung ' + order, from_name: 'Mein Revier', name: name || 'Kunde', message: msg };
+        var o = { access_key: SUBMIT.key, subject: 'Mein Revier: Design von ' + order, from_name: 'Mein Revier', name: name || 'Kunde', message: msg };
         if (mail) o.email = mail;
         return o;
       })())
@@ -2052,7 +2039,6 @@
     if (step === 1 && q && q !== lastQuery) {
       search();   // neuer Ort: erst laden, dann kann der Ausschnitt noch angepasst werden
     } else {
-      if (step === 1 && !locked) setLocked(true, true);
       goStep(step + 1, true);
     }
   });
