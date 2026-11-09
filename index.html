@@ -129,7 +129,6 @@
   .field { display:block; margin-bottom:14px; }
   .field > span { display:block; font-weight:800; font-size:14px; margin-bottom:6px; }
   .choices { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
-  @media (max-width:520px) { .choices { grid-template-columns:1fr 1fr; } }
   .choice { border:3px solid var(--line); border-radius:18px; background:#fff; padding:6px 6px 8px; text-align:center; font-weight:800; font-size:14px; line-height:1.2; }
   .choice small { display:block; font-weight:600; color:var(--muted); font-size:13px; }
   .choice[aria-pressed=true] { border-color:var(--brand); box-shadow:0 0 0 4px var(--ring); }
@@ -139,10 +138,6 @@
   .choice .sw::after { content:''; position:absolute; left:0; right:0; bottom:0; height:40%; }
   .choice .sw.g::after { display:none; }
   .choice .sw.neon { background:linear-gradient(160deg,#2a0f5c,#ff3d9a 55%,#ff9a3d); }
-  .choice .sw.block { background:radial-gradient(circle at 25% 30%,#7fa6ff 0 12%,transparent 13%),radial-gradient(circle at 70% 65%,#7fa6ff 0 12%,transparent 13%),#2457d6; }
-  .choice .sw.battle { background:linear-gradient(135deg,#1b1160 0 40%,#6ed84f 40% 60%,#2fb0ea 60%); }
-  .choice .sw.cozy { background:linear-gradient(135deg,#fff7de 0 40%,#b9ecf5 40% 62%,#c9efb4 62%); }
-  .choice .sw.adventure { background:linear-gradient(135deg,#f3e6bf 0 45%,#b58a55 45% 55%,#e9d3a1 55%); }
   .choice .sw.l::after { background:linear-gradient(to top,#fff,rgba(255,255,255,0)); }
   .choice .sw.d::after { background:linear-gradient(to top,#000,rgba(0,0,0,0)); }
   .switch { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-top:1px solid #f3eadb; cursor:pointer; user-select:none; font-weight:700; }
@@ -309,43 +304,37 @@
 
       <div class="pane" data-pane="1">
         <h2 data-i18n="s1.h">Wähle deinen Ort</h2>
-        <p class="sub" data-i18n="s1.p">Stadt, Ort oder Postleitzahl</p>
+        <p class="sub" data-i18n="s1.p">Such deinen Ort und zoome, bis dein Viertel passt.</p>
         <div class="searchbar">
           <input id="q" type="text" data-i18n-ph="s1.ph" placeholder="z. B. 40213 oder Düsseldorf" aria-label="Stadt, Ort oder Postleitzahl" autocomplete="off">
           <button id="go" class="btn primary" type="button" data-i18n="s1.go">Karte laden</button>
         </div>
-      </div>
-
-      <div class="pane" data-pane="2">
-        <h2 data-i18n="s2.h">Ausschnitt wählen</h2>
-        <p class="sub" data-i18n="s2.p">Zieh die Karte und zoome, bis dein Viertel passt.</p>
         <div class="zoomrow">
           <button type="button" class="btn" id="zoomIn" aria-label="Zoom +">+</button>
           <button type="button" class="btn" id="zoomOut" aria-label="Zoom −">−</button>
           <span data-i18n="s2.z">Oder mit zwei Fingern / Mausrad</span>
         </div>
         <label class="switch"><span data-i18n="s2.lock">Ausschnitt fixieren</span><input type="checkbox" id="viewLock"><span class="track"></span></label>
-        <label class="switch"><span data-i18n="s2.places">Ortsnamen</span><input type="checkbox" id="tPlaces" checked><span class="track"></span></label>
-        <label class="switch"><span data-i18n="s2.streets">Straßennamen</span><input type="checkbox" id="tStreets"><span class="track"></span></label>
+        <details class="more">
+          <summary data-i18n="s3.more">Mehr Optionen</summary>
+          <label class="switch"><span data-i18n="s2.places">Ortsnamen</span><input type="checkbox" id="tPlaces" checked><span class="track"></span></label>
+          <label class="switch"><span data-i18n="s2.streets">Straßennamen</span><input type="checkbox" id="tStreets"><span class="track"></span></label>
+        </details>
       </div>
 
-      <div class="pane" data-pane="3">
+      <div class="pane" data-pane="2">
         <h2 data-i18n="s3.h">Titel &amp; Stil</h2>
         <label class="field"><span data-i18n="s3.title">Titel auf dem Poster</span><input id="titleIn" type="text" maxlength="40" data-i18n-ph="s3.ph" placeholder="z. B. Düsseldorf"></label>
         <div class="choices" role="group">
           <button type="button" class="choice" data-theme="light" aria-pressed="true"><span class="sw l"></span><span data-i18n="s3.light">Hell</span><small data-i18n="s3.lightS">Freundlich</small></button>
           <button type="button" class="choice" data-theme="dark" aria-pressed="false"><span class="sw d"></span><span data-i18n="s3.dark">Dunkel</span><small data-i18n="s3.darkS">Gamer-Look</small></button>
-          <button type="button" class="choice" data-theme="neon" aria-pressed="false"><span class="sw g neon"></span><span data-i18n="s3.neon">neon</span><small data-i18n="s3.neonS">neon</small></button>
-          <button type="button" class="choice" data-theme="block" aria-pressed="false"><span class="sw g block"></span><span data-i18n="s3.block">block</span><small data-i18n="s3.blockS">block</small></button>
-          <button type="button" class="choice" data-theme="battle" aria-pressed="false"><span class="sw g battle"></span><span data-i18n="s3.battle">battle</span><small data-i18n="s3.battleS">battle</small></button>
-          <button type="button" class="choice" data-theme="cozy" aria-pressed="false"><span class="sw g cozy"></span><span data-i18n="s3.cozy">cozy</span><small data-i18n="s3.cozyS">cozy</small></button>
-          <button type="button" class="choice" data-theme="adventure" aria-pressed="false"><span class="sw g adventure"></span><span data-i18n="s3.adventure">adventure</span><small data-i18n="s3.adventureS">adventure</small></button>
+          <button type="button" class="choice" data-theme="neon" aria-pressed="false"><span class="sw g neon"></span><span data-i18n="s3.neon">Neon-Küste</span><small data-i18n="s3.neonS">Sonnenuntergang</small></button>
         </div>
-        <label class="switch"><span data-i18n="s3.cross">Fadenkreuz</span><input type="checkbox" id="optCross" checked><span class="track"></span></label>
-        <label class="switch"><span data-i18n="s3.legend">Legende</span><input type="checkbox" id="optLegend" checked><span class="track"></span></label>
-        <label class="switch"><span data-i18n="s3.fog">Weicher Rand</span><input type="checkbox" id="optFog"><span class="track"></span></label>
         <details class="more" id="fogBox">
-          <summary data-i18n="s3.more">Rand feiner einstellen</summary>
+          <summary data-i18n="s3.more">Mehr Optionen</summary>
+          <label class="switch"><span data-i18n="s3.cross">Fadenkreuz</span><input type="checkbox" id="optCross" checked><span class="track"></span></label>
+          <label class="switch"><span data-i18n="s3.legend">Legende</span><input type="checkbox" id="optLegend" checked><span class="track"></span></label>
+          <label class="switch"><span data-i18n="s3.fog">Weicher Rand</span><input type="checkbox" id="optFog"><span class="track"></span></label>
           <div class="fogin">
             <label><span data-i18n="s3.f1">Stärke</span><input id="fogWidth" type="range" min="0" max="100" value="45"></label>
             <label><span data-i18n="s3.f2">Weichheit</span><input id="fogSoft" type="range" min="0" max="80" value="30"></label>
@@ -356,7 +345,7 @@
         </details>
       </div>
 
-      <div class="pane" data-pane="4">
+      <div class="pane" data-pane="3">
         <h2 data-i18n="s4.h">Deine Orte</h2>
         <p class="sub" data-i18n="s4.p">Tipp ein Symbol an, dann auf die Karte.</p>
         <div class="palette" id="palette"></div>
@@ -369,7 +358,7 @@
         <div class="plist" id="plist"></div>
       </div>
 
-      <div class="pane" data-pane="5">
+      <div class="pane" data-pane="4">
         <h2 data-i18n="s5.h">Fertig!</h2>
         <p class="sub" data-i18n="s5.p">Schau dir dein Poster an. Passt alles?</p>
         <div class="finish">
@@ -446,14 +435,13 @@
       'hero.lead': 'Such deinen Ort, markiere deine Lieblingsorte und häng deine eigene Spielkarte an die Wand.',
       'hero.c1': 'Ort suchen', 'hero.c2': 'Orte markieren', 'hero.c3': 'Poster erhalten', 'hero.cta': 'Los geht’s',
       'art.l1': 'Mein Zuhause', 'art.l2': 'Felix Haus', 'art.l3': 'TSV Fußball', 'art.l4': 'Unser See', 'art.title': 'DEIN VIERTEL',
-      's1.h': 'Wähle deinen Ort', 's1.p': 'Stadt, Ort oder Postleitzahl', 's1.ph': 'z. B. 40213 oder Düsseldorf', 's1.go': 'Karte laden',
+      's1.h': 'Wähle deinen Ort', 's1.p': 'Such deinen Ort und zoome, bis dein Viertel passt.', 's1.ph': 'z. B. 40213 oder Düsseldorf', 's1.go': 'Karte laden',
       's2.h': 'Ausschnitt wählen', 's2.p': 'Zieh die Karte und zoome, bis dein Viertel passt. Mit „Weiter“ wird der Ausschnitt fixiert.', 's2.z': 'Oder mit zwei Fingern / Mausrad', 's2.lock': 'Ausschnitt fixieren',
       's2.places': 'Ortsnamen', 's2.streets': 'Straßennamen',
       's3.h': 'Titel & Stil', 's3.title': 'Titel auf dem Poster', 's3.ph': 'z. B. Düsseldorf',
       's3.light': 'Hell', 's3.lightS': 'Freundlich', 's3.dark': 'Dunkel', 's3.darkS': 'Gamer-Look',
-      's3.neon': 'Neon-Küste', 's3.neonS': 'Sonnenuntergang', 's3.block': 'Blockwelt', 's3.blockS': 'Bunte Bausteine', 's3.battle': 'Battle-Insel', 's3.battleS': 'Mit Koordinaten',
-      's3.cozy': 'Gemütliche Insel', 's3.cozyS': 'Pastell', 's3.adventure': 'Abenteuer', 's3.adventureS': 'Schatzkarte',
-      's3.cross': 'Fadenkreuz', 's3.legend': 'Legende', 's3.fog': 'Weicher Rand', 's3.more': 'Rand feiner einstellen',
+      's3.neon': 'Neon-Küste', 's3.neonS': 'Sonnenuntergang',
+      's3.cross': 'Fadenkreuz', 's3.legend': 'Legende', 's3.fog': 'Weicher Rand', 's3.more': 'Mehr Optionen',
       's3.f1': 'Stärke', 's3.f2': 'Weichheit', 's3.f3': 'Struktur', 's3.f4': 'Deckkraft', 's3.f5': 'Farbe',
       's4.h': 'Deine Orte', 's4.p': 'Tipp ein Symbol an, dann auf die Karte.', 's4.letters': 'Buchstaben (z. B. für Freunde)',
       's4.lcol': 'Farbe für neue Buchstaben', 's4.place': 'Am Fadenkreuz setzen',
@@ -461,7 +449,7 @@
       's5.note': 'Reiche dein Design mit deiner Etsy-Bestellnummer ein. Wir schicken dir die Datei über Etsy.',
       'lock.off': 'Design sperren', 'lock.on': 'Gesperrt · Entsperren',
       'nav.back': '← Zurück', 'nav.next': 'Weiter →',
-      'sn1': 'Ort', 'sn2': 'Ausschnitt', 'sn3': 'Stil', 'sn4': 'Orte', 'sn5': 'Fertig', 'step.of': 'Schritt {n} von {m}',
+      'sn1': 'Ort', 'sn2': 'Stil', 'sn3': 'Orte', 'sn4': 'Fertig', 'step.of': 'Schritt {n} von {m}',
       'dlg.lh': 'Link zu deinem Design', 'dlg.lp': 'Mit diesem Link öffnet sich dein Poster genau so, wie du es gestaltet hast.',
       'dlg.copy': 'Link kopieren', 'dlg.copied': 'Kopiert ✓',
       'dlg.fh': 'Design einreichen', 'dlg.fp': 'Wir erstellen aus deinem Design die fertige Datei und schicken sie dir über deine Etsy-Bestellung.',
@@ -495,14 +483,13 @@
       'hero.lead': 'Find your place, mark your favorite spots and hang your very own game map on the wall.',
       'hero.c1': 'Find your place', 'hero.c2': 'Mark your spots', 'hero.c3': 'Get your poster', 'hero.cta': 'Let’s go',
       'art.l1': 'My home', 'art.l2': 'Felix’s house', 'art.l3': 'Football club', 'art.l4': 'Our lake', 'art.title': 'YOUR HOOD',
-      's1.h': 'Choose your place', 's1.p': 'City, town or postcode', 's1.ph': 'e.g. Berlin or 10115', 's1.go': 'Load map',
+      's1.h': 'Choose your place', 's1.p': 'Find your place and zoom until your area fits.', 's1.ph': 'e.g. Berlin or 10115', 's1.go': 'Load map',
       's2.h': 'Frame your map', 's2.p': 'Drag and zoom until your area fits. Tapping “Next” locks the view.', 's2.z': 'Or pinch with two fingers / mouse wheel', 's2.lock': 'Lock the view',
       's2.places': 'Place names', 's2.streets': 'Street names',
       's3.h': 'Title & style', 's3.title': 'Poster title', 's3.ph': 'e.g. Berlin',
       's3.light': 'Light', 's3.lightS': 'Friendly', 's3.dark': 'Dark', 's3.darkS': 'Gamer look',
-      's3.neon': 'Neon Coast', 's3.neonS': 'Sunset', 's3.block': 'Block World', 's3.blockS': 'Colorful bricks', 's3.battle': 'Battle Island', 's3.battleS': 'With grid',
-      's3.cozy': 'Cozy Island', 's3.cozyS': 'Pastel', 's3.adventure': 'Adventure', 's3.adventureS': 'Treasure map',
-      's3.cross': 'Crosshair', 's3.legend': 'Legend', 's3.fog': 'Soft edge', 's3.more': 'Fine-tune the edge',
+      's3.neon': 'Neon Coast', 's3.neonS': 'Sunset',
+      's3.cross': 'Crosshair', 's3.legend': 'Legend', 's3.fog': 'Soft edge', 's3.more': 'More options',
       's3.f1': 'Strength', 's3.f2': 'Softness', 's3.f3': 'Texture', 's3.f4': 'Opacity', 's3.f5': 'Color',
       's4.h': 'Your places', 's4.p': 'Tap an icon, then tap the map.', 's4.letters': 'Letters (e.g. for friends)',
       's4.lcol': 'Color for new letters', 's4.place': 'Place at crosshair',
@@ -510,7 +497,7 @@
       's5.note': 'Submit your design with your Etsy order number. We’ll send you the file via Etsy.',
       'lock.off': 'Lock design', 'lock.on': 'Locked · Unlock',
       'nav.back': '← Back', 'nav.next': 'Next →',
-      'sn1': 'Place', 'sn2': 'Frame', 'sn3': 'Style', 'sn4': 'Spots', 'sn5': 'Done', 'step.of': 'Step {n} of {m}',
+      'sn1': 'Place', 'sn2': 'Style', 'sn3': 'Spots', 'sn4': 'Done', 'step.of': 'Step {n} of {m}',
       'dlg.lh': 'Link to your design', 'dlg.lp': 'This link opens your poster exactly the way you made it.',
       'dlg.copy': 'Copy link', 'dlg.copied': 'Copied ✓',
       'dlg.fh': 'Submit design', 'dlg.fp': 'We’ll turn your design into the final file and send it to you through your Etsy order.',
@@ -573,45 +560,13 @@
       badge: { stroke: '#111111', shape: 'circle', mixTo: '#ffffff', mixA: 0, glow: '' },
       attr: 'rgba(100,103,107,.9)', wm: { f: '255,255,255', fa: 0.38, s: '0,0,0', sa: 0.25 } },
     neon: { base: 'dark', fog: [42, 15, 92], bg: '#1b0f3a', border: '#ff5fae',
-      map: { pixel: 0, water: ['#06384a', '#1fd3c8'], green: ['#2a1166', '#7a3fd0'], land: ['#1a0a46', '#c42f8f', '#ffb04a'] },
+      map: { water: ['#06384a', '#1fd3c8'], green: ['#2a1166', '#7a3fd0'], land: ['#1a0a46', '#c42f8f', '#ffb04a'] },
       frame: { type: 'neon', m: 6, r: 1.2 },
       legend: { bg: 'rgba(26,10,70,.84)', fg: '#ffffff', r: 0.8, bd: '#ff4fa3' },
       title: { fill: '#ffffff', out: '#ff2f92', sub: '#ffd2ea', grad: '32,10,84', ga: 0.9, fam: FAM_IMPACT, st: 'italic ', glow: '#ff2f92' },
       cross: { c: 'rgba(255,255,255,.95)', sh: 'rgba(255,47,146,.9)' },
       badge: { stroke: '#ffffff', shape: 'circle', mixTo: '#ffffff', mixA: 0.1, glow: '#ff4fa3' },
-      attr: 'rgba(255,255,255,.75)', wm: { f: '255,255,255', fa: 0.34, s: '255,47,146', sa: 0.3 } },
-    block: { base: 'light', fog: [236, 232, 222], bg: '#bfe0ff', border: '#2457d6',
-      map: { pixel: 56, water: ['#4aa3ff', '#8ccaff'], green: ['#46b950', '#86e06f'], land: ['#c8c3b8', '#faf7ef'] },
-      frame: { type: 'block', m: 6, r: 0 },
-      legend: { bg: 'rgba(255,255,255,.95)', fg: '#10265e', r: 0, bd: '#2457d6' },
-      title: { fill: '#ffffff', out: '#10265e', sub: '#ffffff', grad: '36,87,214', ga: 0.92, fam: FAM_IMPACT, st: '', glow: '' },
-      cross: { c: 'rgba(16,38,94,.9)', sh: 'rgba(255,255,255,.9)' },
-      badge: { stroke: '#10265e', shape: 'square', mixTo: '#ffffff', mixA: 0, glow: '' },
-      attr: 'rgba(255,255,255,.8)', wm: { f: '16,38,94', fa: 0.25, s: '255,255,255', sa: 0.5 } },
-    battle: { base: 'light', fog: [230, 218, 172], bg: '#d9c58f', border: '#ffe14d',
-      map: { pixel: 0, water: ['#2fb0ea', '#79d6ff'], green: ['#5ed04a', '#a8ee5f'], land: ['#d6c07e', '#f8edc4'] },
-      frame: { type: 'battle', m: 6, r: 0 },
-      legend: { bg: 'rgba(27,17,96,.9)', fg: '#ffffff', r: 0, bd: '#ffe14d' },
-      title: { fill: '#ffe14d', out: '#1b1160', sub: '#ffffff', grad: '27,17,96', ga: 0.92, fam: FAM_IMPACT, st: 'italic ', glow: '' },
-      cross: { c: 'rgba(255,255,255,.95)', sh: 'rgba(27,17,96,.8)' },
-      badge: { stroke: '#1b1160', shape: 'hex', mixTo: '#ffffff', mixA: 0, glow: '' },
-      attr: 'rgba(255,255,255,.75)', wm: { f: '27,17,96', fa: 0.26, s: '255,255,255', sa: 0.5 } },
-    cozy: { base: 'light', fog: [250, 240, 214], bg: '#fbf3dc', border: '#fff6e0',
-      map: { pixel: 0, water: ['#86cfe6', '#b9ecf5'], green: ['#96d687', '#c9efb4'], land: ['#ecdcb2', '#fff7de'] },
-      frame: { type: 'cozy', m: 6.5, r: 0 },
-      legend: { bg: 'rgba(255,250,236,.95)', fg: '#5a4632', r: 1.2, bd: '#8fd3a8' },
-      title: { fill: '#5a4632', out: '#fff6e0', sub: '#7a6a55', grad: '255,246,224', ga: 0.95, fam: 'Nunito, "Arial Rounded MT Bold", Arial, sans-serif', st: '', glow: '' },
-      cross: { c: 'rgba(90,70,50,.8)', sh: 'rgba(255,246,224,.9)' },
-      badge: { stroke: '#fff6e0', shape: 'circle', mixTo: '#ffffff', mixA: 0.28, glow: '' },
-      attr: 'rgba(90,70,50,.7)', wm: { f: '90,70,50', fa: 0.2, s: '255,255,255', sa: 0.5 } },
-    adventure: { base: 'light', fog: [236, 220, 178], bg: '#ecdcb2', border: '#5a3a1a',
-      map: { pixel: 0, water: ['#7fa6a0', '#b3cfc6'], green: ['#a4ae72', '#cbd29a'], land: ['#6f4520', '#b58a55', '#f3e6bf'] },
-      frame: { type: 'adventure', m: 6, r: 0 },
-      legend: { bg: 'rgba(243,230,191,.94)', fg: '#3d2410', r: 0, bd: '#5a3a1a' },
-      title: { fill: '#3d2410', out: '#f3e6bf', sub: '#5a3a1a', grad: '233,211,161', ga: 0.95, fam: 'Georgia, "Palatino Linotype", serif', st: 'italic ', glow: '' },
-      cross: { c: 'rgba(61,36,16,.85)', sh: 'rgba(243,230,191,.9)' },
-      badge: { stroke: '#3d2410', shape: 'circle', mixTo: '#f3e6bf', mixA: 0.15, glow: '' },
-      attr: 'rgba(61,36,16,.7)', wm: { f: '61,36,16', fa: 0.2, s: '243,230,191', sa: 0.5 } }
+      attr: 'rgba(255,255,255,.75)', wm: { f: '255,255,255', fa: 0.34, s: '255,47,146', sa: 0.3 } }
   };
   function TH() { return THEMES[theme]; }
   function badgeStroke() { return THEMES[theme].badge.stroke; }
@@ -645,16 +600,6 @@
     return out;
   }
   function tintMap(g, W, H, M, base) {
-    if (M.pixel) {   // Blockoptik: Karte grob verpixeln
-      var bw = M.pixel, bh = Math.max(1, Math.round(bw * H / W)), tc = document.createElement('canvas');
-      tc.width = bw; tc.height = bh;
-      var tg = tc.getContext('2d');
-      tg.imageSmoothingEnabled = true;
-      tg.drawImage(g.canvas, 0, 0, W, H, 0, 0, bw, bh);
-      g.imageSmoothingEnabled = false;
-      g.drawImage(tc, 0, 0, bw, bh, 0, 0, W, H);
-      g.imageSmoothingEnabled = true;
-    }
     var im = g.getImageData(0, 0, W, H), d = im.data;
     var LW = stopsLUT(M.water), LG = stopsLUT(M.green), LL = stopsLUT(M.land), dk = base === 'dark';
     for (var i = 0; i < d.length; i += 4) {
@@ -685,31 +630,6 @@
       g.fillStyle = lg; g.fillRect(0, 0, W, H);
       g.strokeStyle = 'rgba(255,255,255,.13)'; g.lineWidth = 0.5 * cw;
       for (x = -H; x < W; x += 2.4 * cw) { g.beginPath(); g.moveTo(x, H); g.lineTo(x + H, 0); g.stroke(); }
-    } else if (F.type === 'block') {
-      g.fillStyle = '#2457d6'; g.fillRect(0, 0, W, H);
-      for (y = 1.5 * cw; y < H; y += 3 * cw) for (x = 1.5 * cw; x < W; x += 3 * cw) {
-        g.fillStyle = '#163a96'; g.beginPath(); g.arc(x, y + 0.22 * cw, 1.05 * cw, 0, TAU); g.fill();
-        g.fillStyle = '#4f86ff'; g.beginPath(); g.arc(x, y, 1.05 * cw, 0, TAU); g.fill();
-        g.fillStyle = 'rgba(255,255,255,.35)'; g.beginPath(); g.arc(x - 0.3 * cw, y - 0.3 * cw, 0.35 * cw, 0, TAU); g.fill();
-      }
-    } else if (F.type === 'battle') {
-      lg = g.createLinearGradient(0, 0, W, H); lg.addColorStop(0, '#1b1160'); lg.addColorStop(1, '#4a2bd4');
-      g.fillStyle = lg; g.fillRect(0, 0, W, H);
-      g.fillStyle = 'rgba(255,225,77,.16)';
-      for (x = -H; x < W; x += 5 * cw) { g.beginPath(); g.moveTo(x, H); g.lineTo(x + 1.6 * cw, H); g.lineTo(x + H + 1.6 * cw, 0); g.lineTo(x + H, 0); g.closePath(); g.fill(); }
-    } else if (F.type === 'cozy') {
-      g.fillStyle = '#a9dcb6'; g.fillRect(0, 0, W, H);
-      var row = 0;
-      for (y = 1.6 * cw; y < H; y += 3.2 * cw, row++) for (x = (row % 2 ? 3.2 : 1.6) * cw; x < W; x += 3.2 * cw) {
-        g.fillStyle = 'rgba(255,255,255,.8)';
-        for (k = 0; k < 5; k++) { var an = TAU / 5 * k; g.beginPath(); g.arc(x + Math.cos(an) * 0.55 * cw, y + Math.sin(an) * 0.55 * cw, 0.42 * cw, 0, TAU); g.fill(); }
-        g.fillStyle = '#ffd35c'; g.beginPath(); g.arc(x, y, 0.3 * cw, 0, TAU); g.fill();
-      }
-    } else {   // adventure
-      g.fillStyle = '#e9d3a1'; g.fillRect(0, 0, W, H);
-      g.fillStyle = 'rgba(122,74,31,.55)';
-      for (x = 2 * cw; x < W; x += 2.6 * cw) { dia(g, x, m / 2, 0.75 * cw); dia(g, x, H - m / 2, 0.75 * cw); }
-      for (y = 2 * cw; y < H; y += 2.6 * cw) { dia(g, m / 2, y, 0.75 * cw); dia(g, W - m / 2, y, 0.75 * cw); }
     }
     g.restore();
     g.save();
@@ -718,33 +638,6 @@
       g.beginPath(); rrSub(g, m, m, iw, ih, r); g.stroke();
       g.shadowColor = 'transparent'; g.strokeStyle = 'rgba(255,255,255,.75)'; g.lineWidth = 0.25 * cw;
       g.strokeRect(0.9 * cw, 0.9 * cw, W - 1.8 * cw, H - 1.8 * cw);
-    } else if (F.type === 'block') {
-      g.strokeStyle = '#10265e'; g.lineWidth = 0.9 * cw; g.strokeRect(m, m, iw, ih);
-      g.lineWidth = 1.2 * cw; g.strokeRect(0.6 * cw, 0.6 * cw, W - 1.2 * cw, H - 1.2 * cw);
-    } else if (F.type === 'battle') {
-      var cell = iw / 10, i, rows = 0;
-      g.strokeStyle = 'rgba(255,255,255,.32)'; g.lineWidth = 0.15 * cw;
-      g.beginPath();
-      for (i = 1; i < 10; i++) { g.moveTo(m + cell * i, m); g.lineTo(m + cell * i, H - m); }
-      for (y = m + cell; y < H - m; y += cell) { g.moveTo(m, y); g.lineTo(W - m, y); }
-      g.stroke();
-      g.strokeStyle = '#ffe14d'; g.lineWidth = 0.8 * cw; g.strokeRect(m, m, iw, ih);
-      g.font = '800 ' + (2.3 * cw) + 'px Nunito, Inter, Arial, sans-serif'; g.fillStyle = '#ffe14d'; g.textAlign = 'center'; g.textBaseline = 'middle';
-      for (i = 0; i < 10; i++) g.fillText('ABCDEFGHIJ'.charAt(i), m + cell * (i + 0.5), m / 2);
-      for (y = m + cell / 2; y < H - m - cell / 2 + 0.01; y += cell) { rows++; g.fillText(String(rows), m / 2, y); }
-    } else if (F.type === 'cozy') {
-      g.fillStyle = '#fff6e0';
-      for (x = m + 1.1 * cw; x < W - m; x += 2.2 * cw) { g.beginPath(); g.arc(x, m, 1.15 * cw, 0, TAU); g.fill(); g.beginPath(); g.arc(x, H - m, 1.15 * cw, 0, TAU); g.fill(); }
-      for (y = m + 1.1 * cw; y < H - m; y += 2.2 * cw) { g.beginPath(); g.arc(m, y, 1.15 * cw, 0, TAU); g.fill(); g.beginPath(); g.arc(W - m, y, 1.15 * cw, 0, TAU); g.fill(); }
-      g.strokeStyle = '#fff6e0'; g.lineWidth = 0.9 * cw; g.strokeRect(0.45 * cw, 0.45 * cw, W - 0.9 * cw, H - 0.9 * cw);
-    } else {
-      g.strokeStyle = '#5a3a1a'; g.lineWidth = 0.55 * cw; g.strokeRect(m, m, iw, ih);
-      g.lineWidth = 0.3 * cw; g.strokeRect(1 * cw, 1 * cw, W - 2 * cw, H - 2 * cw);
-      g.fillStyle = '#5a3a1a';
-      [[m / 2, m / 2], [W - m / 2, m / 2], [m / 2, H - m / 2], [W - m / 2, H - m / 2]].forEach(function (p) {
-        g.beginPath(); g.arc(p[0], p[1], 1.3 * cw, 0, TAU); g.fill();
-        g.fillStyle = '#e9d3a1'; g.beginPath(); g.arc(p[0], p[1], 0.65 * cw, 0, TAU); g.fill(); g.fillStyle = '#5a3a1a';
-      });
     }
     g.restore();
   }
@@ -2121,7 +2014,7 @@
   });
 
   // ---- Schritte ----
-  var STEPS = 5, step = 1;
+  var STEPS = 4, step = 1;
   function buildProgress() {
     var ol = document.getElementById('progress');
     ol.innerHTML = '';
@@ -2145,7 +2038,7 @@
     document.getElementById('stepNo').textContent = t('step.of', { n: step, m: STEPS }) + ' · ' + t('sn' + step);
     document.getElementById('backBtn').style.visibility = step === 1 ? 'hidden' : 'visible';
     document.getElementById('nextBtn').style.display = step === STEPS ? 'none' : '';
-    if (step !== 4 && armed) setArmed(false);
+    if (step !== 3 && armed) setArmed(false);
     status('');
     if (scroll && window.innerWidth <= 860) {
       var c = document.querySelector('.card');
@@ -2157,9 +2050,9 @@
   document.getElementById('nextBtn').addEventListener('click', function () {
     var q = document.getElementById('q').value.trim();
     if (step === 1 && q && q !== lastQuery) {
-      search().then(function (ok) { if (ok) goStep(2, true); });
+      search();   // neuer Ort: erst laden, dann kann der Ausschnitt noch angepasst werden
     } else {
-      if (step === 2 && !locked) setLocked(true, true);
+      if (step === 1 && !locked) setLocked(true, true);
       goStep(step + 1, true);
     }
   });
@@ -2210,7 +2103,7 @@
   setArmed(false);
   if (st0 && applyState(st0)) {
     status(t('st.fromlink'));
-    if (OWNER) goStep(5);
+    if (OWNER) goStep(4);
   } else {
     setTitle('Berlin', 52.52, 13.405);
     render();
