@@ -1786,7 +1786,7 @@
   var SUBMIT = {
     url: 'https://api.web3forms.com/submit',
     key: '0389e255-c09c-481b-9443-80c1aa0b00cd',                                   // Web3Forms-Zugangsschlüssel (öffentlich vorgesehen)
-    ownerUrl: 'https://mein-revier.braun-raven.workers.dev/'         // Adresse, die in deiner Einreichungs-Mail steht
+    ownerUrl: location.origin + location.pathname         // gleiche Adresse, auf der die Seite gerade läuft
   };
   // Affiliate-Link zum Druckanbieter. Leer lassen = der Werbe-Hinweis nach dem Einreichen erscheint nicht.
   var AFFILIATE = { url: '' };
