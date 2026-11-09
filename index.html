@@ -6,261 +6,253 @@
 <title>Mein Revier – Dein Viertel als Poster</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Nunito:wght@500;600;700;800;900&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css">
 <style>
-  :root { --bg:#14181c; --panel:#1e252b; --line:#33404a; --text:#e9eef2; --accent:#f5c518; }
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--text); font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  header { padding:12px 16px; background:var(--panel); border-bottom:1px solid var(--line); display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-  header h1 { font-size:16px; margin:0 12px 0 0; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); }
-  input[type=text] { background:#10151a; border:1px solid var(--line); color:var(--text); padding:8px 10px; border-radius:6px; font-size:14px; min-width:200px; }
-  button { background:#2a343c; border:1px solid var(--line); color:var(--text); padding:8px 12px; border-radius:6px; font-size:14px; cursor:pointer; }
-  button:hover { background:#34414b; }
-  button.on { background:var(--accent); color:#111; border-color:var(--accent); font-weight:600; }
-  button.primary { background:var(--accent); color:#111; border-color:var(--accent); font-weight:600; }
-  .tools { padding:10px 16px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; border-bottom:1px solid var(--line); }
-  .tools label, .panel label { font-size:13px; color:#aab6bf; display:flex; align-items:center; gap:6px; }
-  #status { font-size:13px; color:#aab6bf; padding:6px 16px; min-height:28px; }
-  main { display:flex; flex-direction:column; align-items:center; padding:8px 16px 24px; }
-  .wrap { display:flex; gap:20px; justify-content:center; align-items:flex-start; flex-wrap:wrap; width:100%; }
-  .poster { flex:none; width:min(92vw, calc((100vh - 230px) * 5 / 7)); min-width:280px; aspect-ratio:5 / 7; position:relative; container-type:inline-size;
-            border:8px solid #f3ead0; box-shadow:0 10px 40px rgba(0,0,0,.6); background:#222; overflow:hidden; }
-  #map { position:absolute; inset:0; isolation:isolate; background:#1f2327; }
-  /* GTA-ähnlicher Look per Farbfilter (Prototyp) */
-  #map canvas.maplibregl-canvas { filter: grayscale(1) brightness(1.7); outline:none; }
-  #map.osm canvas.maplibregl-canvas { filter: grayscale(1) contrast(1.1) brightness(.7); }
-  #fog { position:absolute; inset:0; width:100%; height:100%; z-index:5; pointer-events:none; touch-action:none; }
-  #fog.paint { pointer-events:auto; cursor:crosshair; }
-  #selRing { position:absolute; z-index:6; pointer-events:none; border:2px dashed #fff; border-radius:50%; box-shadow:0 0 0 2px rgba(0,0,0,.55), 0 0 14px rgba(255,255,255,.35); transform:translate(-50%,-50%); }
-  #selRing[hidden] { display:none; }
-  .plist .item.sel { background:rgba(245,197,24,.1); outline:1px solid rgba(245,197,24,.6); border-radius:8px; }
-  .legend { position:absolute; top:3cqw; right:0; z-index:7; display:flex; flex-direction:column; align-items:flex-end; gap:.7cqw; pointer-events:none; }
-  .legend .row { display:flex; align-items:center; gap:1.4cqw; background:rgba(0,0,0,.74); color:#fff; padding:.6cqw 1.6cqw .6cqw 2.4cqw; font-size:2.5cqw; line-height:1; white-space:nowrap; }
-  .legend .row svg { width:3.6cqw; height:3.6cqw; display:block; }
-  .titlebar { position:absolute; left:0; right:0; bottom:0; z-index:8; padding:14cqw 4cqw 4cqw; text-align:center;
-              background:linear-gradient(to top, rgba(0,0,0,.92) 35%, rgba(0,0,0,0)); pointer-events:none; }
-  .titlebar h2 { margin:0; font-family:Impact, "Arial Black", "Helvetica Neue", sans-serif; font-weight:900; text-transform:uppercase;
-                 letter-spacing:.03em; line-height:1; font-size:calc(11cqw * var(--f, 1)); color:#f3ead0;
-                 text-shadow:-.35cqw -.35cqw 0 #000, .35cqw -.35cqw 0 #000, -.35cqw .35cqw 0 #000, .35cqw .35cqw 0 #000, 0 .8cqw 0 #000; }
-  .titlebar p { margin:1.5cqw 0 0; font-size:2.6cqw; letter-spacing:.35em; color:#c9bf9f; text-transform:uppercase; }
-  .watermark { position:absolute; inset:0; z-index:9; pointer-events:none;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='280' height='170'><text x='140' y='95' text-anchor='middle' font-family='Arial Black, Arial' font-weight='900' font-size='34' fill='white' fill-opacity='0.38' stroke='black' stroke-opacity='0.25' stroke-width='1' transform='rotate(-25 140 85)'>VORSCHAU</text></svg>"); }
-  .panel { flex:none; width:300px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px; }
-  .panel h3 { margin:0 0 8px; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); }
-  .palette { display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; margin-bottom:8px; }
-  .palette button { padding:4px; display:flex; justify-content:center; border-radius:8px; }
-  .palette button.sel { background:var(--accent); border-color:var(--accent); }
-  .palette svg { width:34px; height:34px; display:block; }
-  .palette.letters { grid-template-columns:repeat(9, minmax(0, 1fr)); gap:3px; }
-  .palette.letters button { padding:1px; min-width:0; border-radius:6px; }
-  .palette.letters svg { width:100%; height:auto; }
-  #selLabel { font-size:13px; color:#aab6bf; margin-bottom:8px; }
-  .panel input[type=text] { width:100%; min-width:0; margin-bottom:8px; }
-  .panel .opts { display:flex; flex-direction:column; gap:6px; margin:10px 0; }
-  .plist { max-height:260px; overflow:auto; margin-top:6px; display:flex; flex-direction:column; gap:6px; }
-  .plist .item { display:flex; align-items:center; gap:6px; }
-  .plist .item svg { width:26px; height:26px; flex:none; }
-  .plist .item input { margin:0; padding:5px 8px; font-size:13px; }
-  .plist .item button { padding:4px 8px; }
-  .empty { font-size:13px; color:#8393a0; }
-  .fogbox { border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin:10px 0; }
-  .fogbox summary { cursor:pointer; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); }
-  .fogin { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
-  .fogin label { justify-content:space-between; }
-  .fogin input[type=range] { width:140px; }
-  .fogtools { display:flex; gap:6px; flex-wrap:wrap; }
-  .fogtools button { padding:6px 10px; font-size:13px; }
-  .colorpick { width:30px; height:30px; padding:0; border:1px solid var(--line); background:none; border-radius:6px; flex:none; cursor:pointer; }
-  .plist .item span.ico { display:flex; flex:none; }
-  .buy { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; justify-content:center; }
-  .note { font-size:12px; color:#8393a0; margin-top:12px; text-align:center; max-width:560px; }
-  /* ---- Design v2: moderner Kopfbereich und Vorschau ---- */
-  body { font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-         background: radial-gradient(1200px 600px at 12% -10%, #243040 0%, rgba(20,24,28,0) 60%),
-                     radial-gradient(900px 500px at 100% 0%, #3a2a14 0%, rgba(20,24,28,0) 55%), var(--bg);
-         background-attachment: fixed; }
-  header { position:sticky; top:0; z-index:50; padding:12px clamp(12px, 3vw, 28px); gap:18px;
-           background:rgba(16,20,24,.72); backdrop-filter:blur(14px) saturate(1.4); -webkit-backdrop-filter:blur(14px) saturate(1.4);
-           border-bottom:1px solid rgba(255,255,255,.08); }
-  .brand { display:flex; align-items:center; gap:12px; text-decoration:none; color:inherit; }
-  .brand svg { flex:none; filter:drop-shadow(0 4px 14px rgba(255,160,0,.35)); }
-  .brand .word { display:block; font-family:"Barlow Condensed", Impact, "Arial Narrow", sans-serif; font-weight:800; font-size:28px; letter-spacing:.06em; line-height:.9; text-transform:uppercase; }
-  .brand .word b { color:var(--accent); font-weight:800; }
-  .brand .tag { display:block; font-size:10.5px; font-weight:500; letter-spacing:.22em; text-transform:uppercase; color:#8fa0ad; margin-top:5px; }
-  .searchbar { display:flex; align-items:center; gap:8px; flex:1 1 320px; max-width:540px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:999px; padding:4px 4px 4px 14px; }
-  .searchbar:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px rgba(245,197,24,.18); }
-  .searchbar input { flex:1; min-width:0 !important; background:transparent !important; border:0 !important; outline:none; padding:8px 4px !important; color:var(--text); font-size:14px; }
-  .searchbar svg { flex:none; opacity:.6; }
-  .searchbar button { border-radius:999px; padding:9px 18px; }
-  .titlefield { display:flex; flex-direction:column; gap:3px; }
-  .titlefield span { font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#8fa0ad; padding-left:14px; }
-  .titlefield input { border-radius:999px !important; background:rgba(255,255,255,.06) !important; border-color:rgba(255,255,255,.12) !important; padding:8px 14px !important; }
-  .tools { border-bottom:0; padding:14px clamp(12px,3vw,28px) 4px; }
-  .tools button { border-radius:999px; padding:8px 16px; }
-  button.primary { background:linear-gradient(135deg,#ffd84a,#ff9f1a); border-color:transparent; }
-  .panel { background:rgba(30,37,43,.82); }
-  .mock { width:100%; max-width:1180px; margin-top:30px; }
-  .mock h2 { margin:0 0 4px; font-family:"Barlow Condensed", Impact, sans-serif; font-weight:800; font-size:28px; letter-spacing:.06em; text-transform:uppercase; }
-  .mock h2 b { color:var(--accent); }
-  .mock p { margin:0 0 14px; font-size:13px; color:#8fa0ad; }
-  .mockgrid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px; }
-  .mockgrid figure { margin:0; }
-  .mockgrid canvas { width:100%; height:auto; display:block; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.45); background:#1b2026; }
-  .mockgrid figcaption { font-size:12px; color:#8fa0ad; margin-top:8px; letter-spacing:.1em; text-transform:uppercase; }
-  /* An/Aus-Schalter */
-  .tools { gap:22px; }
-  .switch { position:relative; display:inline-flex; align-items:center; gap:10px; cursor:pointer; user-select:none; font-size:14px; color:var(--text); }
-  .switch input { position:absolute; opacity:0; width:0; height:0; }
-  .switch .track { width:44px; height:25px; border-radius:999px; background:#3a4650; position:relative; transition:background .2s; flex:none; }
-  .switch .track::after { content:''; position:absolute; top:3px; left:3px; width:19px; height:19px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.4); transition:transform .2s, background .2s; }
-  .switch input:checked + .track { background:linear-gradient(135deg,#ffd84a,#ff9f1a); }
-  .switch input:checked + .track::after { transform:translateX(19px); background:#111; }
-  .switch input:focus-visible + .track { outline:2px solid var(--accent); outline-offset:3px; }
-  /* ---- Suchbereich über der Karte ---- */
-  .finder { display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:center; gap:14px 18px; max-width:1180px; margin:0 auto; padding:8px clamp(16px,3vw,28px) 10px; }
-  .finder .searchbar { flex:1 1 440px; max-width:640px; padding:6px 6px 6px 18px; }
-  .finder .searchbar input { font-size:16px; padding:10px 4px !important; }
-  .finder .searchbar button { padding:12px 24px; }
-  .finder .titlefield { flex:0 1 260px; }
-  .buy { margin:28px 0 4px; align-items:center; }
-  .buy button.soon { opacity:.55; cursor:not-allowed; display:inline-flex; flex-direction:column; align-items:center; gap:2px; line-height:1.2; }
-  .buy button.soon small { font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
-  .buy .testdl { background:transparent; border:1px dashed rgba(255,255,255,.35); color:#e9eef2; border-radius:999px; padding:10px 18px; }
-  .buy .testdl:hover { border-color:var(--accent); color:var(--accent); }
-  .soonnote { flex-basis:100%; text-align:center; margin:4px 0 0; font-size:13px; color:#8fa0ad; }
-  /* ---- Sperren ---- */
-  .lockbtn { margin-left:auto; display:inline-flex; align-items:center; gap:8px; border-radius:999px; padding:8px 16px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.18); color:var(--text); }
-  .lockbtn .lk-closed { display:none; }
-  body.locked .lockbtn { background:linear-gradient(135deg,#ffd84a,#ff9f1a); color:#111; border-color:transparent; font-weight:600; }
-  body.locked .lockbtn .lk-open { display:none; } body.locked .lockbtn .lk-closed { display:block; }
-  .lockbadge { position:absolute; top:3cqw; left:3cqw; z-index:10; width:8cqw; height:8cqw; display:none; place-items:center; border-radius:50%; background:rgba(0,0,0,.72); color:#fff; pointer-events:none; }
-  .lockbadge svg { width:55%; height:55%; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
-  body.locked .lockbadge { display:grid; }
-  body.locked .panel, body.locked .finder, body.locked .tools .switch { pointer-events:none; opacity:.45; }
-  body.locked .panel { filter:grayscale(.5); }
-  /* ---- Kaufseite ---- */
-  .shop { position:fixed; inset:0; z-index:200; overflow:auto; background:radial-gradient(1000px 520px at 10% -10%, #243040 0%, rgba(20,24,28,0) 60%), radial-gradient(800px 480px at 100% 0%, #3a2a14 0%, rgba(20,24,28,0) 55%), var(--bg); }
-  .shop[hidden] { display:none; }
-  .shop-top { position:sticky; top:0; z-index:2; display:flex; align-items:center; gap:16px; padding:12px clamp(12px,3vw,28px); background:rgba(16,20,24,.8); backdrop-filter:blur(14px); border-bottom:1px solid rgba(255,255,255,.08); }
-  .shop-back { border-radius:999px; padding:8px 16px; }
-  .shop-brand { font-family:"Barlow Condensed", Impact, sans-serif; font-weight:800; font-size:24px; letter-spacing:.06em; text-transform:uppercase; }
-  .shop-brand b { color:var(--accent); }
-  .shop-test { margin-left:auto; font-size:12px; color:#8fa0ad; }
-  .shop-grid { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(300px,.8fr); gap:clamp(20px,3vw,44px); max-width:1260px; margin:0 auto; padding:clamp(18px,3vw,40px) clamp(12px,3vw,28px) 48px; align-items:start; }
-  .shop-view canvas { width:100%; height:auto; display:block; border-radius:18px; box-shadow:0 20px 60px rgba(0,0,0,.55); background:#1b2026; }
-  .shop-rooms { display:flex; gap:8px; justify-content:center; margin-top:14px; }
-  .shop-rooms button { border-radius:999px; padding:7px 16px; }
-  .shop-info { background:rgba(30,37,43,.82); border:1px solid rgba(255,255,255,.1); border-radius:18px; padding:clamp(18px,2.4vw,28px); position:sticky; top:84px; }
-  .shop-info h2 { margin:0 0 4px; font-family:"Barlow Condensed", Impact, sans-serif; font-weight:800; font-size:32px; letter-spacing:.04em; text-transform:uppercase; }
-  .shop-sub { margin:0 0 18px; color:#8fa0ad; font-size:14px; }
-  .shop-tabs { display:flex; gap:6px; background:rgba(255,255,255,.05); border-radius:999px; padding:4px; margin-bottom:18px; }
-  .shop-tabs button { flex:1; border:0; background:transparent; border-radius:999px; padding:9px 8px; font-size:13px; }
-  .shop-tabs button.on { background:linear-gradient(135deg,#ffd84a,#ff9f1a); color:#111; font-weight:600; }
-  .shop-field { margin-bottom:16px; } .shop-field label { display:block; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#8fa0ad; margin-bottom:6px; }
-  .shop-field select { width:100%; padding:11px 12px; border-radius:10px; border:1px solid var(--line); background:#12171b; color:var(--text); font:inherit; }
-  .shop-price { display:flex; align-items:baseline; gap:10px; margin:6px 0 14px; }
-  .shop-price span { font-size:38px; font-weight:700; }
-  .shop-price small { color:#8fa0ad; font-size:13px; }
-  .shop-facts { list-style:none; margin:0 0 20px; padding:0; display:flex; flex-direction:column; gap:10px; }
-  .shop-facts li { display:flex; justify-content:space-between; gap:16px; font-size:14px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,.08); }
-  .shop-facts li span:first-child { color:#8fa0ad; } .shop-facts li span:last-child { text-align:right; }
-  .shop-pay { width:100%; padding:14px; font-size:16px; border-radius:999px; opacity:.6; cursor:not-allowed; }
-  .shop-hint { font-size:12px; color:#8fa0ad; margin:12px 0 0; text-align:center; }
-  body.shop-open { overflow:hidden; }
-  @media (max-width: 860px) { .shop-grid { grid-template-columns:1fr; } .shop-info { position:static; } .shop-test { display:none; } }
-  /* ---- Einreichen / Link ---- */
-  .ownertools[hidden] { display:none !important; }
-  .ownertools { display:inline-flex; gap:10px; align-items:center; flex-wrap:wrap; }
-  .ownertools select { padding:9px 12px; border-radius:10px; border:1px solid #2b343c; background:#12171b; color:#e8edf0; font:inherit; }
-  .buy > button { border-radius:999px; padding:12px 22px; }
-  .dlg { position:fixed; inset:0; z-index:300; display:grid; place-items:center; padding:16px; background:rgba(8,10,12,.7); backdrop-filter:blur(6px); }
-  .dlg[hidden] { display:none; }
-  .dlg-card { position:relative; width:min(520px,100%); max-height:92vh; overflow:auto; background:#1e252b; border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:26px; box-shadow:0 30px 80px rgba(0,0,0,.6); }
-  .dlg-card h3 { margin:0 0 6px; font-family:"Barlow Condensed", Impact, sans-serif; font-size:28px; letter-spacing:.04em; text-transform:uppercase; }
-  .dlg-card p { margin:0 0 14px; color:#8fa0ad; font-size:14px; line-height:1.5; }
-  .dlg-card label { display:block; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#8fa0ad; margin-bottom:12px; }
-  .dlg-card input[type=text], .dlg-card input[type=email], .dlg-card textarea { display:block; width:100%; margin-top:6px; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:#12171b; color:var(--text); font:inherit; font-size:14px; letter-spacing:0; text-transform:none; }
-  .dlg-card .dlg-check { display:flex; gap:10px; align-items:flex-start; text-transform:none; letter-spacing:0; font-size:13px; color:#b4c0c9; }
-  .dlg-card .dlg-check input { margin-top:3px; }
-  .dlg-card button.primary { width:100%; padding:13px; border-radius:999px; font-size:15px; }
-  .dlg-x { position:absolute; top:12px; right:12px; border-radius:50% !important; width:34px; height:34px; padding:0 !important; }
-  .dlg-thanks { margin-top:14px; padding:14px; border:1px solid #2b343c; border-radius:12px; text-align:center; }
-  .dlg-thanks[hidden] { display:none; }
-  .dlg-thanks small { display:block; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#8a97a1; }
-  .dlg-thanks p { margin:6px 0 10px; }
-  .dlg-thanks a { display:inline-block; padding:10px 16px; border-radius:10px; background:#e8edf0; color:#0b0e11; font-weight:600; text-decoration:none; }
-  .dlg-msg { min-height:20px; font-size:13px !important; }
-  .dlg-msg.ok { color:#7ddc8c !important; } .dlg-msg.err { color:#ff8a80 !important; }
-  /* ---- Hero ---- */
+  :root { --bg:#fff8ee; --card:#fff; --ink:#26303b; --muted:#6b7785; --line:#eadfce; --soft:#fff1dc; --brand:#ff8a1f; --brand2:#ffc14a; --teal:#1fa896; --ring:rgba(255,138,31,.35); }
+  * { box-sizing:border-box; }
   html { scroll-behavior:smooth; }
-  #tool { scroll-margin-top:84px; }
-  .hero { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr); gap:clamp(24px,5vw,72px); align-items:center;
-          max-width:1180px; margin:0 auto; padding:clamp(36px,7vw,88px) clamp(16px,3vw,28px) clamp(28px,5vw,56px); }
-  .eyebrow { display:inline-block; font-size:11px; font-weight:600; letter-spacing:.24em; text-transform:uppercase; color:var(--accent);
-             border:1px solid rgba(245,197,24,.35); border-radius:999px; padding:6px 12px; background:rgba(245,197,24,.07); }
-  .hero h1 { margin:18px 0 16px; font-family:"Barlow Condensed", Impact, "Arial Narrow", sans-serif; font-weight:800; text-transform:uppercase;
-             font-size:clamp(46px,8vw,96px); line-height:.92; letter-spacing:.02em; color:#fff; }
-  .hero h1 em { font-style:normal; background:linear-gradient(135deg,#ffd84a,#ff9f1a); -webkit-background-clip:text; background-clip:text; color:transparent; }
-  .lead { font-size:clamp(15px,1.6vw,18px); line-height:1.6; color:#b4c0c9; max-width:540px; margin:0 0 24px; }
-  .lead strong { color:#fff; font-weight:600; }
-  .steps { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:26px; }
-  .step { display:flex; align-items:center; gap:10px; padding:8px 14px 8px 8px; border-radius:999px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); font-size:13px; color:#d5dde3; }
-  .step b { width:24px; height:24px; border-radius:50%; display:grid; place-items:center; font-size:12px; color:#111; background:linear-gradient(135deg,#ffd84a,#ff9f1a); flex:none; }
-  .hero-cta { display:flex; flex-wrap:wrap; align-items:center; gap:16px 22px; }
-  .cta { display:inline-flex; align-items:center; gap:10px; padding:14px 26px; border-radius:999px; text-decoration:none; font-weight:700; font-size:15px; color:#111;
-         background:linear-gradient(135deg,#ffd84a,#ff9f1a); box-shadow:0 10px 30px rgba(255,160,0,.28); transition:transform .15s, box-shadow .15s; }
-  .cta:hover { transform:translateY(-2px); box-shadow:0 14px 36px rgba(255,160,0,.4); }
-  .hero-art { display:flex; justify-content:center; }
-  .art-poster { container-type:inline-size; position:relative; width:min(100%,330px); aspect-ratio:5/7; border:7px solid #f3ead0; transform:rotate(3deg); overflow:hidden; background:#1b1f23;
-                box-shadow:0 30px 70px rgba(0,0,0,.6), 0 0 90px rgba(255,160,0,.12); }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:"Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size:16px; line-height:1.5;
+         background-image:radial-gradient(900px 480px at 8% -8%, #ffe6bd 0%, rgba(255,248,238,0) 60%), radial-gradient(800px 420px at 100% 0%, #d9f2ee 0%, rgba(255,248,238,0) 55%);
+         background-attachment:fixed; }
+  button { font:inherit; cursor:pointer; }
+  input[type=text], input[type=email], textarea, select { font:inherit; color:var(--ink); background:#fff; border:2px solid var(--line); border-radius:14px; padding:11px 14px; width:100%; min-width:0; }
+  input[type=text]:focus, input[type=email]:focus, textarea:focus, select:focus { outline:none; border-color:var(--brand); box-shadow:0 0 0 4px var(--ring); }
+  :focus-visible { outline:3px solid var(--brand); outline-offset:2px; }
+
+  /* ---- Knöpfe ---- */
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:2px solid var(--line); background:#fff; color:var(--ink); padding:12px 22px; border-radius:999px; font-weight:800; font-size:16px; transition:transform .12s, box-shadow .12s, background .12s; }
+  .btn:hover { background:var(--soft); }
+  .btn:active { transform:translateY(1px); }
+  .btn.primary { background:linear-gradient(135deg,var(--brand2),var(--brand)); border-color:transparent; color:#2a1700; box-shadow:0 8px 20px rgba(255,138,31,.3); }
+  .btn.primary:hover { box-shadow:0 10px 26px rgba(255,138,31,.45); }
+  .btn.ghost { background:transparent; }
+  .btn[disabled] { opacity:.5; cursor:not-allowed; }
+  .btn.sm { padding:8px 16px; font-size:14px; }
+
+  /* ---- Kopfzeile ---- */
+  header { position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:16px; padding:10px clamp(14px,3vw,32px); background:rgba(255,248,238,.88); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-bottom:1px solid var(--line); }
+  .brand { display:flex; align-items:center; gap:12px; text-decoration:none; color:inherit; }
+  .brand .word { font-family:"Barlow Condensed", Impact, "Arial Narrow", sans-serif; font-weight:800; font-size:28px; letter-spacing:.05em; line-height:1; text-transform:uppercase; }
+  .brand .word b { color:var(--brand); font-weight:800; }
+  .lang { margin-left:auto; display:inline-flex; background:#fff; border:2px solid var(--line); border-radius:999px; padding:3px; }
+  .lang button { border:0; background:transparent; border-radius:999px; padding:5px 14px; font-weight:800; font-size:14px; color:var(--muted); }
+  .lang button[aria-pressed=true] { background:linear-gradient(135deg,var(--brand2),var(--brand)); color:#2a1700; }
+
+  /* ---- Einstieg ---- */
+  .hero { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); gap:clamp(20px,4vw,56px); align-items:center; max-width:1160px; margin:0 auto; padding:clamp(24px,5vw,64px) clamp(16px,3vw,28px) clamp(18px,3vw,32px); }
+  .eyebrow { display:inline-block; font-size:13px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#b25a00; background:#ffe9c6; border-radius:999px; padding:6px 14px; }
+  .hero h1 { margin:14px 0 12px; font-weight:900; font-size:clamp(40px,7vw,80px); line-height:1; letter-spacing:-.01em; }
+  .hero h1 em { font-style:normal; background:linear-gradient(135deg,#ffb21f,#ff6a1f); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .lead { font-size:clamp(17px,1.8vw,20px); color:var(--muted); max-width:460px; margin:0 0 22px; font-weight:600; }
+  .chips { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:24px; }
+  .chip { display:flex; align-items:center; gap:8px; background:#fff; border:2px solid var(--line); border-radius:999px; padding:6px 14px 6px 6px; font-weight:700; font-size:14px; }
+  .chip b { width:26px; height:26px; border-radius:50%; display:grid; place-items:center; font-size:13px; color:#2a1700; background:linear-gradient(135deg,var(--brand2),var(--brand)); }
+  .hero-art { display:flex; justify-content:center; align-items:center; }
+  .art-poster { container-type:inline-size; position:relative; width:min(48%,250px); flex:none; aspect-ratio:5/7; border:6px solid #f3ead0; overflow:hidden; background:#1b1f23; box-shadow:0 22px 50px rgba(60,40,10,.35); }
+  .art-poster:not(.light) { transform:rotate(4deg); z-index:2; }
+  .art-poster.light { transform:rotate(-5deg) translateY(18px); margin-right:-26px; z-index:1; border-color:#fff; background:#efece4; }
   .art-map { position:absolute; inset:0; }
   .art-map svg { width:100%; height:100%; display:block; }
   .art-map::after { content:''; position:absolute; inset:0; background:radial-gradient(circle at 50% 50%, rgba(10,12,14,0) 38%, rgba(10,12,14,.92) 90%); }
+  .art-poster.light .art-map::after { background:radial-gradient(circle at 50% 50%, rgba(255,255,255,0) 40%, rgba(255,255,255,.9) 92%); }
+  .art-poster.light .art-map rect { fill:#f1eee6; }
+  .art-poster.light .art-map path[stroke="#1a1f23"] { stroke:#b9d7ea; }
+  .art-poster.light .art-map path[stroke="#3c444b"] { stroke:#b9d7ea; }
+  .art-poster.light .art-map path[fill="#353c40"] { fill:#d9ecd0; }
+  .art-poster.light .art-map g[stroke="#454d54"] { stroke:#fff; }
+  .art-poster.light .art-map g[stroke="#6a737b"] { stroke:#ffd9a0; }
   .dot svg { width:58%; height:58%; display:block; }
-  .dot { display:grid; place-items:center; }
+  .dot { position:absolute; display:grid; place-items:center; width:11%; aspect-ratio:1; border-radius:50%; border:2px solid #111; box-shadow:0 4px 10px rgba(0,0,0,.4); }
+  .art-poster.light .dot { border-color:#fff; }
+  .d1 { left:24%; top:30%; } .d2 { left:10%; top:50%; } .d3 { left:56%; top:56%; } .d5 { left:74%; top:63%; } .d4 { left:30%; top:62%; }
   .art-legend { position:absolute; top:4.5cqw; right:0; z-index:3; display:flex; flex-direction:column; align-items:flex-end; gap:1.2cqw; }
-  .lrow { display:flex; align-items:center; gap:2.4cqw; background:rgba(0,0,0,.78); color:#fff; padding:1.2cqw 2.6cqw 1.2cqw 3.6cqw; font-size:4.2cqw; line-height:1; font-weight:600; white-space:nowrap; }
+  .lrow { display:flex; align-items:center; gap:2.4cqw; background:rgba(0,0,0,.78); color:#fff; padding:1.2cqw 2.6cqw 1.2cqw 3.6cqw; font-size:4.2cqw; line-height:1; font-weight:700; white-space:nowrap; }
+  .art-poster.light .lrow { background:rgba(255,255,255,.92); color:#1d2530; }
   .lrow b { width:7cqw; height:7cqw; border-radius:50%; border:.5cqw solid #111; display:grid; place-items:center; flex:none; }
+  .art-poster.light .lrow b { border-color:#fff; }
   .lrow b svg { width:58%; height:58%; display:block; }
-  .dot { position:absolute; width:11%; aspect-ratio:1; border-radius:50%; border:2px solid #111; box-shadow:0 4px 10px rgba(0,0,0,.5); }
-  .d1 { left:24%; top:30%; background:#4fc3f7; } .d2 { left:10%; top:50%; background:#ffd84a; }
-  .d3 { left:56%; top:56%; } .d5 { left:74%; top:63%; } .d4 { left:30%; top:62%; background:#66bb6a; }
   .art-cross { position:absolute; left:50%; top:46%; width:34%; height:0; transform:translate(-50%,-50%); }
   .art-cross::before, .art-cross::after { content:''; position:absolute; background:rgba(255,255,255,.9); }
+  .art-poster.light .art-cross::before, .art-poster.light .art-cross::after { background:rgba(30,37,48,.8); }
   .art-cross::before { left:0; right:0; top:-1px; height:2px; -webkit-mask:linear-gradient(90deg,#000 0 38%,transparent 38% 62%,#000 62%); mask:linear-gradient(90deg,#000 0 38%,transparent 38% 62%,#000 62%); }
-  .art-cross::after { top:-17px; bottom:auto; height:34px; left:calc(50% - 1px); width:2px; -webkit-mask:linear-gradient(180deg,#000 0 30%,transparent 30% 70%,#000 70%); mask:linear-gradient(180deg,#000 0 30%,transparent 30% 70%,#000 70%); }
-  .art-title { position:absolute; left:0; right:0; bottom:0; padding:22% 4% 7%; text-align:center; font-family:Impact,"Arial Black",sans-serif; font-size:clamp(22px,3.4vw,36px);
-               letter-spacing:.03em; color:#f3ead0; background:linear-gradient(to top, rgba(0,0,0,.92) 40%, rgba(0,0,0,0)); text-shadow:0 2px 0 #000; }
-  @media (max-width: 820px) { .hero { grid-template-columns:1fr; } .hero-art { order:-1; } .art-poster { width:min(62%,240px); } }
+  .art-cross::after { top:-17px; height:34px; left:calc(50% - 1px); width:2px; -webkit-mask:linear-gradient(180deg,#000 0 30%,transparent 30% 70%,#000 70%); mask:linear-gradient(180deg,#000 0 30%,transparent 30% 70%,#000 70%); }
+  .art-title { position:absolute; left:0; right:0; bottom:0; padding:22% 4% 7%; text-align:center; font-family:Impact,"Arial Black",sans-serif; font-size:clamp(18px,2.6vw,28px); letter-spacing:.03em; color:#f3ead0; background:linear-gradient(to top, rgba(0,0,0,.92) 40%, rgba(0,0,0,0)); text-shadow:0 2px 0 #000; }
+  .art-poster.light .art-title { color:#1f2933; background:linear-gradient(to top, rgba(255,255,255,.95) 40%, rgba(255,255,255,0)); text-shadow:0 2px 0 #fff; }
+  @media (max-width:820px) { .hero { grid-template-columns:1fr; } .hero-art { order:-1; } .art-poster { width:min(40%,180px); } }
+
+  /* ---- Gestaltung: Poster + Schritte ---- */
+  .tool { max-width:1160px; margin:0 auto; padding:8px clamp(12px,3vw,28px) 24px; scroll-margin-top:70px; }
+  .stage { display:grid; grid-template-columns:auto minmax(320px,440px); gap:clamp(20px,3vw,44px); justify-content:center; align-items:start; }
+  .posterbox { position:sticky; top:76px; }
+  .poster { position:relative; container-type:inline-size; width:min(46vw, calc((100vh - 130px) * 5 / 7), 540px); min-width:280px; aspect-ratio:5/7; border:8px solid #fff; background:#f1efe9; overflow:hidden; box-shadow:0 16px 44px rgba(90,55,10,.28); transition:border-color .2s; }
+  .poster[data-theme=dark] { border-color:#f3ead0; background:#1f2327; box-shadow:0 16px 44px rgba(0,0,0,.45); }
+  #map { position:absolute; inset:0; isolation:isolate; background:#f1efe9; }
+  .poster[data-theme=dark] #map { background:#1f2327; }
+  #map canvas.maplibregl-canvas { outline:none; filter:saturate(.5); }
+  .poster[data-theme=dark] #map canvas.maplibregl-canvas { filter:grayscale(1) brightness(1.7); }
+  .poster[data-theme=dark] #map.osm canvas.maplibregl-canvas { filter:grayscale(1) contrast(1.1) brightness(.7); }
+  #fog { position:absolute; inset:0; width:100%; height:100%; z-index:5; pointer-events:none; touch-action:none; }
+  #selRing { position:absolute; z-index:6; pointer-events:none; border:3px dashed #fff; border-radius:50%; box-shadow:0 0 0 2px rgba(0,0,0,.55), 0 0 14px rgba(255,255,255,.35); transform:translate(-50%,-50%); }
+  #selRing[hidden] { display:none; }
+  .legend { position:absolute; top:3cqw; right:0; z-index:7; display:flex; flex-direction:column; align-items:flex-end; gap:.7cqw; pointer-events:none; }
+  .legend .row { display:flex; align-items:center; gap:1.4cqw; background:rgba(255,255,255,.9); color:#1d2530; padding:.6cqw 1.6cqw .6cqw 2.4cqw; font-size:2.5cqw; font-weight:700; line-height:1; white-space:nowrap; box-shadow:0 .3cqw 1cqw rgba(0,0,0,.12); }
+  .poster[data-theme=dark] .legend .row { background:rgba(0,0,0,.74); color:#fff; box-shadow:none; }
+  .legend .row svg { width:3.6cqw; height:3.6cqw; display:block; }
+  .titlebar { position:absolute; left:0; right:0; bottom:0; z-index:8; padding:14cqw 4cqw 4cqw; text-align:center; background:linear-gradient(to top, rgba(255,255,255,.95) 35%, rgba(255,255,255,0)); pointer-events:none; }
+  .poster[data-theme=dark] .titlebar { background:linear-gradient(to top, rgba(0,0,0,.92) 35%, rgba(0,0,0,0)); }
+  .titlebar h2 { margin:0; font-family:Impact, "Arial Black", "Helvetica Neue", sans-serif; font-weight:900; text-transform:uppercase; letter-spacing:.03em; line-height:1; font-size:calc(11cqw * var(--f, 1)); color:#1f2933;
+                 text-shadow:-.35cqw -.35cqw 0 #fff, .35cqw -.35cqw 0 #fff, -.35cqw .35cqw 0 #fff, .35cqw .35cqw 0 #fff, 0 .8cqw 0 #fff; }
+  .poster[data-theme=dark] .titlebar h2 { color:#f3ead0; text-shadow:-.35cqw -.35cqw 0 #000, .35cqw -.35cqw 0 #000, -.35cqw .35cqw 0 #000, .35cqw .35cqw 0 #000, 0 .8cqw 0 #000; }
+  .titlebar p { margin:1.5cqw 0 0; font-size:2.6cqw; letter-spacing:.35em; color:#5b6670; text-transform:uppercase; }
+  .poster[data-theme=dark] .titlebar p { color:#c9bf9f; }
+  .watermark { position:absolute; inset:0; z-index:9; pointer-events:none; background-image:var(--wm); }
+  .lockbadge { position:absolute; top:3cqw; left:3cqw; z-index:10; width:8cqw; height:8cqw; display:none; place-items:center; border-radius:50%; background:rgba(0,0,0,.72); color:#fff; pointer-events:none; }
+  .lockbadge svg { width:55%; height:55%; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  body.locked .lockbadge { display:grid; }
+
+  .card { background:var(--card); border:2px solid var(--line); border-radius:26px; padding:clamp(16px,2.4vw,26px); box-shadow:0 12px 34px rgba(120,80,20,.12); }
+  .progress { list-style:none; margin:0 0 6px; padding:0; display:flex; gap:8px; }
+  .progress li { flex:1; }
+  .progress button { width:100%; height:8px; padding:0; border:0; border-radius:999px; background:#f0e6d6; }
+  .progress li.done button { background:#ffd9a0; }
+  .progress li.cur button { background:linear-gradient(90deg,var(--brand2),var(--brand)); }
+  .stepno { font-size:13px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#b25a00; margin:10px 0 2px; }
+  .pane { display:none; }
+  .pane.show { display:block; animation:pin .25s ease; }
+  @keyframes pin { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+  .pane h2 { margin:0 0 4px; font-size:clamp(24px,3vw,30px); font-weight:900; line-height:1.15; }
+  .pane .sub { margin:0 0 14px; color:var(--muted); font-weight:600; }
+  .searchbar { display:flex; gap:8px; align-items:center; }
+  .searchbar .btn { flex:none; }
+  .zoomrow { display:flex; gap:10px; align-items:center; margin:2px 0 14px; }
+  .zoomrow .btn { width:54px; height:54px; padding:0; font-size:28px; line-height:1; }
+  .zoomrow span { color:var(--muted); font-weight:600; font-size:15px; }
+  .field { display:block; margin-bottom:14px; }
+  .field > span { display:block; font-weight:800; font-size:14px; margin-bottom:6px; }
+  .choices { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+  .choice { border:3px solid var(--line); border-radius:18px; background:#fff; padding:8px 8px 10px; text-align:center; font-weight:800; }
+  .choice small { display:block; font-weight:600; color:var(--muted); font-size:13px; }
+  .choice[aria-pressed=true] { border-color:var(--brand); box-shadow:0 0 0 4px var(--ring); }
+  .choice .sw { display:block; height:54px; border-radius:12px; margin-bottom:8px; position:relative; overflow:hidden; }
+  .choice .sw.l { background:linear-gradient(135deg,#f6f3ea 0 55%,#cfe6f3 55% 70%,#f6f3ea 70%); }
+  .choice .sw.d { background:linear-gradient(135deg,#2b3036 0 55%,#1b2a38 55% 70%,#2b3036 70%); }
+  .choice .sw::after { content:''; position:absolute; left:0; right:0; bottom:0; height:40%; }
+  .choice .sw.l::after { background:linear-gradient(to top,#fff,rgba(255,255,255,0)); }
+  .choice .sw.d::after { background:linear-gradient(to top,#000,rgba(0,0,0,0)); }
+  .switch { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-top:1px solid #f3eadb; cursor:pointer; user-select:none; font-weight:700; }
+  .switch input { position:absolute; opacity:0; width:0; height:0; }
+  .switch .track { width:50px; height:28px; border-radius:999px; background:#e4d9c6; position:relative; flex:none; transition:background .2s; }
+  .switch .track::after { content:''; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); transition:transform .2s; }
+  .switch input:checked + .track { background:linear-gradient(135deg,var(--brand2),var(--brand)); }
+  .switch input:checked + .track::after { transform:translateX(22px); }
+  .switch input:focus-visible + .track { outline:3px solid var(--brand); outline-offset:2px; }
+  details.more { margin-top:8px; border-top:1px solid #f3eadb; padding-top:8px; }
+  details.more summary { cursor:pointer; font-weight:800; font-size:14px; color:var(--muted); padding:6px 0; }
+  .fogin { display:flex; flex-direction:column; gap:10px; margin-top:8px; }
+  .fogin label { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:14px; font-weight:700; }
+  .fogin input[type=range] { width:150px; accent-color:var(--brand); }
+  .palette { display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:10px; }
+  .palette button { border:2px solid var(--line); border-radius:16px; background:#fff; padding:8px 2px 6px; display:flex; flex-direction:column; align-items:center; gap:2px; font-size:12px; font-weight:700; color:var(--ink); line-height:1.15; }
+  .palette button svg { width:38px; height:38px; display:block; }
+  .palette button span { min-height:2.3em; display:flex; align-items:flex-start; text-align:center; }
+  .palette button.sel { border-color:var(--brand); background:var(--soft); box-shadow:0 0 0 3px var(--ring); }
+  .palette.letters { grid-template-columns:repeat(9, minmax(0,1fr)); gap:4px; }
+  .palette.letters button { padding:2px; border-radius:10px; border-width:2px; }
+  .palette.letters button svg { width:100%; height:auto; }
+  .palette.letters button span { display:none; }
+  .letterrow { display:flex; align-items:center; justify-content:space-between; gap:12px; font-weight:700; font-size:14px; margin:6px 0 10px; }
+  .colorpick { width:34px; height:34px; padding:0; border:2px solid var(--line); background:none; border-radius:10px; flex:none; cursor:pointer; }
+  .placebtn { width:100%; margin-bottom:14px; }
+  .plist { display:flex; flex-direction:column; gap:8px; max-height:300px; overflow:auto; }
+  .plist h3 { margin:6px 0 2px; font-size:14px; font-weight:800; }
+  .plist .item { display:flex; align-items:center; gap:8px; padding:6px; border-radius:14px; border:2px solid transparent; }
+  .plist .item.sel { background:var(--soft); border-color:var(--brand2); }
+  .plist .item svg { width:30px; height:30px; flex:none; display:block; }
+  .plist .item input[type=text] { padding:8px 12px; font-size:15px; }
+  .plist .item button { border:0; background:#f6efe3; border-radius:50%; width:34px; height:34px; flex:none; font-weight:800; color:var(--muted); }
+  .empty { color:var(--muted); font-size:14px; font-weight:600; }
+  .hint { min-height:24px; margin:12px 0 0; font-size:14px; font-weight:700; color:#8a5200; }
+  .nav { display:flex; justify-content:space-between; gap:10px; margin-top:16px; padding-top:16px; border-top:2px dashed #f0e6d6; }
+  .nav .btn { flex:0 1 auto; }
+  .nav .btn.primary { margin-left:auto; min-width:150px; }
+  .finish { display:flex; flex-direction:column; gap:10px; margin-top:6px; }
+  .finish .btn { width:100%; padding:15px 22px; font-size:17px; }
+  .lockbtn[aria-pressed=true] { background:var(--soft); border-color:var(--brand); }
+  .lockbtn .lk-closed { display:none; } .lockbtn[aria-pressed=true] .lk-open { display:none; } .lockbtn[aria-pressed=true] .lk-closed { display:inline; }
+  .note { font-size:13px; color:var(--muted); font-weight:600; margin:12px 0 0; }
+  .ownertools[hidden] { display:none !important; }
+  .ownertools { margin-top:14px; padding-top:12px; border-top:1px dashed var(--line); }
+  .ownertools .btn { width:100%; font-size:14px; }
+  body.locked .pane:not([data-pane="5"]) { opacity:.5; pointer-events:none; }
+
+  @media (max-width:860px) {
+    .stage { grid-template-columns:1fr; justify-items:center; gap:14px; }
+    .posterbox { position:sticky; top:62px; z-index:20; padding:6px 0 8px; background:linear-gradient(var(--bg) 85%, rgba(255,248,238,0)); width:100%; display:flex; justify-content:center; }
+    .poster { width:min(78vw, calc(38vh * 5 / 7)); min-width:170px; border-width:6px; }
+    .card { width:100%; max-width:560px; }
+    .palette { grid-template-columns:repeat(4, 1fr); }
+  }
+
+  /* ---- Vorschau im Zimmer ---- */
+  .mock { max-width:1160px; margin:20px auto 0; padding:0 clamp(12px,3vw,28px); }
+  .mock h2 { margin:0 0 4px; font-size:clamp(24px,3vw,32px); font-weight:900; }
+  .mock p { margin:0 0 14px; color:var(--muted); font-weight:600; }
+  .mockgrid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px; }
+  .mockgrid figure { margin:0; }
+  .mockgrid canvas { width:100%; height:auto; display:block; border-radius:20px; box-shadow:0 12px 30px rgba(90,55,10,.2); background:#e9e2d4; }
+  .mockgrid figcaption { font-size:14px; font-weight:700; color:var(--muted); margin-top:8px; }
+  .foot { max-width:760px; margin:26px auto 40px; padding:0 16px; text-align:center; font-size:12.5px; color:#8a95a1; font-weight:600; }
+
+  /* ---- Dialog ---- */
+  .dlg { position:fixed; inset:0; z-index:300; display:grid; place-items:center; padding:16px; background:rgba(38,30,20,.5); backdrop-filter:blur(4px); }
+  .dlg[hidden] { display:none; }
+  .dlg-card { position:relative; width:min(520px,100%); max-height:92vh; overflow:auto; background:#fff; border-radius:26px; padding:26px; box-shadow:0 30px 80px rgba(60,40,10,.4); }
+  .dlg-card h3 { margin:0 0 6px; font-size:26px; font-weight:900; }
+  .dlg-card p { margin:0 0 14px; color:var(--muted); font-size:15px; font-weight:600; }
+  .dlg-card label { display:block; font-size:14px; font-weight:800; margin-bottom:12px; }
+  .dlg-card input[type=text], .dlg-card input[type=email], .dlg-card textarea { display:block; margin-top:6px; font-weight:500; }
+  .dlg-card .dlg-check { display:flex; gap:10px; align-items:flex-start; font-size:13px; font-weight:600; color:var(--muted); }
+  .dlg-card .dlg-check input { margin-top:3px; width:auto; }
+  .dlg-card .btn.primary { width:100%; }
+  .dlg-x { position:absolute; top:12px; right:12px; width:38px; height:38px; padding:0 !important; border-radius:50% !important; }
+  .dlg-thanks { margin-top:14px; padding:14px; border:2px solid var(--line); border-radius:16px; text-align:center; }
+  .dlg-thanks[hidden] { display:none; }
+  .dlg-thanks small { display:block; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+  .dlg-thanks p { margin:6px 0 10px; }
+  .dlg-thanks a { display:inline-block; padding:10px 18px; border-radius:999px; background:var(--ink); color:#fff; font-weight:800; text-decoration:none; }
+  .dlg-msg { min-height:20px; font-size:14px !important; }
+  .dlg-msg.ok { color:#14804a !important; } .dlg-msg.err { color:#c0392b !important; }
 </style>
 </head>
 <body>
 <header>
   <a class="brand" href="#" onclick="return false" aria-label="Mein Revier">
     <svg width="44" height="44" viewBox="0 0 40 40" aria-hidden="true">
-      <rect width="40" height="40" rx="8" fill="#0d1114"/>
-      <rect x="1" y="1" width="38" height="38" rx="7" fill="none" stroke="#ff9f1a" stroke-width="1.4"/>
-      <!-- R als Silhouette, Umrandung gestrichelt wie eine Stadtgrenze (Strich-Punkt) -->
-      <path id="logoR" d="M11 31V9h10.5c4.6 0 7.5 2.6 7.5 6.5 0 3.2-2 5.4-5 6.2L30 31h-6.4l-4.8-8.4H17V31z M17 14v4.6h4.2c1.7 0 2.7-.9 2.7-2.3s-1-2.3-2.7-2.3z" fill="#ffb21f" fill-rule="evenodd"/>
+      <rect width="40" height="40" rx="9" fill="#0d1114"/>
+      <rect x="1" y="1" width="38" height="38" rx="8" fill="none" stroke="#ff9f1a" stroke-width="1.4"/>
+      <path d="M11 31V9h10.5c4.6 0 7.5 2.6 7.5 6.5 0 3.2-2 5.4-5 6.2L30 31h-6.4l-4.8-8.4H17V31z M17 14v4.6h4.2c1.7 0 2.7-.9 2.7-2.3s-1-2.3-2.7-2.3z" fill="#ffb21f" fill-rule="evenodd"/>
       <path d="M11 31V9h10.5c4.6 0 7.5 2.6 7.5 6.5 0 3.2-2 5.4-5 6.2L30 31h-6.4l-4.8-8.4H17V31z M17 14v4.6h4.2c1.7 0 2.7-.9 2.7-2.3s-1-2.3-2.7-2.3z" fill="none" stroke="#0d1114" stroke-width="1.1" stroke-dasharray="3.2 1.4 0.6 1.4" stroke-linejoin="round" fill-rule="evenodd"/>
     </svg>
     <span class="word">Mein <b>Revier</b></span>
   </a>
+  <div class="lang" role="group" aria-label="Sprache / Language">
+    <button type="button" id="langDe" aria-pressed="true">DE</button>
+    <button type="button" id="langEn" aria-pressed="false">EN</button>
+  </div>
 </header>
+
 <section class="hero" aria-labelledby="heroTitle">
   <div class="hero-text">
-    <span class="eyebrow">Dein Poster · Dein Viertel</span>
-    <h1 id="heroTitle">Dein <em>Revier</em>.<br>Dein Poster.</h1>
-    <p class="lead">Gib Stadt, Ort oder Postleitzahl ein, setz die Orte, die dir etwas bedeuten, und bring deine Karte im dunklen Spiel-Look an die Wand. Als Download oder gedrucktes Poster.</p>
-    <div class="steps">
-      <div class="step"><b>1</b><span>Ort oder PLZ eingeben</span></div>
-      <div class="step"><b>2</b><span>Lieblingsorte markieren und benennen</span></div>
-      <div class="step"><b>3</b><span>Als Bild oder Poster holen</span></div>
+    <span class="eyebrow" data-i18n="hero.eyebrow">Dein Poster · Dein Viertel</span>
+    <h1 id="heroTitle" data-i18n-html="hero.h1">Dein <em>Revier</em>.<br>Dein Poster.</h1>
+    <p class="lead" data-i18n="hero.lead">Such deinen Ort, markiere deine Lieblingsorte und häng deine eigene Spielkarte an die Wand.</p>
+    <div class="chips">
+      <div class="chip"><b>1</b><span data-i18n="hero.c1">Ort suchen</span></div>
+      <div class="chip"><b>2</b><span data-i18n="hero.c2">Orte markieren</span></div>
+      <div class="chip"><b>3</b><span data-i18n="hero.c3">Poster erhalten</span></div>
     </div>
-    <div class="hero-cta">
-      <a class="cta" href="#tool">Jetzt Poster gestalten <span aria-hidden="true">↓</span></a>
-    </div>
+    <a class="btn primary" href="#tool" data-i18n="hero.cta">Los geht's</a>
   </div>
   <div class="hero-art" aria-hidden="true">
     <div class="art-poster">
@@ -283,156 +275,280 @@
         </g>
       </svg></div>
       <i class="dot d1" style="background:#29b6f6"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 2s7 7.5 7 12a7 7 0 0 1-14 0c0-4.5 7-12 7-12z"/></svg></i><i class="dot d2" style="background:#f5b800"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#111" d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.5 5.8 21.1l1.4-7L2 9.3l7-.8z"/></svg></i><i class="dot d3" style="background:#dfe5e8"><svg viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="19" text-anchor="middle" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="21" fill="#111">F</text></svg></i><i class="dot d4" style="background:#43a047"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 3 2 12h3v9h5v-6h4v6h5v-9h3z"/></svg></i><i class="dot d5" style="background:#fb8c00"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#111" d="M2 9h2V7h2v10H4v-2H2zM20 9h2v6h-2v2h-2V7h2zM6 11h12v2H6z"/></svg></i>
-      <div class="art-legend"><div class="lrow"><span>Mein Zuhause</span><b style="background:#43a047"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 3 2 12h3v9h5v-6h4v6h5v-9h3z"/></svg></b></div><div class="lrow"><span>Felix Haus</span><b style="background:#dfe5e8"><svg viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="19" text-anchor="middle" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="21" fill="#111">F</text></svg></b></div><div class="lrow"><span>TSV Fußball</span><b style="background:#fb8c00"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#111" d="M2 9h2V7h2v10H4v-2H2zM20 9h2v6h-2v2h-2V7h2zM6 11h12v2H6z"/></svg></b></div><div class="lrow"><span>Unser See</span><b style="background:#29b6f6"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 2s7 7.5 7 12a7 7 0 0 1-14 0c0-4.5 7-12 7-12z"/></svg></b></div><div class="lrow"><span>Lieblingsplatz</span><b style="background:#f5b800"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#111" d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.5 5.8 21.1l1.4-7L2 9.3l7-.8z"/></svg></b></div></div>
+      <div class="art-legend"><div class="lrow"><span data-i18n="art.l1">Mein Zuhause</span><b style="background:#43a047"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 3 2 12h3v9h5v-6h4v6h5v-9h3z"/></svg></b></div><div class="lrow"><span data-i18n="art.l2">Felix Haus</span><b style="background:#dfe5e8"><svg viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="19" text-anchor="middle" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="21" fill="#111">F</text></svg></b></div><div class="lrow"><span data-i18n="art.l3">TSV Fußball</span><b style="background:#fb8c00"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#111" d="M2 9h2V7h2v10H4v-2H2zM20 9h2v6h-2v2h-2V7h2zM6 11h12v2H6z"/></svg></b></div><div class="lrow"><span data-i18n="art.l4">Unser See</span><b style="background:#29b6f6"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 2s7 7.5 7 12a7 7 0 0 1-14 0c0-4.5 7-12 7-12z"/></svg></b></div></div>
       <div class="art-cross"></div>
-      <div class="art-title">DEIN VIERTEL</div>
+      <div class="art-title" data-i18n="art.title">DEIN VIERTEL</div>
     </div>
   </div>
 </section>
-<section class="finder" id="tool" aria-label="Ort suchen">
-  <div class="searchbar">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-    <input id="q" type="text" placeholder="Stadt, Ort oder PLZ, z. B. 40213" value="Berlin" aria-label="Stadt, Ort oder Postleitzahl">
-    <button id="go" class="primary">Karte laden</button>
+
+<section class="tool" id="tool" aria-label="Poster gestalten">
+  <div class="stage">
+    <div class="posterbox">
+      <div class="poster" id="poster" data-theme="light">
+        <div id="map"></div>
+        <canvas id="fog"></canvas>
+        <div id="selRing" hidden></div>
+        <div class="legend" id="legend"></div>
+        <div class="titlebar"><h2 id="title">BERLIN</h2><p id="coords"></p></div>
+        <div class="watermark"></div>
+        <div class="lockbadge" id="lockBadge" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <ol class="progress" id="progress"></ol>
+      <div class="stepno" id="stepNo"></div>
+
+      <div class="pane" data-pane="1">
+        <h2 data-i18n="s1.h">Wähle deinen Ort</h2>
+        <p class="sub" data-i18n="s1.p">Stadt, Ort oder Postleitzahl</p>
+        <div class="searchbar">
+          <input id="q" type="text" data-i18n-ph="s1.ph" placeholder="z. B. 40213 oder Düsseldorf" aria-label="Stadt, Ort oder Postleitzahl" autocomplete="off">
+          <button id="go" class="btn primary" type="button" data-i18n="s1.go">Karte laden</button>
+        </div>
+      </div>
+
+      <div class="pane" data-pane="2">
+        <h2 data-i18n="s2.h">Ausschnitt wählen</h2>
+        <p class="sub" data-i18n="s2.p">Zieh die Karte und zoome, bis dein Viertel passt.</p>
+        <div class="zoomrow">
+          <button type="button" class="btn" id="zoomIn" aria-label="Zoom +">+</button>
+          <button type="button" class="btn" id="zoomOut" aria-label="Zoom −">−</button>
+          <span data-i18n="s2.z">Oder mit zwei Fingern / Mausrad</span>
+        </div>
+        <label class="switch"><span data-i18n="s2.places">Ortsnamen</span><input type="checkbox" id="tPlaces" checked><span class="track"></span></label>
+        <label class="switch"><span data-i18n="s2.streets">Straßennamen</span><input type="checkbox" id="tStreets"><span class="track"></span></label>
+      </div>
+
+      <div class="pane" data-pane="3">
+        <h2 data-i18n="s3.h">Titel &amp; Stil</h2>
+        <label class="field"><span data-i18n="s3.title">Titel auf dem Poster</span><input id="titleIn" type="text" maxlength="40" data-i18n-ph="s3.ph" placeholder="z. B. Düsseldorf"></label>
+        <div class="choices" role="group">
+          <button type="button" class="choice" data-theme="light" aria-pressed="true"><span class="sw l"></span><span data-i18n="s3.light">Hell</span><small data-i18n="s3.lightS">Freundlich</small></button>
+          <button type="button" class="choice" data-theme="dark" aria-pressed="false"><span class="sw d"></span><span data-i18n="s3.dark">Dunkel</span><small data-i18n="s3.darkS">Gamer-Look</small></button>
+        </div>
+        <label class="switch"><span data-i18n="s3.cross">Fadenkreuz</span><input type="checkbox" id="optCross" checked><span class="track"></span></label>
+        <label class="switch"><span data-i18n="s3.legend">Legende</span><input type="checkbox" id="optLegend" checked><span class="track"></span></label>
+        <label class="switch"><span data-i18n="s3.fog">Weicher Rand</span><input type="checkbox" id="optFog"><span class="track"></span></label>
+        <details class="more" id="fogBox">
+          <summary data-i18n="s3.more">Rand feiner einstellen</summary>
+          <div class="fogin">
+            <label><span data-i18n="s3.f1">Stärke</span><input id="fogWidth" type="range" min="0" max="100" value="45"></label>
+            <label><span data-i18n="s3.f2">Weichheit</span><input id="fogSoft" type="range" min="0" max="80" value="30"></label>
+            <label><span data-i18n="s3.f3">Struktur</span><input id="fogSmoke" type="range" min="0" max="100" value="60"></label>
+            <label><span data-i18n="s3.f4">Deckkraft</span><input id="fogOpacity" type="range" min="40" max="100" value="100"></label>
+            <label><span data-i18n="s3.f5">Farbe</span><input id="fogColor" type="color" class="colorpick" value="#f3f0e8"></label>
+          </div>
+        </details>
+      </div>
+
+      <div class="pane" data-pane="4">
+        <h2 data-i18n="s4.h">Deine Orte</h2>
+        <p class="sub" data-i18n="s4.p">Tipp ein Symbol an, dann auf die Karte.</p>
+        <div class="palette" id="palette"></div>
+        <details class="more">
+          <summary data-i18n="s4.letters">Buchstaben (z. B. für Freunde)</summary>
+          <div class="palette letters" id="paletteL" style="margin-top:8px"></div>
+          <div class="letterrow"><span data-i18n="s4.lcol">Farbe für neue Buchstaben</span><input type="color" id="letterColor" class="colorpick" value="#dfe5e8"></div>
+        </details>
+        <button type="button" class="btn placebtn" id="placeCross" data-i18n="s4.place">Am Fadenkreuz setzen</button>
+        <div class="plist" id="plist"></div>
+      </div>
+
+      <div class="pane" data-pane="5">
+        <h2 data-i18n="s5.h">Fertig!</h2>
+        <p class="sub" data-i18n="s5.p">Schau dir dein Poster an. Passt alles?</p>
+        <div class="finish">
+          <button type="button" class="btn primary" id="submitBtn" data-i18n="s5.submit">Design einreichen</button>
+          <button type="button" class="btn" id="shareBtn" data-i18n="s5.share">Link speichern</button>
+          <button type="button" class="btn ghost lockbtn" id="lockBtn" aria-pressed="false">
+            <svg class="lk-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>
+            <svg class="lk-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <span id="lockTxt">Sperren</span>
+          </button>
+        </div>
+        <p class="note" data-i18n="s5.note">Reiche dein Design mit deiner Etsy-Bestellnummer ein. Wir schicken dir die Datei über Etsy.</p>
+        <span id="ownerTools" class="ownertools" hidden>
+          <button id="testDl" type="button" class="btn">Alle Dateien exportieren: A4, A3, A2, Handy (nur lokal)</button>
+        </span>
+      </div>
+
+      <p class="hint" id="status" role="status"></p>
+      <div class="nav">
+        <button type="button" class="btn ghost" id="backBtn" data-i18n="nav.back">← Zurück</button>
+        <button type="button" class="btn primary" id="nextBtn" data-i18n="nav.next">Weiter →</button>
+      </div>
+    </div>
   </div>
-  <label class="titlefield"><span>Poster-Titel</span><input id="titleIn" type="text" placeholder="Titel auf dem Poster"></label>
 </section>
-<div class="tools">
-  <label class="switch"><input type="checkbox" id="tPlaces" checked><span class="track"></span><span class="lbl">Ortsnamen</span></label>
-  <label class="switch"><input type="checkbox" id="tStreets"><span class="track"></span><span class="lbl">Straßennamen</span></label>
-  <button type="button" id="lockBtn" class="lockbtn" aria-pressed="false"><svg class="lk-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg><svg class="lk-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span id="lockTxt">Fertig – Poster sperren</span></button>
-</div>
-<div id="status"></div>
-<main>
-  <div class="wrap">
-    <div class="poster" id="poster">
-      <div id="map"></div>
-      <canvas id="fog"></canvas>
-      <div id="selRing" hidden></div>
-      <div class="legend" id="legend"></div>
-      <div class="titlebar"><h2 id="title">BERLIN</h2><p id="coords"></p></div>
-      <div class="watermark"></div>
-      <div class="lockbadge" id="lockBadge" aria-hidden="true"><svg class="lk-closed"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
-    </div>
 
-    <div class="panel">
-      <h3>Orte (Icons)</h3>
-      <div class="empty" style="margin:-2px 0 8px">Icon antippen, dann auf die Karte klicken. Gesetzte Orte anklicken und ziehen, um sie zu verschieben.</div>
-      <div class="palette" id="palette"></div>
-      <div class="empty" style="margin:4px 0 6px">Buchstaben (z. B. für Freunde)</div>
-      <div class="palette letters" id="paletteL"></div>
-      <label style="justify-content:space-between; margin-bottom:8px">Farbe für neue Buchstaben <input type="color" id="letterColor" value="#dfe5e8"></label>
-      <div id="selLabel"></div>
-      <input id="poiName" type="text" placeholder="Name des Ortes (optional)">
-      <button id="placeCross" style="width:100%">Am Fadenkreuz platzieren</button>
-      <div class="opts">
-        <label><input type="checkbox" id="optCross" checked> Fadenkreuz anzeigen</label>
-        <label><input type="checkbox" id="optLegend" checked> Legende auf dem Poster</label>
-      </div>
-      <details class="fogbox" id="fogBox">
-        <summary>Vignette</summary>
-        <div class="fogin">
-          <label><input type="checkbox" id="optFog"> Vignette aktivieren</label>
-          <label>Stärke <input id="fogWidth" type="range" min="0" max="100" value="45"></label>
-          <label>Weichheit <input id="fogSoft" type="range" min="0" max="80" value="30"></label>
-          <label>Struktur <input id="fogSmoke" type="range" min="0" max="100" value="60"></label>
-          <label>Deckkraft <input id="fogOpacity" type="range" min="40" max="100" value="100"></label>
-          <label>Farbe <input id="fogColor" type="color" value="#0a0c0e"></label>
-        </div>
-      </details>
-      <h3>Deine Orte</h3>
-      <div class="plist" id="plist"></div>
+<div class="dlg" id="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle" hidden>
+  <div class="dlg-card">
+    <button type="button" class="btn dlg-x" id="dlgX" aria-label="×">✕</button>
+    <div id="dlgLink" hidden>
+      <h3 id="dlgTitle" data-i18n="dlg.lh">Link zu deinem Design</h3>
+      <p data-i18n="dlg.lp">Mit diesem Link öffnet sich dein Poster genau so, wie du es gestaltet hast.</p>
+      <textarea id="linkText" readonly rows="4"></textarea>
+      <button type="button" class="btn primary" id="linkCopy" style="margin-top:12px" data-i18n="dlg.copy">Link kopieren</button>
     </div>
-  </div>
-  <div class="buy">
-    <button id="shareBtn" type="button">Link zum Design kopieren</button>
-    <button id="submitBtn" type="button" class="primary">Design einreichen</button>
-    <span id="ownerTools" class="ownertools" hidden>
-      <button id="testDl" type="button" class="testdl">Alle Dateien exportieren: A4, A3, A2, Handy (nur lokal)</button>
-    </span>
-    <button id="buyImg" type="button" class="primary" hidden>Als Bild kaufen</button>
-    <button id="buyPoster" type="button" class="primary" hidden>Als Poster bestellen</button>
-    <p class="soonnote">Fertig gestaltet? Reiche dein Design mit deiner Etsy-Bestellnummer ein. Wir erstellen daraus deine Datei und schicken sie dir über Etsy.</p>
-  </div>
-
-  <div class="dlg" id="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle" hidden>
-    <div class="dlg-card">
-      <button type="button" class="dlg-x" id="dlgX" aria-label="Schließen">✕</button>
-      <div id="dlgLink" hidden>
-        <h3 id="dlgTitle">Link zu deinem Design</h3>
-        <p>Mit diesem Link öffnet sich dein Poster genau so, wie du es gestaltet hast.</p>
-        <textarea id="linkText" readonly rows="4"></textarea>
-        <button type="button" class="primary" id="linkCopy">Link kopieren</button>
+    <form id="dlgForm" hidden>
+      <h3 id="dlgTitle2" data-i18n="dlg.fh">Design einreichen</h3>
+      <p data-i18n="dlg.fp">Wir erstellen aus deinem Design die fertige Datei und schicken sie dir über deine Etsy-Bestellung.</p>
+      <label><span data-i18n="dlg.order">Etsy-Bestellnummer *</span><input type="text" id="fOrder" required maxlength="40" autocomplete="off"></label>
+      <label><span data-i18n="dlg.mail">E-Mail (optional)</span><input type="email" id="fMail" maxlength="120" autocomplete="email"></label>
+      <label><span data-i18n="dlg.name">Name</span><input type="text" id="fName" maxlength="80" autocomplete="name"></label>
+      <label><span data-i18n="dlg.msg">Nachricht</span><textarea id="fMsg" rows="3" maxlength="600" data-i18n-ph="dlg.msgph" placeholder="Zum Beispiel Wünsche oder Hinweise"></textarea></label>
+      <input type="text" id="fWeb" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0">
+      <label class="dlg-check"><input type="checkbox" id="fOk" required> <span data-i18n="dlg.ok">Ich willige ein, dass meine Angaben und mein Design zur Bearbeitung meiner Bestellung per E-Mail übermittelt werden. *</span></label>
+      <label class="dlg-check"><input type="checkbox" id="fTips"> <span data-i18n="dlg.tips">Optional: Ich möchte Tipps und Angebote rund ums Drucken meines Posters per E-Mail erhalten. Die Einwilligung kann ich jederzeit widerrufen.</span></label>
+      <p class="dlg-msg" id="fMsgOut" role="status"></p>
+      <button type="submit" class="btn primary" id="fSend" data-i18n="dlg.send">Design einreichen</button>
+      <div class="dlg-thanks" id="fThanks" hidden>
+        <small data-i18n="dlg.ad">Werbung</small>
+        <p data-i18n="dlg.adp">Dein Poster drucken lassen?</p>
+        <a id="fThanksLink" href="#" target="_blank" rel="sponsored noopener" data-i18n="dlg.adl">Zum Druckanbieter</a>
       </div>
-      <form id="dlgForm" hidden>
-        <h3 id="dlgTitle2">Design einreichen</h3>
-        <p>Wir erstellen aus deinem Design die fertige Datei und schicken sie dir über deine Etsy-Bestellung.</p>
-        <label>Etsy-Bestellnummer *<input type="text" id="fOrder" required maxlength="40" autocomplete="off"></label>
-        <label>E-Mail (optional)<input type="email" id="fMail" maxlength="120" autocomplete="email"></label>
-        <label>Name<input type="text" id="fName" maxlength="80" autocomplete="name"></label>
-        <label>Nachricht<textarea id="fMsg" rows="3" maxlength="600" placeholder="Zum Beispiel Wünsche oder Hinweise"></textarea></label>
-        <input type="text" id="fWeb" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0">
-        <label class="dlg-check"><input type="checkbox" id="fOk" required> Ich willige ein, dass meine Angaben und mein Design zur Bearbeitung meiner Bestellung per E-Mail übermittelt werden. *</label>
-        <label class="dlg-check"><input type="checkbox" id="fTips"> Optional: Ich möchte Tipps und Angebote rund ums Drucken meines Posters per E-Mail erhalten. Die Einwilligung kann ich jederzeit widerrufen.</label>
-        <p class="dlg-msg" id="fMsgOut" role="status"></p>
-        <button type="submit" class="primary" id="fSend">Design einreichen</button>
-        <div class="dlg-thanks" id="fThanks" hidden>
-          <small>Werbung</small>
-          <p>Dein Poster drucken lassen?</p>
-          <a id="fThanksLink" href="#" target="_blank" rel="sponsored noopener">Zum Druckanbieter</a>
-        </div>
-      </form>
-    </div>
-  </div>
-  <section class="mock" id="mock">
-    <h2>Live-<b>Vorschau</b></h2>
-    <p>So könnte dein Poster bei dir aussehen. Die Bilder aktualisieren sich bei jeder Änderung.</p>
-    <div class="mockgrid">
-      <figure><canvas id="mkWall" width="960" height="600"></canvas><figcaption>Im Wohnzimmer</figcaption></figure>
-      <figure><canvas id="mkGallery" width="960" height="600"></canvas><figcaption>Im Gamer-Zimmer</figcaption></figure>
-      <figure><canvas id="mkPhone" width="960" height="600"></canvas><figcaption>Handy-Hintergrund</figcaption></figure>
-    </div>
-  </section>
-  <div class="note">Karte © OpenStreetMap-Mitwirkende. Kartenkacheln und Suche sind in diesem Prototyp nur für Tests gedacht. Das Wasserzeichen erscheint nur in der Bearbeitung.</div>
-  <div class="note" id="tileNote"></div>
-</main>
-<div class="shop" id="shop" role="dialog" aria-modal="true" aria-labelledby="shopTitle" hidden>
-  <div class="shop-top">
-    <button type="button" class="shop-back" id="shopBack">← Zurück zum Editor</button>
-    <span class="shop-brand">Mein <b>Revier</b></span>
-    <span class="shop-test">Testphase · Preise und Zeiten sind Beispielwerte</span>
-  </div>
-  <div class="shop-grid">
-    <div class="shop-view">
-      <canvas id="shopCv" width="960" height="600"></canvas>
-      <div class="shop-rooms" id="shopRooms">
-        <button type="button" class="on" data-room="wall">Wohnzimmer</button>
-        <button type="button" data-room="gallery">Gamer-Zimmer</button>
-      </div>
-    </div>
-    <aside class="shop-info">
-      <h2 id="shopTitle">Dein Poster</h2>
-      <p class="shop-sub" id="shopSub"></p>
-      <div class="shop-tabs" id="shopTabs" role="tablist">
-        <button type="button" role="tab" data-prod="poster">Poster</button>
-        <button type="button" role="tab" data-prod="phone">Handybild</button>
-        <button type="button" role="tab" data-prod="file">Druckdatei</button>
-      </div>
-      <div id="shopSizeBox" class="shop-field"><label for="shopSize">Größe</label><select id="shopSize"></select></div>
-      <div class="shop-price"><span id="shopPrice"></span><small id="shopTax"></small></div>
-      <ul class="shop-facts" id="shopFacts"></ul>
-      <button type="button" class="primary shop-pay" id="shopPay" disabled>Bezahlung startet bald</button>
-      <p class="shop-hint">Die Bezahlung wird in Kürze freigeschaltet. Dein Poster ist bis dahin gesperrt und bleibt so, wie du es gestaltet hast.</p>
-    </aside>
+    </form>
   </div>
 </div>
 
+<section class="mock" id="mock">
+  <h2 data-i18n="mock.h">So hängt es bei dir</h2>
+  <p data-i18n="mock.p">Die Bilder aktualisieren sich bei jeder Änderung.</p>
+  <div class="mockgrid">
+    <figure><canvas id="mkWall" width="960" height="600"></canvas><figcaption data-i18n="mock.c1">Im Wohnzimmer</figcaption></figure>
+    <figure><canvas id="mkGallery" width="960" height="600"></canvas><figcaption data-i18n="mock.c2">Im Gamer-Zimmer</figcaption></figure>
+    <figure><canvas id="mkPhone" width="960" height="600"></canvas><figcaption data-i18n="mock.c3">Handy-Hintergrund</figcaption></figure>
+  </div>
+</section>
+<div class="foot"><span data-i18n="foot.map">Karte © OpenStreetMap-Mitwirkende. Das Wasserzeichen erscheint nur in der Bearbeitung.</span><br><span id="tileNote"></span></div>
 
 <script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
 <script>
 (function () {
+  // ---- Sprache (Deutsch / Englisch) ----
+  // Standard ist Deutsch. Auf true setzen, dann wählt die Seite beim ersten Besuch anhand der Browsersprache automatisch
+  // Englisch, wenn der Browser nicht auf Deutsch steht. Es wird dafür keine IP-Adresse abgefragt (Datenschutz).
+  var AUTO_LANG = false;
+  var DEFAULT_THEME = 'light';   // 'light' (Hell) oder 'dark' (Dunkel) für neue Poster
+  var I18N = {
+    de: {
+      'hero.eyebrow': 'Dein Poster · Dein Viertel', 'hero.h1': 'Dein <em>Revier</em>.<br>Dein Poster.',
+      'hero.lead': 'Such deinen Ort, markiere deine Lieblingsorte und häng deine eigene Spielkarte an die Wand.',
+      'hero.c1': 'Ort suchen', 'hero.c2': 'Orte markieren', 'hero.c3': 'Poster erhalten', 'hero.cta': 'Los geht’s',
+      'art.l1': 'Mein Zuhause', 'art.l2': 'Felix Haus', 'art.l3': 'TSV Fußball', 'art.l4': 'Unser See', 'art.title': 'DEIN VIERTEL',
+      's1.h': 'Wähle deinen Ort', 's1.p': 'Stadt, Ort oder Postleitzahl', 's1.ph': 'z. B. 40213 oder Düsseldorf', 's1.go': 'Karte laden',
+      's2.h': 'Ausschnitt wählen', 's2.p': 'Zieh die Karte und zoome, bis dein Viertel passt.', 's2.z': 'Oder mit zwei Fingern / Mausrad',
+      's2.places': 'Ortsnamen', 's2.streets': 'Straßennamen',
+      's3.h': 'Titel & Stil', 's3.title': 'Titel auf dem Poster', 's3.ph': 'z. B. Düsseldorf',
+      's3.light': 'Hell', 's3.lightS': 'Freundlich', 's3.dark': 'Dunkel', 's3.darkS': 'Gamer-Look',
+      's3.cross': 'Fadenkreuz', 's3.legend': 'Legende', 's3.fog': 'Weicher Rand', 's3.more': 'Rand feiner einstellen',
+      's3.f1': 'Stärke', 's3.f2': 'Weichheit', 's3.f3': 'Struktur', 's3.f4': 'Deckkraft', 's3.f5': 'Farbe',
+      's4.h': 'Deine Orte', 's4.p': 'Tipp ein Symbol an, dann auf die Karte.', 's4.letters': 'Buchstaben (z. B. für Freunde)',
+      's4.lcol': 'Farbe für neue Buchstaben', 's4.place': 'Am Fadenkreuz setzen',
+      's5.h': 'Fertig!', 's5.p': 'Schau dir dein Poster an. Passt alles?', 's5.submit': 'Design einreichen', 's5.share': 'Link speichern',
+      's5.note': 'Reiche dein Design mit deiner Etsy-Bestellnummer ein. Wir schicken dir die Datei über Etsy.',
+      'lock.off': 'Design sperren', 'lock.on': 'Gesperrt · Entsperren',
+      'nav.back': '← Zurück', 'nav.next': 'Weiter →',
+      'sn1': 'Ort', 'sn2': 'Ausschnitt', 'sn3': 'Stil', 'sn4': 'Orte', 'sn5': 'Fertig', 'step.of': 'Schritt {n} von {m}',
+      'dlg.lh': 'Link zu deinem Design', 'dlg.lp': 'Mit diesem Link öffnet sich dein Poster genau so, wie du es gestaltet hast.',
+      'dlg.copy': 'Link kopieren', 'dlg.copied': 'Kopiert ✓',
+      'dlg.fh': 'Design einreichen', 'dlg.fp': 'Wir erstellen aus deinem Design die fertige Datei und schicken sie dir über deine Etsy-Bestellung.',
+      'dlg.order': 'Etsy-Bestellnummer *', 'dlg.mail': 'E-Mail (optional)', 'dlg.name': 'Name', 'dlg.msg': 'Nachricht', 'dlg.msgph': 'Zum Beispiel Wünsche oder Hinweise',
+      'dlg.ok': 'Ich willige ein, dass meine Angaben und mein Design zur Bearbeitung meiner Bestellung per E-Mail übermittelt werden. *',
+      'dlg.tips': 'Optional: Ich möchte Tipps und Angebote rund ums Drucken meines Posters per E-Mail erhalten. Die Einwilligung kann ich jederzeit widerrufen.',
+      'dlg.send': 'Design einreichen', 'dlg.sent': 'Eingereicht ✓', 'dlg.sending': 'Wird gesendet …', 'dlg.thx0': 'Danke!',
+      'dlg.notyet': 'Das Einreichen ist noch nicht freigeschaltet. Bitte versuche es später noch einmal.',
+      'dlg.done': 'Danke! Dein Design ist bei uns angekommen. Wir melden uns über deine Etsy-Bestellung.',
+      'dlg.fail': 'Das hat leider nicht geklappt ({e}). Bitte versuche es noch einmal.', 'dlg.neterr': 'Netzwerkfehler',
+      'dlg.ad': 'Werbung', 'dlg.adp': 'Dein Poster drucken lassen?', 'dlg.adl': 'Zum Druckanbieter',
+      'mock.h': 'So hängt es bei dir', 'mock.p': 'Die Bilder aktualisieren sich bei jeder Änderung.',
+      'mock.c1': 'Im Wohnzimmer', 'mock.c2': 'Im Gamer-Zimmer', 'mock.c3': 'Handy-Hintergrund',
+      'foot.map': 'Karte © OpenStreetMap-Mitwirkende. Das Wasserzeichen erscheint nur in der Bearbeitung.',
+      'tile.note': 'Kartendaten © MapTiler © OpenStreetMap-Mitwirkende.',
+      'tile.osm': 'Ersatzkarte aktiv. Für den schönen Kartenlook trägst du oben im Skript bei MAPTILER_KEY deinen MapTiler-Key ein.',
+      'wm': 'VORSCHAU', 'letter': 'Buchstabe {x}',
+      'st.search': 'Suche …', 'st.nf': 'Ort nicht gefunden. Bei Postleitzahlen hilft oft der Zusatz mit Stadt, z. B. "1010 Wien".',
+      'st.sfail': 'Suche fehlgeschlagen. Internetverbindung prüfen.', 'st.loaded': 'Karte geladen. Weiter geht es mit dem Ausschnitt.',
+      'st.arm': 'Tipp auf die Karte, um "{x}" zu setzen. Das Symbol nochmal antippen beendet das Setzen.',
+      'st.placed': 'Gesetzt! Gib dem Ort unten einen Namen, dann erscheint er in der Legende. Zum Verschieben antippen und ziehen.',
+      'st.fromlink': 'Design aus dem Link geladen.',
+      'st.locked': 'Gesperrt. Zum Weiterbearbeiten entsperren.', 'st.unlocked': 'Entsperrt. Du kannst weiter bearbeiten.',
+      'st.nolabels': 'Für diesen Kartenstil wurden keine {x} gefunden.',
+      'err.tiles': 'Kartendaten konnten nicht geladen werden (Fehler {s}). Key und Internetverbindung prüfen.',
+      'err.style': 'Kartenstil konnte nicht geladen werden. Key, Kartenstil und Internetverbindung prüfen.',
+      'list.empty': 'Noch keine Orte gesetzt.', 'list.color': 'Farbe ändern', 'list.del': 'Ort löschen'
+    },
+    en: {
+      'hero.eyebrow': 'Your poster · Your neighborhood', 'hero.h1': 'Your <em>turf</em>.<br>Your poster.',
+      'hero.lead': 'Find your place, mark your favorite spots and hang your very own game map on the wall.',
+      'hero.c1': 'Find your place', 'hero.c2': 'Mark your spots', 'hero.c3': 'Get your poster', 'hero.cta': 'Let’s go',
+      'art.l1': 'My home', 'art.l2': 'Felix’s house', 'art.l3': 'Football club', 'art.l4': 'Our lake', 'art.title': 'YOUR HOOD',
+      's1.h': 'Choose your place', 's1.p': 'City, town or postcode', 's1.ph': 'e.g. Berlin or 10115', 's1.go': 'Load map',
+      's2.h': 'Frame your map', 's2.p': 'Drag and zoom until your area fits.', 's2.z': 'Or pinch with two fingers / mouse wheel',
+      's2.places': 'Place names', 's2.streets': 'Street names',
+      's3.h': 'Title & style', 's3.title': 'Poster title', 's3.ph': 'e.g. Berlin',
+      's3.light': 'Light', 's3.lightS': 'Friendly', 's3.dark': 'Dark', 's3.darkS': 'Gamer look',
+      's3.cross': 'Crosshair', 's3.legend': 'Legend', 's3.fog': 'Soft edge', 's3.more': 'Fine-tune the edge',
+      's3.f1': 'Strength', 's3.f2': 'Softness', 's3.f3': 'Texture', 's3.f4': 'Opacity', 's3.f5': 'Color',
+      's4.h': 'Your places', 's4.p': 'Tap an icon, then tap the map.', 's4.letters': 'Letters (e.g. for friends)',
+      's4.lcol': 'Color for new letters', 's4.place': 'Place at crosshair',
+      's5.h': 'All done!', 's5.p': 'Take a look at your poster. Everything right?', 's5.submit': 'Submit design', 's5.share': 'Save link',
+      's5.note': 'Submit your design with your Etsy order number. We’ll send you the file via Etsy.',
+      'lock.off': 'Lock design', 'lock.on': 'Locked · Unlock',
+      'nav.back': '← Back', 'nav.next': 'Next →',
+      'sn1': 'Place', 'sn2': 'Frame', 'sn3': 'Style', 'sn4': 'Spots', 'sn5': 'Done', 'step.of': 'Step {n} of {m}',
+      'dlg.lh': 'Link to your design', 'dlg.lp': 'This link opens your poster exactly the way you made it.',
+      'dlg.copy': 'Copy link', 'dlg.copied': 'Copied ✓',
+      'dlg.fh': 'Submit design', 'dlg.fp': 'We’ll turn your design into the final file and send it to you through your Etsy order.',
+      'dlg.order': 'Etsy order number *', 'dlg.mail': 'Email (optional)', 'dlg.name': 'Name', 'dlg.msg': 'Message', 'dlg.msgph': 'For example wishes or notes',
+      'dlg.ok': 'I agree that my details and my design are sent to you by email to process my order. *',
+      'dlg.tips': 'Optional: I’d like to receive tips and offers about printing my poster by email. I can withdraw my consent at any time.',
+      'dlg.send': 'Submit design', 'dlg.sent': 'Submitted ✓', 'dlg.sending': 'Sending …', 'dlg.thx0': 'Thanks!',
+      'dlg.notyet': 'Submitting is not enabled yet. Please try again later.',
+      'dlg.done': 'Thank you! Your design has arrived. We’ll get back to you through your Etsy order.',
+      'dlg.fail': 'That didn’t work ({e}). Please try again.', 'dlg.neterr': 'network error',
+      'dlg.ad': 'Advertisement', 'dlg.adp': 'Want your poster printed?', 'dlg.adl': 'Go to print shop',
+      'mock.h': 'How it looks at home', 'mock.p': 'The images update with every change.',
+      'mock.c1': 'In the living room', 'mock.c2': 'In the gaming room', 'mock.c3': 'Phone wallpaper',
+      'foot.map': 'Map © OpenStreetMap contributors. The watermark only appears while editing.',
+      'tile.note': 'Map data © MapTiler © OpenStreetMap contributors.',
+      'tile.osm': 'Fallback map active. For the nicer map look, add your MapTiler key at MAPTILER_KEY in the script.',
+      'wm': 'PREVIEW', 'letter': 'Letter {x}',
+      'st.search': 'Searching …', 'st.nf': 'Place not found. For postcodes, adding the city often helps, e.g. "1010 Vienna".',
+      'st.sfail': 'Search failed. Please check your internet connection.', 'st.loaded': 'Map loaded. Next, frame your map.',
+      'st.arm': 'Tap the map to place "{x}". Tap the icon again to stop placing.',
+      'st.placed': 'Placed! Give it a name below and it shows up in the legend. Tap and drag to move it.',
+      'st.fromlink': 'Design loaded from the link.',
+      'st.locked': 'Locked. Unlock to keep editing.', 'st.unlocked': 'Unlocked. You can keep editing.',
+      'st.nolabels': 'No {x} found for this map style.',
+      'err.tiles': 'Map data could not be loaded (error {s}). Check key and internet connection.',
+      'err.style': 'Map style could not be loaded. Check key, map style and internet connection.',
+      'list.empty': 'No places yet.', 'list.color': 'Change color', 'list.del': 'Delete place'
+    }
+  };
+  var LANG = 'de';
+  (function () {
+    var q = /[?&]lang=(de|en)\b/.exec(location.search), saved = null;
+    try { saved = localStorage.getItem('revier-lang'); } catch (e) {}
+    if (q) LANG = q[1];
+    else if (saved === 'de' || saved === 'en') LANG = saved;
+    else if (AUTO_LANG && !/^de\b/i.test(navigator.language || 'de')) LANG = 'en';
+  })();
+  function t(k, vars) {
+    var s = (I18N[LANG] && I18N[LANG][k]) || I18N.de[k] || k;
+    if (vars) Object.keys(vars).forEach(function (n) { s = s.replace('{' + n + '}', vars[n]); });
+    return s;
+  }
+  // ---- Poster-Stil (Hell / Dunkel) ----
+  var theme = 'light';
+  var FOG_DEF = { dark: [10, 12, 14], light: [243, 240, 232] };
+  var LIGHT_SAT = 0.5;   // wie bunt die helle Karte bleibt (0 = grau, 1 = volle Farben)
+  function badgeStroke() { return theme === 'dark' ? '#111' : '#fff'; }
+
   // ---- Rauch von außen: Nebel am Posterrand, unabhängig von der Kartenbewegung ----
-  var fogRGB = [10, 12, 14], fogAlpha = 1, fogWidth = 0.45, fogSoft = 0.3, fogSmoke = 0.6;
+  var fogRGB = [243, 240, 232], fogAlpha = 1, fogWidth = 0.45, fogSoft = 0.3, fogSmoke = 0.6;
   var fogCache = null;
 
   function hash2(ix, iy) {
@@ -519,6 +635,13 @@
   ];
   var ICON_BY = {};
   ICONS.forEach(function (ic) { ic.p = new Path2D(ic.d); ICON_BY[ic.id] = ic; });
+  var ICON_EN = { home: 'Home', work: 'Work', school: 'School / Uni', cafe: 'Café', food: 'Restaurant', bar: 'Bar', music: 'Club / Concert', shop: 'Shopping',
+    gym: 'Sport / Gym', park: 'Park', water: 'Lake / River', train: 'Train / Transit', plane: 'Airport', parking: 'Parking', hospital: 'Doctor / Clinic',
+    garage: 'Garage', cinema: 'Cinema', camera: 'Photo spot', heart: 'Friends / Family', star: 'Favorite spot' };
+  function iconLabel(ic) {
+    if (ic.letter) return t('letter', { x: ic.letter });
+    return LANG === 'en' ? (ICON_EN[ic.id] || ic.label) : ic.label;
+  }
 
   // Buchstaben A–Z, z. B. für die Häuser von Freunden
   var LETTERS = [];
@@ -528,23 +651,24 @@
     ICON_BY[ic.id] = ic;
   });
 
-  function iconSVG(ic, size, color) {
+  function iconSVG(ic, size, color, stroke) {
+    var sk = stroke || '#111';
     var col = color || ic.color;
     var fg = color ? textOn(color) : (ic.letter ? '#111' : '#fff');
     if (ic.letter) {
       return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 32 32">' +
-        '<circle cx="16" cy="16" r="14" fill="' + col + '" stroke="#111" stroke-width="2"/>' +
+        '<circle cx="16" cy="16" r="14" fill="' + col + '" stroke="' + sk + '" stroke-width="2"/>' +
         '<text x="16" y="22.5" text-anchor="middle" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="19" fill="' + fg + '">' + ic.letter + '</text></svg>';
     }
     return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 32 32">' +
-      '<circle cx="16" cy="16" r="14" fill="' + col + '" stroke="#111" stroke-width="2"/>' +
+      '<circle cx="16" cy="16" r="14" fill="' + col + '" stroke="' + sk + '" stroke-width="2"/>' +
       '<path transform="translate(6 6) scale(0.8333)" fill="' + fg + '" fill-rule="evenodd" d="' + ic.d + '"/></svg>';
   }
   function esc(s) {
     return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
   }
 
-  var BLANK_STYLE = { version: 8, sources: {}, layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#1f2327' } }] };
+  var BLANK_STYLE = { version: 8, sources: {}, layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#f1efe9' } }] };
   var map = new maplibregl.Map({
     container: 'map', style: BLANK_STYLE, center: [13.405, 52.52], zoom: 11,
     attributionControl: false, dragRotate: false, pitchWithRotate: false, fadeDuration: 0,
@@ -552,12 +676,12 @@
   });
   map.touchZoomRotate.disableRotation();
   // ===== KARTEN-EINSTELLUNG =====
-  // Hier deinen MapTiler-Key zwischen die Anführungszeichen einfügen (kostenloses Konto auf maptiler.com).
+  // MapTiler-Key (kostenloses Konto auf maptiler.com). Er ist im Browser sichtbar, beschränke ihn bei MapTiler deshalb auf deine Domains.
   var MAPTILER_KEY = 't7NRFJqgGF2r5if2zLfq';
-  // Kartenstil, z. B. 'streets-v4-dark' oder ruhiger 'dataviz-v4-dark'
-  var MAP_ID = 'streets-v4-dark';
+  // Kartenstile je Poster-Stil. Es wird der erste verwendet, den MapTiler kennt.
+  var MAP_IDS = { dark: ['streets-v4-dark'], light: ['streets-v4-light', 'streets-v4', 'streets-v2-light'] };
   // ==============================
-  // Namen-Ebenen: Orts- und Straßennamen sind aus, bis man sie per Knopf einschaltet
+  // Namen-Ebenen: Orts- und Straßennamen sind aus, bis man sie per Schalter einschaltet
   var labelIds = { place: [], street: [] };
   var showLabels = { place: true, street: false };
   function labelKind(l) {
@@ -573,49 +697,54 @@
       });
     });
   }
-  function setLabels(kind, on, nameDe) {
+  var mapLoading = true;   // wird false, sobald ein Kartenstil geladen ist
+  function setLabels(kind, on, nameKey) {
     showLabels[kind] = on;
-    if (on && labelIds[kind].length === 0 && !mapLoading) status('Für diesen Kartenstil wurden keine ' + nameDe + ' gefunden.');
+    if (on && labelIds[kind].length === 0 && !mapLoading) status(t('st.nolabels', { x: t(nameKey) }));
     applyLabels();
   }
-  var mapLoading = true;   // wird false, sobald der Kartenstil geladen ist
-  document.getElementById('tPlaces').addEventListener('change', function (e) { setLabels('place', e.target.checked, 'Ortsnamen'); });
-  document.getElementById('tStreets').addEventListener('change', function (e) { setLabels('street', e.target.checked, 'Straßennamen'); });
+  document.getElementById('tPlaces').addEventListener('change', function (e) { setLabels('place', e.target.checked, 's2.places'); });
+  document.getElementById('tStreets').addEventListener('change', function (e) { setLabels('street', e.target.checked, 's2.streets'); });
 
   var mapWarned = false;
-  function mapWarn(t) { if (!mapWarned) { mapWarned = true; status(t); } }
+  function mapWarn(m) { if (!mapWarned) { mapWarned = true; status(m); } }
   map.on('error', function (e) {
-    if (e && e.error && e.error.status) mapWarn('Kartendaten konnten nicht geladen werden (Fehler ' + e.error.status + '). Key und Internetverbindung prüfen.');
+    if (e && e.error && e.error.status) mapWarn(t('err.tiles', { s: e.error.status }));
   });
-  if (MAPTILER_KEY) {
-    fetch('https://api.maptiler.com/maps/' + MAP_ID + '/style.json?key=' + MAPTILER_KEY)
+  var styleCache = {};
+  function fetchStyle(ids, i) {
+    return fetch('https://api.maptiler.com/maps/' + ids[i] + '/style.json?key=' + MAPTILER_KEY)
       .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(function (st) {
-        // Symbole (Haltestellen usw.) entfernen, Orts- und Straßennamen behalten, aber ausgeblendet
-        labelIds = { place: [], street: [] };
-        st.layers = st.layers.filter(function (l) {
-          if (l.type !== 'symbol') return true;
-          var k = labelKind(l);
-          if (!k) return false;
-          l.layout = l.layout || {};
-          l.layout.visibility = showLabels[k] ? 'visible' : 'none';
-          labelIds[k].push(l.id);
-          return true;
-        });
-        // Flache Karte erzwingen, die Umrechnung für den Nebel setzt Mercator voraus
-        delete st.projection;
-        map.setStyle(st);
-        mapLoading = false;
-      })
-      .catch(function () { mapWarn('Kartenstil konnte nicht geladen werden. Key, Kartenstil und Internetverbindung prüfen.'); });
-    document.getElementById('tileNote').textContent = 'Kartendaten © MapTiler © OpenStreetMap-Mitwirkende.';
-  } else {
-    // Ersatzkarte ohne Key (nur zum Ausprobieren)
-    map.setStyle({ version: 8,
-      sources: { osm: { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 19 } },
-      layers: [{ id: 'osm', type: 'raster', source: 'osm' }] });
-    document.getElementById('map').classList.add('osm');
-    document.getElementById('tileNote').textContent = 'Ersatzkarte aktiv. Für den dunklen Spiel-Look trägst du oben im Skript bei MAPTILER_KEY deinen MapTiler-Key ein.';
+      .catch(function (err) { if (i + 1 < ids.length) return fetchStyle(ids, i + 1); throw err; });
+  }
+  function loadMapStyle(th) {
+    if (!MAPTILER_KEY) {
+      // Ersatzkarte ohne Key (nur zum Ausprobieren)
+      map.setStyle({ version: 8,
+        sources: { osm: { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 19 } },
+        layers: [{ id: 'osm', type: 'raster', source: 'osm' }] });
+      document.getElementById('map').classList.add('osm');
+      return Promise.resolve();
+    }
+    var src = styleCache[th] ? Promise.resolve(styleCache[th]) : fetchStyle(MAP_IDS[th], 0).then(function (st) { styleCache[th] = st; return st; });
+    return src.then(function (raw) {
+      var st = JSON.parse(JSON.stringify(raw));
+      // Symbole (Haltestellen usw.) entfernen, Orts- und Straßennamen behalten, aber ausgeblendet
+      labelIds = { place: [], street: [] };
+      st.layers = st.layers.filter(function (l) {
+        if (l.type !== 'symbol') return true;
+        var k = labelKind(l);
+        if (!k) return false;
+        l.layout = l.layout || {};
+        l.layout.visibility = showLabels[k] ? 'visible' : 'none';
+        labelIds[k].push(l.id);
+        return true;
+      });
+      // Flache Karte erzwingen, die Umrechnung für den Nebel setzt Mercator voraus
+      delete st.projection;
+      map.setStyle(st);
+      mapLoading = false;
+    }).catch(function () { mapWarn(t('err.style')); });
   }
 
   var cv = document.getElementById('fog');
@@ -659,7 +788,7 @@
       ctx.shadowBlur = s * 0.4;
       var fg = o.color ? textOn(o.color) : (ic.letter ? '#111' : '#fff');
       ctx.fillStyle = o.color || ic.color;
-      ctx.strokeStyle = '#111';
+      ctx.strokeStyle = badgeStroke();
       ctx.lineWidth = s * 0.16;
       ctx.beginPath();
       ctx.arc(0, 0, s, 0, Math.PI * 2);
@@ -687,9 +816,9 @@
     var cx = w / 2, cy = h / 2;
     var gap = w * 0.02, len = w * 0.14;
     ctx.save();
-    ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+    ctx.strokeStyle = theme === 'dark' ? 'rgba(255,255,255,0.92)' : 'rgba(30,37,48,0.85)';
     ctx.lineWidth = Math.max(1, w * 0.003);
-    ctx.shadowColor = 'rgba(0,0,0,.7)';
+    ctx.shadowColor = theme === 'dark' ? 'rgba(0,0,0,.7)' : 'rgba(255,255,255,.9)';
     ctx.shadowBlur = 3;
     ctx.beginPath();
     ctx.moveTo(cx - gap - len, cy); ctx.lineTo(cx - gap, cy);
@@ -731,7 +860,7 @@
     var fg = o.color ? textOn(o.color) : (ic.letter ? '#111' : '#fff');
     g.save();
     g.fillStyle = o.color || ic.color;
-    g.strokeStyle = '#111';
+    g.strokeStyle = badgeStroke();
     g.lineWidth = s * 0.16;
     g.beginPath();
     g.arc(0, 0, s, 0, Math.PI * 2);
@@ -770,18 +899,25 @@
     var c = document.createElement('canvas');
     c.width = CW; c.height = CH;
     var g = c.getContext('2d');
-    g.fillStyle = '#1f2327';
+    g.fillStyle = theme === 'dark' ? '#1f2327' : '#f1efe9';
     g.fillRect(0, 0, CW, CH);
 
     // 1. Karte (Grau- und Helligkeitsfilter von Hand, damit es in jedem Browser klappt)
     try { coverDraw(g, opts.mapSrc || map.getCanvas(), 0, 0, CW, CH); } catch (e) {}
     try {
       var im = g.getImageData(0, 0, CW, CH), d = im.data, osm = !MAPTILER_KEY;
+      var dark = theme === 'dark';
+      function cl(x) { return x < 0 ? 0 : (x > 255 ? 255 : x); }
       for (var i = 0; i < d.length; i += 4) {
         var v = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
-        v = osm ? ((v - 127.5) * 1.1 + 127.5) * 0.7 : v * 1.7;
-        v = v < 0 ? 0 : (v > 255 ? 255 : v);
-        d[i] = d[i + 1] = d[i + 2] = v;
+        if (dark) {
+          v = osm ? ((v - 127.5) * 1.1 + 127.5) * 0.7 : v * 1.7;
+          d[i] = d[i + 1] = d[i + 2] = cl(v);
+        } else {   // hell: Farben bleiben, nur dezenter
+          d[i] = cl(v + (d[i] - v) * LIGHT_SAT);
+          d[i + 1] = cl(v + (d[i + 1] - v) * LIGHT_SAT);
+          d[i + 2] = cl(v + (d[i + 2] - v) * LIGHT_SAT);
+        }
       }
       g.putImageData(im, 0, 0);
     } catch (e) {}
@@ -811,7 +947,7 @@
     if (document.getElementById('optLegend').checked) {
       var named = legendItems();
       var rowH = 4.8 * cw, y = 3 * cw;
-      g.font = '600 ' + (2.5 * cw) + 'px Inter, -apple-system, Helvetica, Arial, sans-serif';
+      g.font = '700 ' + (2.5 * cw) + 'px Nunito, Inter, -apple-system, Helvetica, Arial, sans-serif';
       g.textBaseline = 'middle';
       named.forEach(function (it) {
         var p = it.p, txt = it.text;
@@ -819,9 +955,9 @@
         var tw = g.measureText(txt).width;
         var rowW = 2.4 * cw + tw + 1.4 * cw + 3.6 * cw + 1.6 * cw;
         var x = CW - rowW;
-        g.fillStyle = 'rgba(0,0,0,.74)';
+        g.fillStyle = theme === 'dark' ? 'rgba(0,0,0,.74)' : 'rgba(255,255,255,.92)';
         g.fillRect(x, y, rowW, rowH);
-        g.fillStyle = '#fff';
+        g.fillStyle = theme === 'dark' ? '#fff' : '#1d2530';
         g.fillText(txt, x + 2.4 * cw, y + rowH / 2);
         g.save();
         g.translate(CW - 1.6 * cw - 1.8 * cw, y + rowH / 2);
@@ -836,9 +972,10 @@
     var coords = (document.getElementById('coords').textContent || '').toUpperCase();
     var gh = 34 * cw;
     var gr = g.createLinearGradient(0, CH - gh, 0, CH);
-    gr.addColorStop(0, 'rgba(0,0,0,0)');
-    gr.addColorStop(0.65, 'rgba(0,0,0,.92)');
-    gr.addColorStop(1, 'rgba(0,0,0,.92)');
+    var tb = theme === 'dark' ? '0,0,0' : '255,255,255', ta = theme === 'dark' ? '.92' : '.95';
+    gr.addColorStop(0, 'rgba(' + tb + ',0)');
+    gr.addColorStop(0.65, 'rgba(' + tb + ',' + ta + ')');
+    gr.addColorStop(1, 'rgba(' + tb + ',' + ta + ')');
     g.fillStyle = gr;
     g.fillRect(0, CH - gh, CW, gh);
     var f = Math.min(1, 13 / Math.max(title.length, 1));
@@ -847,15 +984,16 @@
     g.lineJoin = 'round';
     g.font = '900 ' + (11 * cw * f) + 'px Impact, "Arial Black", "Helvetica Neue", sans-serif';
     var ty = CH - 9.8 * cw;
-    g.fillStyle = '#000';
+    var outline = theme === 'dark' ? '#000' : '#fff';
+    g.fillStyle = outline;
     g.fillText(title, CW / 2, ty + 0.8 * cw);
-    g.strokeStyle = '#000';
+    g.strokeStyle = outline;
     g.lineWidth = 0.7 * cw;
     g.strokeText(title, CW / 2, ty);
-    g.fillStyle = '#f3ead0';
+    g.fillStyle = theme === 'dark' ? '#f3ead0' : '#1f2933';
     g.fillText(title, CW / 2, ty);
     g.font = '500 ' + (2.6 * cw) + 'px Inter, -apple-system, Helvetica, Arial, sans-serif';
-    g.fillStyle = '#c9bf9f';
+    g.fillStyle = theme === 'dark' ? '#c9bf9f' : '#5b6670';
     spaced(g, coords, CW / 2, CH - 4 * cw, 0.35 * 2.6 * cw);
     // Quellenangabe (Lizenzpflicht für OpenStreetMap-Daten)
     // Quellenangabe: sehr klein, dezent grau, unten rechts
@@ -864,7 +1002,7 @@
     g.font = '400 ' + (0.42 * cw) + 'px Inter, -apple-system, Helvetica, Arial, sans-serif';
     g.textAlign = 'right';
     g.textBaseline = 'alphabetic';
-    g.fillStyle = 'rgba(100,103,107,.9)';
+    g.fillStyle = theme === 'dark' ? 'rgba(100,103,107,.9)' : 'rgba(70,75,80,.85)';
     g.fillText(attr, CW - 1.4 * cw, CH - 1.2 * cw);
     g.restore();
     g.textAlign = 'center';
@@ -877,13 +1015,14 @@
     g.font = '900 ' + (34 * k) + 'px "Arial Black", Arial, sans-serif';
     g.textAlign = 'center';
     g.textBaseline = 'middle';
-    g.fillStyle = 'rgba(255,255,255,.38)';
-    g.strokeStyle = 'rgba(0,0,0,.25)';
+    g.fillStyle = theme === 'dark' ? 'rgba(255,255,255,.38)' : 'rgba(31,41,51,.22)';
+    g.strokeStyle = theme === 'dark' ? 'rgba(0,0,0,.25)' : 'rgba(255,255,255,.5)';
     g.lineWidth = k;
+    var wmText = t('wm');
     for (var yy = -CH; yy < CH * 1.2; yy += 170 * k) {
       for (var xx = -CW; xx < CW * 1.4; xx += 280 * k) {
-        g.strokeText('VORSCHAU', xx, yy);
-        g.fillText('VORSCHAU', xx, yy);
+        g.strokeText(wmText, xx, yy);
+        g.fillText(wmText, xx, yy);
       }
     }
     g.restore();
@@ -1126,7 +1265,7 @@
   }
   function updateLegend() {
     document.getElementById('legend').innerHTML = legendItems().map(function (it) {
-      return '<div class="row"><span>' + esc(it.text) + '</span>' + iconSVG(ICON_BY[it.p.icon], 24, it.p.color) + '</div>';
+      return '<div class="row"><span>' + esc(it.text) + '</span>' + iconSVG(ICON_BY[it.p.icon], 24, it.p.color, badgeStroke()) + '</div>';
     }).join('');
     scheduleMockups();
   }
@@ -1137,7 +1276,7 @@
     if (!pois.length) {
       var e = document.createElement('div');
       e.className = 'empty';
-      e.textContent = 'Noch keine Orte gesetzt.';
+      e.textContent = t('list.empty');
       box.appendChild(e);
     }
     pois.forEach(function (p) {
@@ -1147,26 +1286,29 @@
       row.addEventListener('click', function (e) { if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') selectPoi(p.id); });
       var ico = document.createElement('span');
       ico.className = 'ico';
-      ico.innerHTML = iconSVG(ICON_BY[p.icon], 26, p.color);
+      ico.innerHTML = iconSVG(ICON_BY[p.icon], 30, p.color);
       var inp = document.createElement('input');
       inp.type = 'text';
+      inp.maxLength = 40;
       inp.value = p.name;
-      inp.placeholder = ICON_BY[p.icon].label;
+      inp.placeholder = iconLabel(ICON_BY[p.icon]);
       inp.addEventListener('input', function () { p.name = inp.value; updateLegend(); });
       var col = document.createElement('input');
       col.type = 'color';
       col.className = 'colorpick';
-      col.title = 'Farbe ändern';
+      col.title = t('list.color');
       col.value = p.color || ICON_BY[p.icon].color;
       col.addEventListener('input', function () {
         p.color = col.value;
-        ico.innerHTML = iconSVG(ICON_BY[p.icon], 26, p.color);
+        ico.innerHTML = iconSVG(ICON_BY[p.icon], 30, p.color);
         updateLegend();
         render();
       });
       var del = document.createElement('button');
+      del.type = 'button';
       del.textContent = '✕';
-      del.title = 'Ort löschen';
+      del.title = t('list.del');
+      del.setAttribute('aria-label', t('list.del'));
       del.addEventListener('click', function () {
         pois = pois.filter(function (q) { return q.id !== p.id; });
         refreshList(); updateLegend(); render();
@@ -1181,23 +1323,22 @@
   }
 
   function addPoi(lat, lng) {
-    var nameEl = document.getElementById('poiName');
-    pois.push({ id: ++poiId, lat: lat, lng: lng, icon: selIcon, name: nameEl.value.trim(), color: ICON_BY[selIcon].letter ? letterColor : null });
+    pois.push({ id: ++poiId, lat: lat, lng: lng, icon: selIcon, name: '', color: ICON_BY[selIcon].letter ? letterColor : null });
     selPoi = poiId;
-    nameEl.value = '';
     refreshList();
     render();
     var ins = document.querySelectorAll('#plist input[type=text]');
-    if (ins.length && !nameEl.value && !pois[pois.length - 1].name && window.matchMedia('(pointer:fine)').matches) { ins[ins.length - 1].focus(); }
+    if (ins.length && window.matchMedia('(pointer:fine)').matches) { ins[ins.length - 1].focus(); }
   }
 
   function buildPalette() {
-    function fill(el, list, size, color) {
+    function fill(el, list, size, color, labels) {
       el.innerHTML = '';
       list.forEach(function (ic) {
         var b = document.createElement('button');
-        b.title = ic.label;
-        b.innerHTML = iconSVG(ic, size, color);
+        b.type = 'button';
+        b.title = iconLabel(ic);
+        b.innerHTML = iconSVG(ic, size, color) + (labels ? '<span>' + esc(iconLabel(ic)) + '</span>' : '');
         b.className = (armed && ic.id === selIcon) ? 'sel' : '';
         b.addEventListener('click', function () {
           if (armed && selIcon === ic.id) { setArmed(false); return; }
@@ -1207,15 +1348,14 @@
         el.appendChild(b);
       });
     }
-    fill(document.getElementById('palette'), ICONS, 34);
-    fill(document.getElementById('paletteL'), LETTERS, 26, letterColor);
-    document.getElementById('selLabel').textContent = 'Ausgewählt: ' + ICON_BY[selIcon].label;
+    fill(document.getElementById('palette'), ICONS, 38, undefined, true);
+    fill(document.getElementById('paletteL'), LETTERS, 26, letterColor, false);
   }
 
   document.getElementById('placeCross').onclick = function () {
     var c = map.getCenter();
     addPoi(c.lat, c.lng);
-    status('Ort am Fadenkreuz gesetzt. Karte verschieben und erneut platzieren oder Namen in der Liste ändern.');
+    status(t('st.placed'));
   };
   document.getElementById('optCross').addEventListener('change', function (e) { showCross = e.target.checked; render(); });
   document.getElementById('optFog').addEventListener('change', function (e) {
@@ -1255,9 +1395,7 @@
     armed = on;
     map.getCanvasContainer().style.cursor = on ? 'crosshair' : '';
     buildPalette();
-    status(on
-      ? 'Klicke auf die Karte, um "' + ICON_BY[selIcon].label + '" zu setzen. Esc oder das Icon nochmal antippen beendet das Platzieren.'
-      : 'Karte mit der Maus verschieben, mit dem Mausrad zoomen. Icon antippen, um Orte zu setzen.');
+    status(on ? t('st.arm', { x: iconLabel(ICON_BY[selIcon]) }) : '');
   }
   // ---- Orte auswählen und verschieben ----
   var selPoi = null, dragPoi = null, poiClickGuard = false;
@@ -1323,7 +1461,7 @@
     if (poiClickGuard) return;
     if (!armed) { if (selPoi !== null) selectPoi(null); return; }
     addPoi(e.lngLat.lat, e.lngLat.lng);
-    status('Ort gesetzt. Zum Verschieben anklicken und ziehen. Namen und Farbe änderst du rechts in der Liste.');
+    status(t('st.placed'));
   });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') { if (armed) setArmed(false); else if (selPoi !== null) selectPoi(null); }
@@ -1349,12 +1487,13 @@
     scheduleMockups();
   });
 
-  function search() {
-    var q = document.getElementById('q').value.trim();
-    if (!q) return;
-    status('Suche …');
+  var lastQuery = '';
+  function search(qOverride, silent) {
+    var q = (qOverride !== undefined ? qOverride : document.getElementById('q').value).trim();
+    if (!q) return Promise.resolve(false);
+    status(t('st.search'));
     var isPlz = /^\d{4,5}$/.test(q);
-    var base = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&addressdetails=1&accept-language=de&';
+    var base = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&addressdetails=1&accept-language=' + LANG + '&';
     function nom(params) { return fetch(base + params).then(function (r) { return r.json(); }); }
     var first;
     if (isPlz) {
@@ -1365,9 +1504,9 @@
     } else {
       first = nom('q=' + encodeURIComponent(q));
     }
-    first
+    return first
       .then(function (j) {
-        if (!j.length) { status('Ort nicht gefunden. Bei Postleitzahlen hilft oft der Zusatz mit Stadt, z. B. "1010 Wien".'); return; }
+        if (!j.length) { status(t('st.nf')); return false; }
         var it = j[0];
         var bb = it.boundingbox.map(Number);
         ops = []; pois = [];
@@ -1381,14 +1520,18 @@
         refreshList();
         setArmed(false);
         render();
+        lastQuery = q;
+        status(silent ? '' : t('st.loaded'));
+        return true;
       })
-      .catch(function () { status('Suche fehlgeschlagen. Internetverbindung prüfen.'); });
+      .catch(function () { status(t('st.sfail')); return false; });
   }
-  document.getElementById('go').onclick = search;
+  document.getElementById('go').onclick = function () { search(); };
   document.getElementById('q').addEventListener('keydown', function (e) { if (e.key === 'Enter') search(); });
 
   // ---- Poster sperren ("fertig mit der Bearbeitung") ----
   var locked = false;
+  function updateLockTxt() { document.getElementById('lockTxt').textContent = t(locked ? 'lock.on' : 'lock.off'); }
   function setLocked(on) {
     locked = on;
     document.body.classList.toggle('locked', on);
@@ -1398,98 +1541,12 @@
     if (on) setArmed(false);
     var b = document.getElementById('lockBtn');
     b.setAttribute('aria-pressed', on ? 'true' : 'false');
-    document.getElementById('lockTxt').textContent = on ? 'Gesperrt · Entsperren' : 'Fertig – Poster sperren';
+    updateLockTxt();
     ['q', 'go', 'titleIn'].forEach(function (id) { document.getElementById(id).disabled = on; });
     map.getCanvasContainer().style.cursor = on ? 'default' : '';
-    status(on ? 'Poster gesperrt. Karte, Orte und Titel lassen sich nicht mehr versehentlich ändern. Zum Weiterbearbeiten entsperren.' : 'Poster entsperrt. Du kannst weiter bearbeiten.');
+    status(on ? t('st.locked') : t('st.unlocked'));
   }
   document.getElementById('lockBtn').addEventListener('click', function () { setLocked(!locked); });
-
-  // ---- Kaufseite: Vorschau in groß, Preis und Lieferzeit ----
-  // Preise und Zeiten sind BEISPIELWERTE für die Testphase. Hier anpassen, sobald sie feststehen.
-  var SHOP = {
-    tax: 'inkl. MwSt.',
-    posters: [
-      { label: '21 × 30 cm (A4)', price: 19.9, ship: 4.9, days: '4 bis 7 Werktage' },
-      { label: '30 × 42 cm',      price: 27.9, ship: 4.9, days: '4 bis 7 Werktage' },
-      { label: '50 × 70 cm',      price: 39.9, ship: 5.9, days: '4 bis 8 Werktage' }
-    ],
-    phone: { price: 4.9 },
-    file:  { price: 9.9 }
-  };
-  function eur(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
-  var shopProd = 'poster', shopRoom = 'wall', shopWasLocked = false;
-  function shopFacts(rows) {
-    document.getElementById('shopFacts').innerHTML = rows.map(function (r) {
-      return '<li><span>' + r[0] + '</span><span>' + r[1] + '</span></li>';
-    }).join('');
-  }
-  function shopRender() {
-    var title = (document.getElementById('title').textContent || 'Dein Poster').trim();
-    var cv2 = document.getElementById('shopCv');
-    var p;
-    try { p = composePoster(900); } catch (e) { return; }
-    var isPhone = shopProd === 'phone';
-    document.getElementById('shopRooms').style.display = isPhone ? 'none' : 'flex';
-    document.getElementById('shopSizeBox').style.display = shopProd === 'poster' ? 'block' : 'none';
-    Array.prototype.forEach.call(document.querySelectorAll('#shopTabs button'), function (b) { b.classList.toggle('on', b.getAttribute('data-prod') === shopProd); });
-    Array.prototype.forEach.call(document.querySelectorAll('#shopRooms button'), function (b) { b.classList.toggle('on', b.getAttribute('data-room') === shopRoom); });
-    cv2.getContext('2d').clearRect(0, 0, cv2.width, cv2.height);
-    if (isPhone) drawPhone(p, cv2);
-    else if (shopRoom === 'gallery') drawGallery(p, cv2);
-    else drawWall(p, cv2);
-    var tx = SHOP.tax;
-    document.getElementById('shopTax').textContent = tx;
-    if (shopProd === 'poster') {
-      var o = SHOP.posters[parseInt(document.getElementById('shopSize').value, 10) || 0];
-      document.getElementById('shopTitle').textContent = title + ' · Poster';
-      document.getElementById('shopSub').textContent = 'Gedruckt und direkt zu dir geliefert.';
-      document.getElementById('shopPrice').textContent = eur(o.price);
-      shopFacts([['Größe', o.label], ['Lieferzeit', 'ca. ' + o.days], ['Versand', eur(o.ship) + ' innerhalb Deutschlands'], ['Gesamt', eur(o.price + o.ship)]]);
-    } else if (isPhone) {
-      document.getElementById('shopTitle').textContent = title + ' · Handybild';
-      document.getElementById('shopSub').textContent = 'Als Hintergrund für Sperr- und Startbildschirm.';
-      document.getElementById('shopPrice').textContent = eur(SHOP.phone.price);
-      shopFacts([['Lieferung', 'Sofort nach der Zahlung als Download'], ['Format', 'Bild für dein Handy'], ['Versand', 'Entfällt']]);
-    } else {
-      document.getElementById('shopTitle').textContent = title + ' · Druckdatei';
-      document.getElementById('shopSub').textContent = 'Hochauflösend, zum Selbstdrucken oder Verschenken.';
-      document.getElementById('shopPrice').textContent = eur(SHOP.file.price);
-      shopFacts([['Lieferung', 'Sofort nach der Zahlung als Download'], ['Auflösung', 'bis 3300 × 4620 px (ca. 28 × 39 cm, 300 dpi)'], ['Versand', 'Entfällt']]);
-    }
-  }
-  function openShop(prod) {
-    shopProd = prod;
-    var sel = document.getElementById('shopSize');
-    if (!sel.options.length) {
-      SHOP.posters.forEach(function (o, i) { var op = document.createElement('option'); op.value = i; op.textContent = o.label + ' · ' + eur(o.price); sel.appendChild(op); });
-      sel.value = '1';
-    }
-    shopWasLocked = locked;
-    if (!locked) setLocked(true);
-    document.getElementById('shop').hidden = false;
-    document.body.classList.add('shop-open');
-    document.getElementById('shop').scrollTop = 0;
-    shopRender();
-  }
-  function closeShop() {
-    document.getElementById('shop').hidden = true;
-    document.body.classList.remove('shop-open');
-    if (!shopWasLocked) setLocked(false);
-  }
-  document.getElementById('buyPoster').addEventListener('click', function () { openShop('poster'); });
-  document.getElementById('buyImg').addEventListener('click', function () { openShop('phone'); });
-  document.getElementById('shopBack').addEventListener('click', closeShop);
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !document.getElementById('shop').hidden) closeShop(); });
-  document.getElementById('shopTabs').addEventListener('click', function (e) {
-    var b = e.target.closest('button[data-prod]'); if (!b) return;
-    shopProd = b.getAttribute('data-prod'); shopRender();
-  });
-  document.getElementById('shopRooms').addEventListener('click', function (e) {
-    var b = e.target.closest('button[data-room]'); if (!b) return;
-    shopRoom = b.getAttribute('data-room'); shopRender();
-  });
-  document.getElementById('shopSize').addEventListener('change', shopRender);
 
   // Der Export in voller Auflösung ist nur sichtbar, wenn die Seite lokal bei dir läuft (localhost)
   var OWNER = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:';
@@ -1634,6 +1691,7 @@
     var c = map.getCenter();
     return {
       v: 1,
+      th: theme === 'dark' ? 'd' : 'l',
       c: [+c.lng.toFixed(6), +c.lat.toFixed(6)],
       z: +(map.getZoom() - Math.log2(posterW() / 600)).toFixed(3),   // unabhängig von der Bildschirmgröße
       t: document.getElementById('title').textContent,
@@ -1655,6 +1713,7 @@
       return { id: ++poiId, lat: num(q.a, cy, -85, 85), lng: num(q.o, cx, -180, 180), icon: ICON_BY[q.i] ? q.i : 'star',
                name: String(q.n || '').slice(0, 60), color: /^#[0-9a-fA-F]{6}$/.test(q.c || '') ? q.c : null };
     });
+    setTheme(st.th === 'l' ? 'light' : 'dark');
     if (st.f) {
       showFog = !!st.f.on;
       fogWidth = num(st.f.w, 0.45, 0, 1); fogSoft = num(st.f.s, 0.3, 0, 0.8); fogSmoke = num(st.f.m, 0.6, 0, 1); fogAlpha = num(st.f.a, 1, 0.4, 1);
@@ -1710,7 +1769,7 @@
   document.getElementById('linkCopy').addEventListener('click', function () {
     var ta = document.getElementById('linkText'), btn = this;
     ta.select();
-    var done = function () { btn.textContent = 'Kopiert ✓'; setTimeout(function () { btn.textContent = 'Link kopieren'; }, 2000); };
+    var done = function () { btn.textContent = t('dlg.copied'); setTimeout(function () { btn.textContent = t('dlg.copy'); }, 2000); };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(ta.value).then(done, function () { try { document.execCommand('copy'); done(); } catch (e) {} });
     else { try { document.execCommand('copy'); done(); } catch (e) {} }
   });
@@ -1726,8 +1785,8 @@
     var out = document.getElementById('fMsgOut');
     function say(t, cls) { out.textContent = t; out.className = 'dlg-msg ' + (cls || ''); }
     if (sending) return;
-    if (document.getElementById('fWeb').value) { say('Danke!', 'ok'); return; }   // Honeypot: Bots werden still ignoriert
-    if (!SUBMIT.key) { say('Das Einreichen ist noch nicht freigeschaltet. Bitte versuche es später noch einmal.', 'err'); return; }
+    if (document.getElementById('fWeb').value) { say(t('dlg.thx0'), 'ok'); return; }   // Honeypot: Bots werden still ignoriert
+    if (!SUBMIT.key) { say(t('dlg.notyet'), 'err'); return; }
     var order = document.getElementById('fOrder').value.trim(), mail = document.getElementById('fMail').value.trim();
     var name = document.getElementById('fName').value.trim(), note = document.getElementById('fMsg').value.trim();
     var enc = b64enc(JSON.stringify(getState()));
@@ -1735,9 +1794,9 @@
     var title = document.getElementById('title').textContent;
     var tips = document.getElementById('fTips').checked && !!mail;   // Werbung nur mit E-Mail-Adresse möglich
     var msg = 'Neue Design-Einreichung\n\nWerbe-Einwilligung (Druck-Tipps per E-Mail): ' + (tips ? 'JA, erteilt am ' + new Date().toLocaleString('de-DE') : 'NEIN, keine Werbung senden') +
-      '\n\nEtsy-Bestellnummer: ' + order + '\nE-Mail: ' + (mail || '-') + '\nName: ' + (name || '-') + '\nPoster-Titel: ' + title +
+      '\n\nEtsy-Bestellnummer: ' + order + '\nE-Mail: ' + (mail || '-') + '\nName: ' + (name || '-') + '\nPoster-Titel: ' + title + '\nSprache/Stil: ' + LANG + '/' + theme +
       '\nNachricht: ' + (note || '-') + '\n\nLink zum Design (öffentlich):\n' + pub + '\n\nLink zum Exportieren (lokal bei dir):\n' + loc + '\n';
-    sending = true; document.getElementById('fSend').disabled = true; say('Wird gesendet …');
+    sending = true; document.getElementById('fSend').disabled = true; say(t('dlg.sending'));
     fetch(SUBMIT.url, {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify((function () {
@@ -1747,9 +1806,9 @@
       })())
     }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || j.success === false) throw new Error(j.message || ('Fehler ' + r.status)); }); })
       .then(function () {
-        say('Danke! Dein Design ist bei uns angekommen. Wir melden uns über deine Etsy-Bestellung.', 'ok');
+        say(t('dlg.done'), 'ok');
         if (!locked) setLocked(true);
-        document.getElementById('fSend').textContent = 'Eingereicht ✓';
+        document.getElementById('fSend').textContent = t('dlg.sent');
         if (/^https:\/\//.test(AFFILIATE.url)) {
           document.getElementById('fThanksLink').href = AFFILIATE.url;
           document.getElementById('fThanks').hidden = false;
@@ -1757,7 +1816,7 @@
       })
       .catch(function (err) {
         sending = false; document.getElementById('fSend').disabled = false;
-        say('Das hat leider nicht geklappt (' + (err && err.message ? err.message : 'Netzwerkfehler') + '). Bitte versuche es noch einmal.', 'err');
+        say(t('dlg.fail', { e: (err && err.message ? err.message : t('dlg.neterr')) }), 'err');
       });
   });
 
@@ -1765,17 +1824,125 @@
   map.on('idle', scheduleMockups);
   window.addEventListener('resize', function () { map.resize(); resizeCanvas(); render(); });
 
-  resizeCanvas();
-  buildPalette();
-  refreshList();
-  setArmed(false);
+  // ---- Hell / Dunkel ----
+  function setWatermark() {
+    var dark = theme === 'dark';
+    var svg = "<svg xmlns='http://www.w3.org/2000/svg' width='280' height='170'><text x='140' y='95' text-anchor='middle' font-family='Arial Black, Arial' font-weight='900' font-size='34' fill='" +
+      (dark ? 'white' : '#1f2933') + "' fill-opacity='" + (dark ? '0.38' : '0.22') + "' stroke='" + (dark ? 'black' : 'white') + "' stroke-opacity='" + (dark ? '0.25' : '0.5') +
+      "' stroke-width='1' transform='rotate(-25 140 85)'>" + esc(t('wm')) + '</text></svg>';
+    document.getElementById('poster').style.setProperty('--wm', 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")');
+  }
+  function hex2(rgb) { return '#' + rgb.map(function (n) { return ('0' + n.toString(16)).slice(-2); }).join(''); }
+  function setTheme(th, force) {
+    if (!force && th === theme) return;
+    var prev = theme;
+    theme = th;
+    document.getElementById('poster').setAttribute('data-theme', th);
+    Array.prototype.forEach.call(document.querySelectorAll('.choice'), function (b) {
+      b.setAttribute('aria-pressed', b.getAttribute('data-theme') === th ? 'true' : 'false');
+    });
+    if (fogRGB.join() === FOG_DEF[prev].join()) fogRGB = FOG_DEF[th].slice();
+    document.getElementById('fogColor').value = hex2(fogRGB);
+    if (showFog) buildFog();
+    setWatermark();
+    loadMapStyle(th);
+    render();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.choice'), function (b) {
+    b.addEventListener('click', function () { setTheme(b.getAttribute('data-theme')); });
+  });
+
+  // ---- Schritte ----
+  var STEPS = 5, step = 1;
+  function buildProgress() {
+    var ol = document.getElementById('progress');
+    ol.innerHTML = '';
+    for (var i = 1; i <= STEPS; i++) (function (n) {
+      var li = document.createElement('li'), b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('aria-label', t('step.of', { n: n, m: STEPS }) + ': ' + t('sn' + n));
+      b.addEventListener('click', function () { goStep(n, true); });
+      li.appendChild(b);
+      ol.appendChild(li);
+    })(i);
+  }
+  function goStep(n, scroll) {
+    step = Math.max(1, Math.min(STEPS, n));
+    Array.prototype.forEach.call(document.querySelectorAll('.pane'), function (p) {
+      p.classList.toggle('show', +p.getAttribute('data-pane') === step);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('#progress li'), function (li, i) {
+      li.className = i + 1 < step ? 'done' : (i + 1 === step ? 'cur' : '');
+    });
+    document.getElementById('stepNo').textContent = t('step.of', { n: step, m: STEPS }) + ' · ' + t('sn' + step);
+    document.getElementById('backBtn').style.visibility = step === 1 ? 'hidden' : 'visible';
+    document.getElementById('nextBtn').style.display = step === STEPS ? 'none' : '';
+    if (step !== 4 && armed) setArmed(false);
+    status('');
+    if (scroll && window.innerWidth <= 860) {
+      var c = document.querySelector('.card');
+      var y = c.getBoundingClientRect().top + window.pageYOffset - (document.querySelector('.posterbox').offsetHeight + 66);
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    }
+  }
+  document.getElementById('backBtn').addEventListener('click', function () { goStep(step - 1, true); });
+  document.getElementById('nextBtn').addEventListener('click', function () {
+    var q = document.getElementById('q').value.trim();
+    if (step === 1 && q && q !== lastQuery) {
+      search().then(function (ok) { if (ok) goStep(2, true); });
+    } else goStep(step + 1, true);
+  });
+  document.getElementById('zoomIn').addEventListener('click', function () { map.zoomIn({ duration: 200 }); });
+  document.getElementById('zoomOut').addEventListener('click', function () { map.zoomOut({ duration: 200 }); });
+
+  // ---- Sprache anwenden ----
+  function qsa(s) { return Array.prototype.slice.call(document.querySelectorAll(s)); }
+  function applyLang() {
+    document.documentElement.lang = LANG;
+    document.title = LANG === 'en' ? 'Mein Revier – Your neighborhood as a poster' : 'Mein Revier – Dein Viertel als Poster';
+    qsa('[data-i18n]').forEach(function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
+    qsa('[data-i18n-html]').forEach(function (el) { el.innerHTML = t(el.getAttribute('data-i18n-html')); });
+    qsa('[data-i18n-ph]').forEach(function (el) { el.placeholder = t(el.getAttribute('data-i18n-ph')); });
+    document.getElementById('langDe').setAttribute('aria-pressed', LANG === 'de' ? 'true' : 'false');
+    document.getElementById('langEn').setAttribute('aria-pressed', LANG === 'en' ? 'true' : 'false');
+    document.getElementById('tileNote').textContent = MAPTILER_KEY ? t('tile.note') : t('tile.osm');
+    setWatermark();
+    buildPalette();
+    refreshList();
+    buildProgress();
+    goStep(step);
+    updateLockTxt();
+    scheduleMockups();
+  }
+  function setLang(l) {
+    LANG = l;
+    try { localStorage.setItem('revier-lang', l); } catch (e) {}
+    applyLang();
+  }
+  document.getElementById('langDe').addEventListener('click', function () { setLang('de'); });
+  document.getElementById('langEn').addEventListener('click', function () { setLang('en'); });
+
+  // Beispiel-Poster im Kopfbereich: zusätzlich in Hell zeigen
+  (function () {
+    var art = document.querySelector('.art-poster');
+    if (!art) return;
+    var c = art.cloneNode(true);
+    c.classList.add('light');
+    art.parentNode.insertBefore(c, art);
+  })();
+
+  // ---- Start ----
   var st0 = readHash();
+  resizeCanvas();
+  setTheme(st0 ? (st0.th === 'l' ? 'light' : 'dark') : DEFAULT_THEME, true);
+  applyLang();
+  setArmed(false);
   if (st0 && applyState(st0)) {
-    status('Design aus dem Link geladen.');
+    status(t('st.fromlink'));
   } else {
     setTitle('Berlin', 52.52, 13.405);
     render();
-    setTimeout(search, 200);
+    setTimeout(function () { search('Berlin', true); }, 200);
   }
 })();
 </script>
