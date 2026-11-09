@@ -85,27 +85,25 @@
   .tool { max-width:1160px; margin:0 auto; padding:8px clamp(12px,3vw,28px) 24px; scroll-margin-top:70px; }
   .stage { display:grid; grid-template-columns:auto minmax(320px,440px); gap:clamp(20px,3vw,44px); justify-content:center; align-items:start; }
   .posterbox { position:sticky; top:76px; }
-  .poster { position:relative; container-type:inline-size; width:min(46vw, calc((100vh - 130px) * 5 / 7), 540px); min-width:280px; aspect-ratio:5/7; border:8px solid #fff; background:#f1efe9; overflow:hidden; box-shadow:0 16px 44px rgba(90,55,10,.28); transition:border-color .2s; }
-  .poster[data-theme=dark] { border-color:#f3ead0; background:#1f2327; box-shadow:0 16px 44px rgba(0,0,0,.45); }
-  #map { position:absolute; inset:0; isolation:isolate; background:#f1efe9; }
-  .poster[data-theme=dark] #map { background:#1f2327; }
+  .poster { position:relative; container-type:inline-size; width:min(46vw, calc((100vh - 130px) * 5 / 7), 540px); min-width:280px; aspect-ratio:5/7; border:8px solid var(--pborder,#fff); background:var(--pbg,#f1efe9); overflow:hidden; box-shadow:0 16px 44px rgba(90,55,10,.28); transition:border-color .2s; }
+  .poster[data-theme=dark] { box-shadow:0 16px 44px rgba(0,0,0,.45); }
+  #map { position:absolute; inset:0; isolation:isolate; background:var(--pbg,#f1efe9); }
+  #mapFx { position:absolute; inset:0; width:100%; height:100%; z-index:2; pointer-events:none; display:none; }
+  .poster.fx #mapFx { display:block; }
+  #frameCv { position:absolute; inset:0; width:100%; height:100%; z-index:6; pointer-events:none; }
   #map canvas.maplibregl-canvas { outline:none; filter:saturate(.5); }
   .poster[data-theme=dark] #map canvas.maplibregl-canvas { filter:grayscale(1) brightness(1.7); }
   .poster[data-theme=dark] #map.osm canvas.maplibregl-canvas { filter:grayscale(1) contrast(1.1) brightness(.7); }
   #fog { position:absolute; inset:0; width:100%; height:100%; z-index:5; pointer-events:none; touch-action:none; }
   #selRing { position:absolute; z-index:6; pointer-events:none; border:3px dashed #fff; border-radius:50%; box-shadow:0 0 0 2px rgba(0,0,0,.55), 0 0 14px rgba(255,255,255,.35); transform:translate(-50%,-50%); }
   #selRing[hidden] { display:none; }
-  .legend { position:absolute; top:3cqw; right:0; z-index:7; display:flex; flex-direction:column; align-items:flex-end; gap:.7cqw; pointer-events:none; }
-  .legend .row { display:flex; align-items:center; gap:1.4cqw; background:rgba(255,255,255,.9); color:#1d2530; padding:.6cqw 1.6cqw .6cqw 2.4cqw; font-size:2.5cqw; font-weight:700; line-height:1; white-space:nowrap; box-shadow:0 .3cqw 1cqw rgba(0,0,0,.12); }
-  .poster[data-theme=dark] .legend .row { background:rgba(0,0,0,.74); color:#fff; box-shadow:none; }
+  .legend { position:absolute; top:calc(var(--m,0px) + 3cqw); right:var(--m,0px); z-index:7; display:flex; flex-direction:column; align-items:flex-end; gap:.7cqw; pointer-events:none; }
+  .legend .row { display:flex; align-items:center; gap:1.4cqw; background:var(--lgbg,rgba(255,255,255,.92)); color:var(--lgfg,#1d2530); border-radius:var(--lgr,0); box-shadow:inset 0 0 0 .25cqw var(--lgbd,transparent); padding:.6cqw 1.6cqw .6cqw 2.4cqw; font-size:2.5cqw; font-weight:700; line-height:1; white-space:nowrap; }
   .legend .row svg { width:3.6cqw; height:3.6cqw; display:block; }
-  .titlebar { position:absolute; left:0; right:0; bottom:0; z-index:8; padding:14cqw 4cqw 4cqw; text-align:center; background:linear-gradient(to top, rgba(255,255,255,.95) 35%, rgba(255,255,255,0)); pointer-events:none; }
-  .poster[data-theme=dark] .titlebar { background:linear-gradient(to top, rgba(0,0,0,.92) 35%, rgba(0,0,0,0)); }
-  .titlebar h2 { margin:0; font-family:Impact, "Arial Black", "Helvetica Neue", sans-serif; font-weight:900; text-transform:uppercase; letter-spacing:.03em; line-height:1; font-size:calc(11cqw * var(--f, 1)); color:#1f2933;
-                 text-shadow:-.35cqw -.35cqw 0 #fff, .35cqw -.35cqw 0 #fff, -.35cqw .35cqw 0 #fff, .35cqw .35cqw 0 #fff, 0 .8cqw 0 #fff; }
-  .poster[data-theme=dark] .titlebar h2 { color:#f3ead0; text-shadow:-.35cqw -.35cqw 0 #000, .35cqw -.35cqw 0 #000, -.35cqw .35cqw 0 #000, .35cqw .35cqw 0 #000, 0 .8cqw 0 #000; }
-  .titlebar p { margin:1.5cqw 0 0; font-size:2.6cqw; letter-spacing:.35em; color:#5b6670; text-transform:uppercase; }
-  .poster[data-theme=dark] .titlebar p { color:#c9bf9f; }
+  .titlebar { position:absolute; left:var(--m,0px); right:var(--m,0px); bottom:var(--m,0px); z-index:8; padding:14cqw 4cqw 4cqw; text-align:center; background:linear-gradient(to top, rgba(var(--tg,255,255,255),var(--tga,.95)) 35%, rgba(var(--tg,255,255,255),0)); pointer-events:none; }
+  .titlebar h2 { margin:0; font-family:var(--tfam,Impact, "Arial Black", "Helvetica Neue", sans-serif); font-style:var(--tst,normal); font-weight:900; text-transform:uppercase; letter-spacing:.03em; line-height:1; font-size:calc(11cqw * var(--f, 1) * var(--tk, 1)); color:var(--tfill,#1f2933);
+                 text-shadow:var(--tsh,none); }
+  .titlebar p { margin:1.5cqw 0 0; font-size:2.6cqw; letter-spacing:.35em; color:var(--tsub,#5b6670); text-transform:uppercase; }
   .watermark { position:absolute; inset:0; z-index:9; pointer-events:none; background-image:var(--wm); }
   .lockbadge { position:absolute; top:3cqw; left:3cqw; z-index:10; width:8cqw; height:8cqw; display:none; place-items:center; border-radius:50%; background:rgba(0,0,0,.72); color:#fff; pointer-events:none; }
   .lockbadge svg { width:55%; height:55%; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
@@ -130,14 +128,21 @@
   .zoomrow span { color:var(--muted); font-weight:600; font-size:15px; }
   .field { display:block; margin-bottom:14px; }
   .field > span { display:block; font-weight:800; font-size:14px; margin-bottom:6px; }
-  .choices { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
-  .choice { border:3px solid var(--line); border-radius:18px; background:#fff; padding:8px 8px 10px; text-align:center; font-weight:800; }
+  .choices { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
+  @media (max-width:520px) { .choices { grid-template-columns:1fr 1fr; } }
+  .choice { border:3px solid var(--line); border-radius:18px; background:#fff; padding:6px 6px 8px; text-align:center; font-weight:800; font-size:14px; line-height:1.2; }
   .choice small { display:block; font-weight:600; color:var(--muted); font-size:13px; }
   .choice[aria-pressed=true] { border-color:var(--brand); box-shadow:0 0 0 4px var(--ring); }
-  .choice .sw { display:block; height:54px; border-radius:12px; margin-bottom:8px; position:relative; overflow:hidden; }
+  .choice .sw { display:block; height:44px; border-radius:12px; margin-bottom:8px; position:relative; overflow:hidden; }
   .choice .sw.l { background:linear-gradient(135deg,#f6f3ea 0 55%,#cfe6f3 55% 70%,#f6f3ea 70%); }
   .choice .sw.d { background:linear-gradient(135deg,#2b3036 0 55%,#1b2a38 55% 70%,#2b3036 70%); }
   .choice .sw::after { content:''; position:absolute; left:0; right:0; bottom:0; height:40%; }
+  .choice .sw.g::after { display:none; }
+  .choice .sw.neon { background:linear-gradient(160deg,#2a0f5c,#ff3d9a 55%,#ff9a3d); }
+  .choice .sw.block { background:radial-gradient(circle at 25% 30%,#7fa6ff 0 12%,transparent 13%),radial-gradient(circle at 70% 65%,#7fa6ff 0 12%,transparent 13%),#2457d6; }
+  .choice .sw.battle { background:linear-gradient(135deg,#1b1160 0 40%,#6ed84f 40% 60%,#2fb0ea 60%); }
+  .choice .sw.cozy { background:linear-gradient(135deg,#fff7de 0 40%,#b9ecf5 40% 62%,#c9efb4 62%); }
+  .choice .sw.adventure { background:linear-gradient(135deg,#f3e6bf 0 45%,#b58a55 45% 55%,#e9d3a1 55%); }
   .choice .sw.l::after { background:linear-gradient(to top,#fff,rgba(255,255,255,0)); }
   .choice .sw.d::after { background:linear-gradient(to top,#000,rgba(0,0,0,0)); }
   .switch { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-top:1px solid #f3eadb; cursor:pointer; user-select:none; font-weight:700; }
@@ -184,7 +189,7 @@
   .ownertools[hidden] { display:none !important; }
   .ownertools { margin-top:14px; padding-top:12px; border-top:1px dashed var(--line); }
   .ownertools .btn { width:100%; font-size:14px; }
-  body.locked .pane:not([data-pane="5"]) { opacity:.5; pointer-events:none; }
+  #zoomIn:disabled, #zoomOut:disabled { opacity:.4; }
 
   @media (max-width:860px) {
     .stage { grid-template-columns:1fr; justify-items:center; gap:14px; }
@@ -287,7 +292,9 @@
     <div class="posterbox">
       <div class="poster" id="poster" data-theme="light">
         <div id="map"></div>
+        <canvas id="mapFx"></canvas>
         <canvas id="fog"></canvas>
+        <canvas id="frameCv"></canvas>
         <div id="selRing" hidden></div>
         <div class="legend" id="legend"></div>
         <div class="titlebar"><h2 id="title">BERLIN</h2><p id="coords"></p></div>
@@ -317,6 +324,7 @@
           <button type="button" class="btn" id="zoomOut" aria-label="Zoom −">−</button>
           <span data-i18n="s2.z">Oder mit zwei Fingern / Mausrad</span>
         </div>
+        <label class="switch"><span data-i18n="s2.lock">Ausschnitt fixieren</span><input type="checkbox" id="viewLock"><span class="track"></span></label>
         <label class="switch"><span data-i18n="s2.places">Ortsnamen</span><input type="checkbox" id="tPlaces" checked><span class="track"></span></label>
         <label class="switch"><span data-i18n="s2.streets">Straßennamen</span><input type="checkbox" id="tStreets"><span class="track"></span></label>
       </div>
@@ -327,6 +335,11 @@
         <div class="choices" role="group">
           <button type="button" class="choice" data-theme="light" aria-pressed="true"><span class="sw l"></span><span data-i18n="s3.light">Hell</span><small data-i18n="s3.lightS">Freundlich</small></button>
           <button type="button" class="choice" data-theme="dark" aria-pressed="false"><span class="sw d"></span><span data-i18n="s3.dark">Dunkel</span><small data-i18n="s3.darkS">Gamer-Look</small></button>
+          <button type="button" class="choice" data-theme="neon" aria-pressed="false"><span class="sw g neon"></span><span data-i18n="s3.neon">neon</span><small data-i18n="s3.neonS">neon</small></button>
+          <button type="button" class="choice" data-theme="block" aria-pressed="false"><span class="sw g block"></span><span data-i18n="s3.block">block</span><small data-i18n="s3.blockS">block</small></button>
+          <button type="button" class="choice" data-theme="battle" aria-pressed="false"><span class="sw g battle"></span><span data-i18n="s3.battle">battle</span><small data-i18n="s3.battleS">battle</small></button>
+          <button type="button" class="choice" data-theme="cozy" aria-pressed="false"><span class="sw g cozy"></span><span data-i18n="s3.cozy">cozy</span><small data-i18n="s3.cozyS">cozy</small></button>
+          <button type="button" class="choice" data-theme="adventure" aria-pressed="false"><span class="sw g adventure"></span><span data-i18n="s3.adventure">adventure</span><small data-i18n="s3.adventureS">adventure</small></button>
         </div>
         <label class="switch"><span data-i18n="s3.cross">Fadenkreuz</span><input type="checkbox" id="optCross" checked><span class="track"></span></label>
         <label class="switch"><span data-i18n="s3.legend">Legende</span><input type="checkbox" id="optLegend" checked><span class="track"></span></label>
@@ -362,11 +375,6 @@
         <div class="finish">
           <button type="button" class="btn primary" id="submitBtn" data-i18n="s5.submit">Design einreichen</button>
           <button type="button" class="btn" id="shareBtn" data-i18n="s5.share">Link speichern</button>
-          <button type="button" class="btn ghost lockbtn" id="lockBtn" aria-pressed="false">
-            <svg class="lk-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>
-            <svg class="lk-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-            <span id="lockTxt">Sperren</span>
-          </button>
         </div>
         <p class="note" data-i18n="s5.note">Reiche dein Design mit deiner Etsy-Bestellnummer ein. Wir schicken dir die Datei über Etsy.</p>
         <span id="ownerTools" class="ownertools" hidden>
@@ -439,10 +447,12 @@
       'hero.c1': 'Ort suchen', 'hero.c2': 'Orte markieren', 'hero.c3': 'Poster erhalten', 'hero.cta': 'Los geht’s',
       'art.l1': 'Mein Zuhause', 'art.l2': 'Felix Haus', 'art.l3': 'TSV Fußball', 'art.l4': 'Unser See', 'art.title': 'DEIN VIERTEL',
       's1.h': 'Wähle deinen Ort', 's1.p': 'Stadt, Ort oder Postleitzahl', 's1.ph': 'z. B. 40213 oder Düsseldorf', 's1.go': 'Karte laden',
-      's2.h': 'Ausschnitt wählen', 's2.p': 'Zieh die Karte und zoome, bis dein Viertel passt.', 's2.z': 'Oder mit zwei Fingern / Mausrad',
+      's2.h': 'Ausschnitt wählen', 's2.p': 'Zieh die Karte und zoome, bis dein Viertel passt. Mit „Weiter“ wird der Ausschnitt fixiert.', 's2.z': 'Oder mit zwei Fingern / Mausrad', 's2.lock': 'Ausschnitt fixieren',
       's2.places': 'Ortsnamen', 's2.streets': 'Straßennamen',
       's3.h': 'Titel & Stil', 's3.title': 'Titel auf dem Poster', 's3.ph': 'z. B. Düsseldorf',
       's3.light': 'Hell', 's3.lightS': 'Freundlich', 's3.dark': 'Dunkel', 's3.darkS': 'Gamer-Look',
+      's3.neon': 'Neon-Küste', 's3.neonS': 'Sonnenuntergang', 's3.block': 'Blockwelt', 's3.blockS': 'Bunte Bausteine', 's3.battle': 'Battle-Insel', 's3.battleS': 'Mit Koordinaten',
+      's3.cozy': 'Gemütliche Insel', 's3.cozyS': 'Pastell', 's3.adventure': 'Abenteuer', 's3.adventureS': 'Schatzkarte',
       's3.cross': 'Fadenkreuz', 's3.legend': 'Legende', 's3.fog': 'Weicher Rand', 's3.more': 'Rand feiner einstellen',
       's3.f1': 'Stärke', 's3.f2': 'Weichheit', 's3.f3': 'Struktur', 's3.f4': 'Deckkraft', 's3.f5': 'Farbe',
       's4.h': 'Deine Orte', 's4.p': 'Tipp ein Symbol an, dann auf die Karte.', 's4.letters': 'Buchstaben (z. B. für Freunde)',
@@ -474,7 +484,7 @@
       'st.arm': 'Tipp auf die Karte, um "{x}" zu setzen. Das Symbol nochmal antippen beendet das Setzen.',
       'st.placed': 'Gesetzt! Gib dem Ort unten einen Namen, dann erscheint er in der Legende. Zum Verschieben antippen und ziehen.',
       'st.fromlink': 'Design aus dem Link geladen.',
-      'st.locked': 'Gesperrt. Zum Weiterbearbeiten entsperren.', 'st.unlocked': 'Entsperrt. Du kannst weiter bearbeiten.',
+      'st.locked': 'Ausschnitt fixiert. Die Karte lässt sich nicht mehr verschieben oder zoomen.', 'st.unlocked': 'Ausschnitt wieder frei.',
       'st.nolabels': 'Für diesen Kartenstil wurden keine {x} gefunden.',
       'err.tiles': 'Kartendaten konnten nicht geladen werden (Fehler {s}). Key und Internetverbindung prüfen.',
       'err.style': 'Kartenstil konnte nicht geladen werden. Key, Kartenstil und Internetverbindung prüfen.',
@@ -486,10 +496,12 @@
       'hero.c1': 'Find your place', 'hero.c2': 'Mark your spots', 'hero.c3': 'Get your poster', 'hero.cta': 'Let’s go',
       'art.l1': 'My home', 'art.l2': 'Felix’s house', 'art.l3': 'Football club', 'art.l4': 'Our lake', 'art.title': 'YOUR HOOD',
       's1.h': 'Choose your place', 's1.p': 'City, town or postcode', 's1.ph': 'e.g. Berlin or 10115', 's1.go': 'Load map',
-      's2.h': 'Frame your map', 's2.p': 'Drag and zoom until your area fits.', 's2.z': 'Or pinch with two fingers / mouse wheel',
+      's2.h': 'Frame your map', 's2.p': 'Drag and zoom until your area fits. Tapping “Next” locks the view.', 's2.z': 'Or pinch with two fingers / mouse wheel', 's2.lock': 'Lock the view',
       's2.places': 'Place names', 's2.streets': 'Street names',
       's3.h': 'Title & style', 's3.title': 'Poster title', 's3.ph': 'e.g. Berlin',
       's3.light': 'Light', 's3.lightS': 'Friendly', 's3.dark': 'Dark', 's3.darkS': 'Gamer look',
+      's3.neon': 'Neon Coast', 's3.neonS': 'Sunset', 's3.block': 'Block World', 's3.blockS': 'Colorful bricks', 's3.battle': 'Battle Island', 's3.battleS': 'With grid',
+      's3.cozy': 'Cozy Island', 's3.cozyS': 'Pastel', 's3.adventure': 'Adventure', 's3.adventureS': 'Treasure map',
       's3.cross': 'Crosshair', 's3.legend': 'Legend', 's3.fog': 'Soft edge', 's3.more': 'Fine-tune the edge',
       's3.f1': 'Strength', 's3.f2': 'Softness', 's3.f3': 'Texture', 's3.f4': 'Opacity', 's3.f5': 'Color',
       's4.h': 'Your places', 's4.p': 'Tap an icon, then tap the map.', 's4.letters': 'Letters (e.g. for friends)',
@@ -521,7 +533,7 @@
       'st.arm': 'Tap the map to place "{x}". Tap the icon again to stop placing.',
       'st.placed': 'Placed! Give it a name below and it shows up in the legend. Tap and drag to move it.',
       'st.fromlink': 'Design loaded from the link.',
-      'st.locked': 'Locked. Unlock to keep editing.', 'st.unlocked': 'Unlocked. You can keep editing.',
+      'st.locked': 'View locked. The map can no longer be moved or zoomed.', 'st.unlocked': 'View unlocked.',
       'st.nolabels': 'No {x} found for this map style.',
       'err.tiles': 'Map data could not be loaded (error {s}). Check key and internet connection.',
       'err.style': 'Map style could not be loaded. Check key, map style and internet connection.',
@@ -543,9 +555,199 @@
   }
   // ---- Poster-Stil (Hell / Dunkel) ----
   var theme = 'light';
-  var FOG_DEF = { dark: [10, 12, 14], light: [243, 240, 232] };
-  var LIGHT_SAT = 0.5;   // wie bunt die helle Karte bleibt (0 = grau, 1 = volle Farben)
-  function badgeStroke() { return theme === 'dark' ? '#111' : '#fff'; }
+  var LIGHT_SAT = 0.5;   // wie bunt der helle Stil bleibt (0 = grau, 1 = volle Farben)
+  var FAM_IMPACT = 'Impact, "Arial Black", "Helvetica Neue", sans-serif';
+  // Jeder Stil: Kartenbasis (hell/dunkel), Umfärbung der Karte (map), Rahmen (frame), Legende, Titel, Icon-Form, Wasserzeichen.
+  // Die Spiele-Stile sind nur "im Geist" von Spielekarten gestaltet: eigene Farben und Formen, keine Originalgrafiken.
+  var THEMES = {
+    light: { base: 'light', fog: [243, 240, 232], bg: '#f1efe9', border: '#ffffff', frame: null, map: null,
+      legend: { bg: 'rgba(255,255,255,.92)', fg: '#1d2530', r: 0, bd: '' },
+      title: { fill: '#1f2933', out: '#ffffff', sub: '#5b6670', grad: '255,255,255', ga: 0.95, fam: FAM_IMPACT, st: '', glow: '' },
+      cross: { c: 'rgba(30,37,48,0.85)', sh: 'rgba(255,255,255,.9)' },
+      badge: { stroke: '#ffffff', shape: 'circle', mixTo: '#ffffff', mixA: 0, glow: '' },
+      attr: 'rgba(70,75,80,.85)', wm: { f: '31,41,51', fa: 0.22, s: '255,255,255', sa: 0.5 } },
+    dark: { base: 'dark', fog: [10, 12, 14], bg: '#1f2327', border: '#f3ead0', frame: null, map: null,
+      legend: { bg: 'rgba(0,0,0,.74)', fg: '#ffffff', r: 0, bd: '' },
+      title: { fill: '#f3ead0', out: '#000000', sub: '#c9bf9f', grad: '0,0,0', ga: 0.92, fam: FAM_IMPACT, st: '', glow: '' },
+      cross: { c: 'rgba(255,255,255,0.92)', sh: 'rgba(0,0,0,.7)' },
+      badge: { stroke: '#111111', shape: 'circle', mixTo: '#ffffff', mixA: 0, glow: '' },
+      attr: 'rgba(100,103,107,.9)', wm: { f: '255,255,255', fa: 0.38, s: '0,0,0', sa: 0.25 } },
+    neon: { base: 'dark', fog: [42, 15, 92], bg: '#1b0f3a', border: '#ff5fae',
+      map: { pixel: 0, water: ['#06384a', '#1fd3c8'], green: ['#2a1166', '#7a3fd0'], land: ['#1a0a46', '#c42f8f', '#ffb04a'] },
+      frame: { type: 'neon', m: 6, r: 1.2 },
+      legend: { bg: 'rgba(26,10,70,.84)', fg: '#ffffff', r: 0.8, bd: '#ff4fa3' },
+      title: { fill: '#ffffff', out: '#ff2f92', sub: '#ffd2ea', grad: '32,10,84', ga: 0.9, fam: FAM_IMPACT, st: 'italic ', glow: '#ff2f92' },
+      cross: { c: 'rgba(255,255,255,.95)', sh: 'rgba(255,47,146,.9)' },
+      badge: { stroke: '#ffffff', shape: 'circle', mixTo: '#ffffff', mixA: 0.1, glow: '#ff4fa3' },
+      attr: 'rgba(255,255,255,.75)', wm: { f: '255,255,255', fa: 0.34, s: '255,47,146', sa: 0.3 } },
+    block: { base: 'light', fog: [236, 232, 222], bg: '#bfe0ff', border: '#2457d6',
+      map: { pixel: 56, water: ['#4aa3ff', '#8ccaff'], green: ['#46b950', '#86e06f'], land: ['#c8c3b8', '#faf7ef'] },
+      frame: { type: 'block', m: 6, r: 0 },
+      legend: { bg: 'rgba(255,255,255,.95)', fg: '#10265e', r: 0, bd: '#2457d6' },
+      title: { fill: '#ffffff', out: '#10265e', sub: '#ffffff', grad: '36,87,214', ga: 0.92, fam: FAM_IMPACT, st: '', glow: '' },
+      cross: { c: 'rgba(16,38,94,.9)', sh: 'rgba(255,255,255,.9)' },
+      badge: { stroke: '#10265e', shape: 'square', mixTo: '#ffffff', mixA: 0, glow: '' },
+      attr: 'rgba(255,255,255,.8)', wm: { f: '16,38,94', fa: 0.25, s: '255,255,255', sa: 0.5 } },
+    battle: { base: 'light', fog: [230, 218, 172], bg: '#d9c58f', border: '#ffe14d',
+      map: { pixel: 0, water: ['#2fb0ea', '#79d6ff'], green: ['#5ed04a', '#a8ee5f'], land: ['#d6c07e', '#f8edc4'] },
+      frame: { type: 'battle', m: 6, r: 0 },
+      legend: { bg: 'rgba(27,17,96,.9)', fg: '#ffffff', r: 0, bd: '#ffe14d' },
+      title: { fill: '#ffe14d', out: '#1b1160', sub: '#ffffff', grad: '27,17,96', ga: 0.92, fam: FAM_IMPACT, st: 'italic ', glow: '' },
+      cross: { c: 'rgba(255,255,255,.95)', sh: 'rgba(27,17,96,.8)' },
+      badge: { stroke: '#1b1160', shape: 'hex', mixTo: '#ffffff', mixA: 0, glow: '' },
+      attr: 'rgba(255,255,255,.75)', wm: { f: '27,17,96', fa: 0.26, s: '255,255,255', sa: 0.5 } },
+    cozy: { base: 'light', fog: [250, 240, 214], bg: '#fbf3dc', border: '#fff6e0',
+      map: { pixel: 0, water: ['#86cfe6', '#b9ecf5'], green: ['#96d687', '#c9efb4'], land: ['#ecdcb2', '#fff7de'] },
+      frame: { type: 'cozy', m: 6.5, r: 0 },
+      legend: { bg: 'rgba(255,250,236,.95)', fg: '#5a4632', r: 1.2, bd: '#8fd3a8' },
+      title: { fill: '#5a4632', out: '#fff6e0', sub: '#7a6a55', grad: '255,246,224', ga: 0.95, fam: 'Nunito, "Arial Rounded MT Bold", Arial, sans-serif', st: '', glow: '' },
+      cross: { c: 'rgba(90,70,50,.8)', sh: 'rgba(255,246,224,.9)' },
+      badge: { stroke: '#fff6e0', shape: 'circle', mixTo: '#ffffff', mixA: 0.28, glow: '' },
+      attr: 'rgba(90,70,50,.7)', wm: { f: '90,70,50', fa: 0.2, s: '255,255,255', sa: 0.5 } },
+    adventure: { base: 'light', fog: [236, 220, 178], bg: '#ecdcb2', border: '#5a3a1a',
+      map: { pixel: 0, water: ['#7fa6a0', '#b3cfc6'], green: ['#a4ae72', '#cbd29a'], land: ['#6f4520', '#b58a55', '#f3e6bf'] },
+      frame: { type: 'adventure', m: 6, r: 0 },
+      legend: { bg: 'rgba(243,230,191,.94)', fg: '#3d2410', r: 0, bd: '#5a3a1a' },
+      title: { fill: '#3d2410', out: '#f3e6bf', sub: '#5a3a1a', grad: '233,211,161', ga: 0.95, fam: 'Georgia, "Palatino Linotype", serif', st: 'italic ', glow: '' },
+      cross: { c: 'rgba(61,36,16,.85)', sh: 'rgba(243,230,191,.9)' },
+      badge: { stroke: '#3d2410', shape: 'circle', mixTo: '#f3e6bf', mixA: 0.15, glow: '' },
+      attr: 'rgba(61,36,16,.7)', wm: { f: '61,36,16', fa: 0.2, s: '243,230,191', sa: 0.5 } }
+  };
+  function TH() { return THEMES[theme]; }
+  function badgeStroke() { return THEMES[theme].badge.stroke; }
+  function themeCode(th) { return th === 'light' ? 'l' : (th === 'dark' ? 'd' : th); }
+  function themeFromCode(c) { return c === 'l' ? 'light' : (typeof c === 'string' && Object.prototype.hasOwnProperty.call(THEMES, c) ? c : 'dark'); }
+  function rgbOf(h) { return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; }
+  function mixHex(a, b, k) {
+    var x = rgbOf(a), y = rgbOf(b);
+    return '#' + [0, 1, 2].map(function (i) { return ('0' + Math.round(x[i] + (y[i] - x[i]) * k).toString(16)).slice(-2); }).join('');
+  }
+  function badgeFill(col) { var b = THEMES[theme].badge; return b.mixA ? mixHex(col, b.mixTo, b.mixA) : col; }
+  // Form der Icon-Badges (Kreis, Quadrat, Sechseck) auf dem Zeichen-Canvas, Mittelpunkt im Ursprung, Radius s
+  function badgePath(g, s, shape) {
+    g.beginPath();
+    if (shape === 'square') {
+      var r = s * 0.3, a = s * 0.92;
+      g.moveTo(-a + r, -a); g.arcTo(a, -a, a, a, r); g.arcTo(a, a, -a, a, r); g.arcTo(-a, a, -a, -a, r); g.arcTo(-a, -a, a, -a, r); g.closePath();
+    } else if (shape === 'hex') {
+      for (var i = 0; i < 6; i++) { var an = Math.PI / 3 * i - Math.PI / 2; g[i ? 'lineTo' : 'moveTo'](Math.cos(an) * s * 1.08, Math.sin(an) * s * 1.08); }
+      g.closePath();
+    } else g.arc(0, 0, s, 0, Math.PI * 2);
+  }
+
+  // ---- Karte umfärben (Spiele-Stile): Wasser, Grün und Land bekommen je einen eigenen Farbverlauf ----
+  function stopsLUT(stops) {
+    var st = stops.map(rgbOf), out = new Uint8ClampedArray(256 * 3);
+    for (var i = 0; i < 256; i++) {
+      var t = i / 255 * (st.length - 1), k = Math.min(st.length - 2, Math.floor(t)), f = t - k;
+      for (var c = 0; c < 3; c++) out[i * 3 + c] = st[k][c] + (st[k + 1][c] - st[k][c]) * f;
+    }
+    return out;
+  }
+  function tintMap(g, W, H, M, base) {
+    if (M.pixel) {   // Blockoptik: Karte grob verpixeln
+      var bw = M.pixel, bh = Math.max(1, Math.round(bw * H / W)), tc = document.createElement('canvas');
+      tc.width = bw; tc.height = bh;
+      var tg = tc.getContext('2d');
+      tg.imageSmoothingEnabled = true;
+      tg.drawImage(g.canvas, 0, 0, W, H, 0, 0, bw, bh);
+      g.imageSmoothingEnabled = false;
+      g.drawImage(tc, 0, 0, bw, bh, 0, 0, W, H);
+      g.imageSmoothingEnabled = true;
+    }
+    var im = g.getImageData(0, 0, W, H), d = im.data;
+    var LW = stopsLUT(M.water), LG = stopsLUT(M.green), LL = stopsLUT(M.land), dk = base === 'dark';
+    for (var i = 0; i < d.length; i += 4) {
+      var r = d[i], gg = d[i + 1], b = d[i + 2];
+      var lum = 0.2126 * r + 0.7152 * gg + 0.0722 * b;
+      var t = dk ? lum / 115 : (lum - 153) / 102;
+      var ti = t <= 0 ? 0 : (t >= 1 ? 255 : (t * 255) | 0);
+      var L = (b > r + 16 && b > gg + 5) ? LW : ((gg > r + 6 && gg > b + 4) ? LG : LL);
+      d[i] = L[ti * 3]; d[i + 1] = L[ti * 3 + 1]; d[i + 2] = L[ti * 3 + 2];
+    }
+    g.putImageData(im, 0, 0);
+  }
+
+  // ---- Rahmen um die Karte (verdeckt den Rand, die Seiten bleiben nicht leer) ----
+  function rrSub(g, x, y, w, h, r) {
+    if (!r) { g.rect(x, y, w, h); return; }
+    g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
+  }
+  function dia(g, cx, cy, q) { g.beginPath(); g.moveTo(cx, cy - q); g.lineTo(cx + q, cy); g.lineTo(cx, cy + q); g.lineTo(cx - q, cy); g.closePath(); g.fill(); }
+  function drawFrame(g, W, H, cw, F) {
+    if (!F) return;
+    var m = F.m * cw, r = (F.r || 0) * cw, iw = W - 2 * m, ih = H - 2 * m, x, y, k, lg, TAU = Math.PI * 2;
+    g.save();
+    g.beginPath(); g.rect(0, 0, W, H); rrSub(g, m, m, iw, ih, r);
+    g.clip('evenodd');
+    if (F.type === 'neon') {
+      lg = g.createLinearGradient(0, 0, 0, H); lg.addColorStop(0, '#2a0f5c'); lg.addColorStop(0.5, '#ff3d9a'); lg.addColorStop(1, '#ff9a3d');
+      g.fillStyle = lg; g.fillRect(0, 0, W, H);
+      g.strokeStyle = 'rgba(255,255,255,.13)'; g.lineWidth = 0.5 * cw;
+      for (x = -H; x < W; x += 2.4 * cw) { g.beginPath(); g.moveTo(x, H); g.lineTo(x + H, 0); g.stroke(); }
+    } else if (F.type === 'block') {
+      g.fillStyle = '#2457d6'; g.fillRect(0, 0, W, H);
+      for (y = 1.5 * cw; y < H; y += 3 * cw) for (x = 1.5 * cw; x < W; x += 3 * cw) {
+        g.fillStyle = '#163a96'; g.beginPath(); g.arc(x, y + 0.22 * cw, 1.05 * cw, 0, TAU); g.fill();
+        g.fillStyle = '#4f86ff'; g.beginPath(); g.arc(x, y, 1.05 * cw, 0, TAU); g.fill();
+        g.fillStyle = 'rgba(255,255,255,.35)'; g.beginPath(); g.arc(x - 0.3 * cw, y - 0.3 * cw, 0.35 * cw, 0, TAU); g.fill();
+      }
+    } else if (F.type === 'battle') {
+      lg = g.createLinearGradient(0, 0, W, H); lg.addColorStop(0, '#1b1160'); lg.addColorStop(1, '#4a2bd4');
+      g.fillStyle = lg; g.fillRect(0, 0, W, H);
+      g.fillStyle = 'rgba(255,225,77,.16)';
+      for (x = -H; x < W; x += 5 * cw) { g.beginPath(); g.moveTo(x, H); g.lineTo(x + 1.6 * cw, H); g.lineTo(x + H + 1.6 * cw, 0); g.lineTo(x + H, 0); g.closePath(); g.fill(); }
+    } else if (F.type === 'cozy') {
+      g.fillStyle = '#a9dcb6'; g.fillRect(0, 0, W, H);
+      var row = 0;
+      for (y = 1.6 * cw; y < H; y += 3.2 * cw, row++) for (x = (row % 2 ? 3.2 : 1.6) * cw; x < W; x += 3.2 * cw) {
+        g.fillStyle = 'rgba(255,255,255,.8)';
+        for (k = 0; k < 5; k++) { var an = TAU / 5 * k; g.beginPath(); g.arc(x + Math.cos(an) * 0.55 * cw, y + Math.sin(an) * 0.55 * cw, 0.42 * cw, 0, TAU); g.fill(); }
+        g.fillStyle = '#ffd35c'; g.beginPath(); g.arc(x, y, 0.3 * cw, 0, TAU); g.fill();
+      }
+    } else {   // adventure
+      g.fillStyle = '#e9d3a1'; g.fillRect(0, 0, W, H);
+      g.fillStyle = 'rgba(122,74,31,.55)';
+      for (x = 2 * cw; x < W; x += 2.6 * cw) { dia(g, x, m / 2, 0.75 * cw); dia(g, x, H - m / 2, 0.75 * cw); }
+      for (y = 2 * cw; y < H; y += 2.6 * cw) { dia(g, m / 2, y, 0.75 * cw); dia(g, W - m / 2, y, 0.75 * cw); }
+    }
+    g.restore();
+    g.save();
+    if (F.type === 'neon') {
+      g.shadowColor = '#ff3d9a'; g.shadowBlur = 1.8 * cw; g.strokeStyle = '#ffffff'; g.lineWidth = 0.5 * cw;
+      g.beginPath(); rrSub(g, m, m, iw, ih, r); g.stroke();
+      g.shadowColor = 'transparent'; g.strokeStyle = 'rgba(255,255,255,.75)'; g.lineWidth = 0.25 * cw;
+      g.strokeRect(0.9 * cw, 0.9 * cw, W - 1.8 * cw, H - 1.8 * cw);
+    } else if (F.type === 'block') {
+      g.strokeStyle = '#10265e'; g.lineWidth = 0.9 * cw; g.strokeRect(m, m, iw, ih);
+      g.lineWidth = 1.2 * cw; g.strokeRect(0.6 * cw, 0.6 * cw, W - 1.2 * cw, H - 1.2 * cw);
+    } else if (F.type === 'battle') {
+      var cell = iw / 10, i, rows = 0;
+      g.strokeStyle = 'rgba(255,255,255,.32)'; g.lineWidth = 0.15 * cw;
+      g.beginPath();
+      for (i = 1; i < 10; i++) { g.moveTo(m + cell * i, m); g.lineTo(m + cell * i, H - m); }
+      for (y = m + cell; y < H - m; y += cell) { g.moveTo(m, y); g.lineTo(W - m, y); }
+      g.stroke();
+      g.strokeStyle = '#ffe14d'; g.lineWidth = 0.8 * cw; g.strokeRect(m, m, iw, ih);
+      g.font = '800 ' + (2.3 * cw) + 'px Nunito, Inter, Arial, sans-serif'; g.fillStyle = '#ffe14d'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      for (i = 0; i < 10; i++) g.fillText('ABCDEFGHIJ'.charAt(i), m + cell * (i + 0.5), m / 2);
+      for (y = m + cell / 2; y < H - m - cell / 2 + 0.01; y += cell) { rows++; g.fillText(String(rows), m / 2, y); }
+    } else if (F.type === 'cozy') {
+      g.fillStyle = '#fff6e0';
+      for (x = m + 1.1 * cw; x < W - m; x += 2.2 * cw) { g.beginPath(); g.arc(x, m, 1.15 * cw, 0, TAU); g.fill(); g.beginPath(); g.arc(x, H - m, 1.15 * cw, 0, TAU); g.fill(); }
+      for (y = m + 1.1 * cw; y < H - m; y += 2.2 * cw) { g.beginPath(); g.arc(m, y, 1.15 * cw, 0, TAU); g.fill(); g.beginPath(); g.arc(W - m, y, 1.15 * cw, 0, TAU); g.fill(); }
+      g.strokeStyle = '#fff6e0'; g.lineWidth = 0.9 * cw; g.strokeRect(0.45 * cw, 0.45 * cw, W - 0.9 * cw, H - 0.9 * cw);
+    } else {
+      g.strokeStyle = '#5a3a1a'; g.lineWidth = 0.55 * cw; g.strokeRect(m, m, iw, ih);
+      g.lineWidth = 0.3 * cw; g.strokeRect(1 * cw, 1 * cw, W - 2 * cw, H - 2 * cw);
+      g.fillStyle = '#5a3a1a';
+      [[m / 2, m / 2], [W - m / 2, m / 2], [m / 2, H - m / 2], [W - m / 2, H - m / 2]].forEach(function (p) {
+        g.beginPath(); g.arc(p[0], p[1], 1.3 * cw, 0, TAU); g.fill();
+        g.fillStyle = '#e9d3a1'; g.beginPath(); g.arc(p[0], p[1], 0.65 * cw, 0, TAU); g.fill(); g.fillStyle = '#5a3a1a';
+      });
+    }
+    g.restore();
+  }
 
   // ---- Rauch von außen: Nebel am Posterrand, unabhängig von der Kartenbewegung ----
   var fogRGB = [243, 240, 232], fogAlpha = 1, fogWidth = 0.45, fogSoft = 0.3, fogSmoke = 0.6;
@@ -652,16 +854,18 @@
   });
 
   function iconSVG(ic, size, color, stroke) {
-    var sk = stroke || '#111';
-    var col = color || ic.color;
-    var fg = color ? textOn(color) : (ic.letter ? '#111' : '#fff');
+    var sk = stroke || badgeStroke();
+    var col = badgeFill(color || ic.color);
+    var fg = (color || THEMES[theme].badge.mixA) ? textOn(col) : (ic.letter ? '#111' : '#fff');
+    var sh = THEMES[theme].badge.shape;
+    var shp = sh === 'square' ? '<rect x="3" y="3" width="26" height="26" rx="6" fill="' + col + '" stroke="' + sk + '" stroke-width="2"/>'
+      : (sh === 'hex' ? '<polygon points="16,1 29,8.5 29,23.5 16,31 3,23.5 3,8.5" fill="' + col + '" stroke="' + sk + '" stroke-width="2" stroke-linejoin="round"/>'
+      : '<circle cx="16" cy="16" r="14" fill="' + col + '" stroke="' + sk + '" stroke-width="2"/>');
     if (ic.letter) {
-      return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 32 32">' +
-        '<circle cx="16" cy="16" r="14" fill="' + col + '" stroke="' + sk + '" stroke-width="2"/>' +
+      return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 32 32">' + shp +
         '<text x="16" y="22.5" text-anchor="middle" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="19" fill="' + fg + '">' + ic.letter + '</text></svg>';
     }
-    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 32 32">' +
-      '<circle cx="16" cy="16" r="14" fill="' + col + '" stroke="' + sk + '" stroke-width="2"/>' +
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 32 32">' + shp +
       '<path transform="translate(6 6) scale(0.8333)" fill="' + fg + '" fill-rule="evenodd" d="' + ic.d + '"/></svg>';
   }
   function esc(s) {
@@ -773,6 +977,8 @@
     cv.width = Math.round(cv.clientWidth * dpr);
     cv.height = Math.round(cv.clientHeight * dpr);
     if (showFog) buildFog();
+    drawFrameDom();
+    fxUpdate();
   }
 
   function drawPois(w, h) {
@@ -784,14 +990,14 @@
       if (p.x + s < 0 || p.y + s < 0 || p.x - s > w || p.y - s > h) continue;
       ctx.save();
       ctx.translate(p.x, p.y);
-      ctx.shadowColor = 'rgba(0,0,0,.55)';
-      ctx.shadowBlur = s * 0.4;
-      var fg = o.color ? textOn(o.color) : (ic.letter ? '#111' : '#fff');
-      ctx.fillStyle = o.color || ic.color;
+      var BT = THEMES[theme].badge, fc = badgeFill(o.color || ic.color);
+      ctx.shadowColor = BT.glow || 'rgba(0,0,0,.55)';
+      ctx.shadowBlur = s * (BT.glow ? 0.9 : 0.4);
+      var fg = (o.color || BT.mixA) ? textOn(fc) : (ic.letter ? '#111' : '#fff');
+      ctx.fillStyle = fc;
       ctx.strokeStyle = badgeStroke();
       ctx.lineWidth = s * 0.16;
-      ctx.beginPath();
-      ctx.arc(0, 0, s, 0, Math.PI * 2);
+      badgePath(ctx, s, BT.shape);
       ctx.fill();
       ctx.shadowColor = 'transparent';
       ctx.stroke();
@@ -816,9 +1022,9 @@
     var cx = w / 2, cy = h / 2;
     var gap = w * 0.02, len = w * 0.14;
     ctx.save();
-    ctx.strokeStyle = theme === 'dark' ? 'rgba(255,255,255,0.92)' : 'rgba(30,37,48,0.85)';
+    ctx.strokeStyle = THEMES[theme].cross.c;
     ctx.lineWidth = Math.max(1, w * 0.003);
-    ctx.shadowColor = theme === 'dark' ? 'rgba(0,0,0,.7)' : 'rgba(255,255,255,.9)';
+    ctx.shadowColor = THEMES[theme].cross.sh;
     ctx.shadowBlur = 3;
     ctx.beginPath();
     ctx.moveTo(cx - gap - len, cy); ctx.lineTo(cx - gap, cy);
@@ -857,13 +1063,13 @@
 
   // Icon-Badge am Ursprung zeichnen (für die Legende im Vorschaubild)
   function drawBadge(g, o, ic, s) {
-    var fg = o.color ? textOn(o.color) : (ic.letter ? '#111' : '#fff');
+    var BT = THEMES[theme].badge, fc = badgeFill(o.color || ic.color);
+    var fg = (o.color || BT.mixA) ? textOn(fc) : (ic.letter ? '#111' : '#fff');
     g.save();
-    g.fillStyle = o.color || ic.color;
+    g.fillStyle = fc;
     g.strokeStyle = badgeStroke();
     g.lineWidth = s * 0.16;
-    g.beginPath();
-    g.arc(0, 0, s, 0, Math.PI * 2);
+    badgePath(g, s, BT.shape);
     g.fill();
     g.stroke();
     if (ic.letter) {
@@ -899,12 +1105,13 @@
     var c = document.createElement('canvas');
     c.width = CW; c.height = CH;
     var g = c.getContext('2d');
-    g.fillStyle = theme === 'dark' ? '#1f2327' : '#f1efe9';
+    var T = THEMES[theme], F = T.frame, M = F ? F.m * cw : 0;
+    g.fillStyle = T.bg;
     g.fillRect(0, 0, CW, CH);
 
     // 1. Karte (Grau- und Helligkeitsfilter von Hand, damit es in jedem Browser klappt)
     try { coverDraw(g, opts.mapSrc || map.getCanvas(), 0, 0, CW, CH); } catch (e) {}
-    try {
+    if (T.map) { try { tintMap(g, CW, CH, T.map, T.base); } catch (e) {} } else try {
       var im = g.getImageData(0, 0, CW, CH), d = im.data, osm = !MAPTILER_KEY;
       var dark = theme === 'dark';
       function cl(x) { return x < 0 ? 0 : (x > 255 ? 255 : x); }
@@ -943,10 +1150,12 @@
       coverDraw(g, cv, 0, 0, CW, CH);
     }
 
+    drawFrame(g, CW, CH, cw, F);
+
     // 3. Legende
     if (document.getElementById('optLegend').checked) {
       var named = legendItems();
-      var rowH = 4.8 * cw, y = 3 * cw;
+      var rowH = 4.8 * cw, y = M + 3 * cw, LG = T.legend;
       g.font = '700 ' + (2.5 * cw) + 'px Nunito, Inter, -apple-system, Helvetica, Arial, sans-serif';
       g.textBaseline = 'middle';
       named.forEach(function (it) {
@@ -954,13 +1163,14 @@
         g.textAlign = 'left';
         var tw = g.measureText(txt).width;
         var rowW = 2.4 * cw + tw + 1.4 * cw + 3.6 * cw + 1.6 * cw;
-        var x = CW - rowW;
-        g.fillStyle = theme === 'dark' ? 'rgba(0,0,0,.74)' : 'rgba(255,255,255,.92)';
-        g.fillRect(x, y, rowW, rowH);
-        g.fillStyle = theme === 'dark' ? '#fff' : '#1d2530';
+        var x = CW - M - rowW;
+        g.fillStyle = LG.bg;
+        g.beginPath(); rrSub(g, x, y, rowW, rowH, LG.r * cw); g.fill();
+        if (LG.bd) { g.strokeStyle = LG.bd; g.lineWidth = 0.25 * cw; g.beginPath(); rrSub(g, x + 0.125 * cw, y + 0.125 * cw, rowW - 0.25 * cw, rowH - 0.25 * cw, LG.r * cw); g.stroke(); }
+        g.fillStyle = LG.fg;
         g.fillText(txt, x + 2.4 * cw, y + rowH / 2);
         g.save();
-        g.translate(CW - 1.6 * cw - 1.8 * cw, y + rowH / 2);
+        g.translate(CW - M - 1.6 * cw - 1.8 * cw, y + rowH / 2);
         drawBadge(g, p, ICON_BY[p.icon], 1.6 * cw);
         g.restore();
         y += rowH + 0.7 * cw;
@@ -971,30 +1181,32 @@
     var title = (document.getElementById('title').textContent || '').toUpperCase();
     var coords = (document.getElementById('coords').textContent || '').toUpperCase();
     var gh = 34 * cw;
-    var gr = g.createLinearGradient(0, CH - gh, 0, CH);
-    var tb = theme === 'dark' ? '0,0,0' : '255,255,255', ta = theme === 'dark' ? '.92' : '.95';
+    var gr = g.createLinearGradient(0, CH - M - gh, 0, CH - M);
+    var tb = T.title.grad, ta = String(T.title.ga);
     gr.addColorStop(0, 'rgba(' + tb + ',0)');
     gr.addColorStop(0.65, 'rgba(' + tb + ',' + ta + ')');
     gr.addColorStop(1, 'rgba(' + tb + ',' + ta + ')');
     g.fillStyle = gr;
-    g.fillRect(0, CH - gh, CW, gh);
-    var f = Math.min(1, 13 / Math.max(title.length, 1));
+    g.fillRect(M, CH - M - gh, CW - 2 * M, gh);
+    var f = Math.min(1, 13 / Math.max(title.length, 1)) * (1 - 2 * M / CW);
     g.textBaseline = 'alphabetic';
     g.textAlign = 'center';
     g.lineJoin = 'round';
-    g.font = '900 ' + (11 * cw * f) + 'px Impact, "Arial Black", "Helvetica Neue", sans-serif';
-    var ty = CH - 9.8 * cw;
-    var outline = theme === 'dark' ? '#000' : '#fff';
+    g.font = T.title.st + '900 ' + (11 * cw * f) + 'px ' + T.title.fam;
+    var ty = CH - M - 9.8 * cw;
+    var outline = T.title.out;
+    if (T.title.glow) { g.shadowColor = T.title.glow; g.shadowBlur = 2 * cw; }
     g.fillStyle = outline;
     g.fillText(title, CW / 2, ty + 0.8 * cw);
     g.strokeStyle = outline;
     g.lineWidth = 0.7 * cw;
     g.strokeText(title, CW / 2, ty);
-    g.fillStyle = theme === 'dark' ? '#f3ead0' : '#1f2933';
+    g.shadowColor = 'transparent'; g.shadowBlur = 0;
+    g.fillStyle = T.title.fill;
     g.fillText(title, CW / 2, ty);
     g.font = '500 ' + (2.6 * cw) + 'px Inter, -apple-system, Helvetica, Arial, sans-serif';
-    g.fillStyle = theme === 'dark' ? '#c9bf9f' : '#5b6670';
-    spaced(g, coords, CW / 2, CH - 4 * cw, 0.35 * 2.6 * cw);
+    g.fillStyle = T.title.sub;
+    spaced(g, coords, CW / 2, CH - M - 4 * cw, 0.35 * 2.6 * cw);
     // Quellenangabe (Lizenzpflicht für OpenStreetMap-Daten)
     // Quellenangabe: sehr klein, dezent grau, unten rechts
     var attr = MAPTILER_KEY ? '© OpenStreetMap-Mitwirkende · © MapTiler' : '© OpenStreetMap-Mitwirkende';
@@ -1002,7 +1214,7 @@
     g.font = '400 ' + (0.42 * cw) + 'px Inter, -apple-system, Helvetica, Arial, sans-serif';
     g.textAlign = 'right';
     g.textBaseline = 'alphabetic';
-    g.fillStyle = theme === 'dark' ? 'rgba(100,103,107,.9)' : 'rgba(70,75,80,.85)';
+    g.fillStyle = T.attr;
     g.fillText(attr, CW - 1.4 * cw, CH - 1.2 * cw);
     g.restore();
     g.textAlign = 'center';
@@ -1015,8 +1227,8 @@
     g.font = '900 ' + (34 * k) + 'px "Arial Black", Arial, sans-serif';
     g.textAlign = 'center';
     g.textBaseline = 'middle';
-    g.fillStyle = theme === 'dark' ? 'rgba(255,255,255,.38)' : 'rgba(31,41,51,.22)';
-    g.strokeStyle = theme === 'dark' ? 'rgba(0,0,0,.25)' : 'rgba(255,255,255,.5)';
+    g.fillStyle = 'rgba(' + T.wm.f + ',' + T.wm.fa + ')';
+    g.strokeStyle = 'rgba(' + T.wm.s + ',' + T.wm.sa + ')';
     g.lineWidth = k;
     var wmText = t('wm');
     for (var yy = -CH; yy < CH * 1.2; yy += 170 * k) {
@@ -1261,7 +1473,7 @@
   // Legendeneinträge: nur Orte, denen du selbst einen Namen gegeben hast
   function legendItems() {
     return pois.filter(function (p) { return p.name && p.name.trim(); })
-      .map(function (p) { return { p: p, text: p.name.trim() }; }).slice(0, 10);
+      .map(function (p) { return { p: p, text: p.name.trim() }; }).slice(0, 18);
   }
   function updateLegend() {
     document.getElementById('legend').innerHTML = legendItems().map(function (it) {
@@ -1419,7 +1631,7 @@
     var ring = document.getElementById('selRing');
     var p = null;
     for (var i = 0; i < pois.length; i++) if (pois[i].id === selPoi) p = pois[i];
-    if (!p || locked) { ring.hidden = true; return; }
+    if (!p) { ring.hidden = true; return; }
     var q = map.project([p.lng, p.lat]);
     var d = 2 * (Math.max(10, cv.clientWidth * 0.028) + 5);
     ring.style.width = d + 'px'; ring.style.height = d + 'px';
@@ -1429,7 +1641,7 @@
   var cc = map.getCanvasContainer();
   function cpos(e) { var b = cc.getBoundingClientRect(); return { x: e.clientX - b.left, y: e.clientY - b.top }; }
   cc.addEventListener('pointerdown', function (e) {
-    if (locked || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
     var m = cpos(e), hit = poiAt(m.x, m.y);
     if (!hit) return;
     var q = map.project([hit.lng, hit.lat]);
@@ -1445,7 +1657,7 @@
       render();
       return;
     }
-    if (locked || e.target !== cc && !cc.contains(e.target)) return;
+    if (e.target !== cc && !cc.contains(e.target)) return;
     var h = cpos(e);
     cc.style.cursor = poiAt(h.x, h.y) ? 'grab' : (armed ? 'crosshair' : '');
   });
@@ -1531,26 +1743,40 @@
 
   // ---- Poster sperren ("fertig mit der Bearbeitung") ----
   var locked = false;
-  function updateLockTxt() { document.getElementById('lockTxt').textContent = t(locked ? 'lock.on' : 'lock.off'); }
-  function setLocked(on) {
+  function updateLockTxt() {}
+  function setLocked(on, quiet) {
     locked = on;
     document.body.classList.toggle('locked', on);
     var h = ['dragPan', 'scrollZoom', 'doubleClickZoom', 'touchZoomRotate', 'keyboard', 'boxZoom'];
     h.forEach(function (n) { if (map[n]) { if (on) map[n].disable(); else map[n].enable(); } });
     if (!on) map.touchZoomRotate.disableRotation();
-    if (on) setArmed(false);
-    var b = document.getElementById('lockBtn');
-    b.setAttribute('aria-pressed', on ? 'true' : 'false');
-    updateLockTxt();
-    ['q', 'go', 'titleIn'].forEach(function (id) { document.getElementById(id).disabled = on; });
-    map.getCanvasContainer().style.cursor = on ? 'default' : '';
-    status(on ? t('st.locked') : t('st.unlocked'));
+    document.getElementById('viewLock').checked = on;
+    document.getElementById('zoomIn').disabled = on;
+    document.getElementById('zoomOut').disabled = on;
+    if (!quiet) status(on ? t('st.locked') : t('st.unlocked'));
   }
-  document.getElementById('lockBtn').addEventListener('click', function () { setLocked(!locked); });
+  document.getElementById('viewLock').addEventListener('change', function (e) { setLocked(e.target.checked); });
 
   // Der Export in voller Auflösung ist nur sichtbar, wenn die Seite lokal bei dir läuft (localhost)
+  // Auf anderen Geräten: einmal die Seite mit ?owner=DEIN-CODE öffnen, dann merkt sich der Browser, dass du es bist.
+  // Im Code steht nur der Hash des Codes. Das ist ein Sichtschutz, kein echter Schutz.
+  var OWNER_HASH = '943232becf1956505f8f8872d52e24b3cc7c81a62c44b61602d273523a2d98cd';
   var OWNER = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:';
+  try { if (localStorage.getItem('revier-owner') === '1') OWNER = true; } catch (e) {}
   document.getElementById('ownerTools').hidden = !OWNER;
+  (function () {
+    var m = /[?&]owner=([^&#]+)/.exec(location.search);
+    if (!m) return;
+    try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
+    if (!(window.crypto && crypto.subtle && window.TextEncoder)) return;
+    crypto.subtle.digest('SHA-256', new TextEncoder().encode(decodeURIComponent(m[1]))).then(function (buf) {
+      var hex = Array.prototype.map.call(new Uint8Array(buf), function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+      if (hex !== OWNER_HASH) return;
+      try { localStorage.setItem('revier-owner', '1'); } catch (e) {}
+      OWNER = true;
+      document.getElementById('ownerTools').hidden = false;
+    });
+  })();
   // ---- Export in hoher Auflösung ----
   // TESTMODUS: Der Download ist noch kostenlos. Später kommt hier die Bezahlung (Stripe) davor,
   // und die Datei wird erst nach erfolgreicher Zahlung auf dem Server erzeugt.
@@ -1680,7 +1906,7 @@
   var SUBMIT = {
     url: 'https://api.web3forms.com/submit',
     key: '0389e255-c09c-481b-9443-80c1aa0b00cd',                                   // Web3Forms-Zugangsschlüssel (öffentlich vorgesehen)
-    ownerUrl: 'http://localhost:3000/'         // Adresse, unter der die Seite bei dir lokal läuft
+    ownerUrl: 'https://mein-revier.braun-raven.workers.dev/'         // Adresse, die in deiner Einreichungs-Mail steht
   };
   // Affiliate-Link zum Druckanbieter. Leer lassen = der Werbe-Hinweis nach dem Einreichen erscheint nicht.
   var AFFILIATE = { url: '' };
@@ -1691,7 +1917,7 @@
     var c = map.getCenter();
     return {
       v: 1,
-      th: theme === 'dark' ? 'd' : 'l',
+      th: themeCode(theme),
       c: [+c.lng.toFixed(6), +c.lat.toFixed(6)],
       z: +(map.getZoom() - Math.log2(posterW() / 600)).toFixed(3),   // unabhängig von der Bildschirmgröße
       t: document.getElementById('title').textContent,
@@ -1713,7 +1939,7 @@
       return { id: ++poiId, lat: num(q.a, cy, -85, 85), lng: num(q.o, cx, -180, 180), icon: ICON_BY[q.i] ? q.i : 'star',
                name: String(q.n || '').slice(0, 60), color: /^#[0-9a-fA-F]{6}$/.test(q.c || '') ? q.c : null };
     });
-    setTheme(st.th === 'l' ? 'light' : 'dark');
+    setTheme(themeFromCode(st.th));
     if (st.f) {
       showFog = !!st.f.on;
       fogWidth = num(st.f.w, 0.45, 0, 1); fogSoft = num(st.f.s, 0.3, 0, 0.8); fogSmoke = num(st.f.m, 0.6, 0, 1); fogAlpha = num(st.f.a, 1, 0.4, 1);
@@ -1807,7 +2033,6 @@
     }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || j.success === false) throw new Error(j.message || ('Fehler ' + r.status)); }); })
       .then(function () {
         say(t('dlg.done'), 'ok');
-        if (!locked) setLocked(true);
         document.getElementById('fSend').textContent = t('dlg.sent');
         if (/^https:\/\//.test(AFFILIATE.url)) {
           document.getElementById('fThanksLink').href = AFFILIATE.url;
@@ -1826,26 +2051,69 @@
 
   // ---- Hell / Dunkel ----
   function setWatermark() {
-    var dark = theme === 'dark';
-    var svg = "<svg xmlns='http://www.w3.org/2000/svg' width='280' height='170'><text x='140' y='95' text-anchor='middle' font-family='Arial Black, Arial' font-weight='900' font-size='34' fill='" +
-      (dark ? 'white' : '#1f2933') + "' fill-opacity='" + (dark ? '0.38' : '0.22') + "' stroke='" + (dark ? 'black' : 'white') + "' stroke-opacity='" + (dark ? '0.25' : '0.5') +
+    var W = THEMES[theme].wm;
+    var svg = "<svg xmlns='http://www.w3.org/2000/svg' width='280' height='170'><text x='140' y='95' text-anchor='middle' font-family='Arial Black, Arial' font-weight='900' font-size='34' fill='rgb(" +
+      W.f + ")' fill-opacity='" + W.fa + "' stroke='rgb(" + W.s + ")' stroke-opacity='" + W.sa +
       "' stroke-width='1' transform='rotate(-25 140 85)'>" + esc(t('wm')) + '</text></svg>';
     document.getElementById('poster').style.setProperty('--wm', 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")');
   }
   function hex2(rgb) { return '#' + rgb.map(function (n) { return ('0' + n.toString(16)).slice(-2); }).join(''); }
+  // Stil auf die Bildschirm-Vorschau übertragen (Farben, Schrift, Rahmenabstand)
+  function applyThemeCss() {
+    var T = THEMES[theme], s = document.getElementById('poster').style, F = T.frame, o = T.title.out;
+    s.setProperty('--pbg', T.bg); s.setProperty('--pborder', T.border);
+    s.setProperty('--m', F ? F.m + 'cqw' : '0px'); s.setProperty('--tk', F ? String(1 - 2 * F.m / 100) : '1');
+    s.setProperty('--lgbg', T.legend.bg); s.setProperty('--lgfg', T.legend.fg); s.setProperty('--lgr', T.legend.r + 'cqw'); s.setProperty('--lgbd', T.legend.bd || 'transparent');
+    s.setProperty('--tg', T.title.grad); s.setProperty('--tga', String(T.title.ga));
+    s.setProperty('--tfill', T.title.fill); s.setProperty('--tsub', T.title.sub); s.setProperty('--tfam', T.title.fam); s.setProperty('--tst', T.title.st ? 'italic' : 'normal');
+    s.setProperty('--tsh', '-.35cqw -.35cqw 0 ' + o + ', .35cqw -.35cqw 0 ' + o + ', -.35cqw .35cqw 0 ' + o + ', .35cqw .35cqw 0 ' + o + ', 0 .8cqw 0 ' + o + (T.title.glow ? ', 0 0 2cqw ' + T.title.glow : ''));
+  }
+  var frameCv = document.getElementById('frameCv');
+  function drawFrameDom() {
+    var W = cv.clientWidth, H = cv.clientHeight, dpr = window.devicePixelRatio || 1;
+    frameCv.width = Math.round(W * dpr); frameCv.height = Math.round(H * dpr);
+    var g = frameCv.getContext('2d');
+    g.clearRect(0, 0, frameCv.width, frameCv.height);
+    drawFrame(g, frameCv.width, frameCv.height, frameCv.width / 100, THEMES[theme].frame);
+  }
+  // Live-Vorschau der umgefärbten Karte (Spiele-Stile): Kopie der Karte, mit denselben Farben wie im Export
+  var fxCv = document.getElementById('mapFx'), fxPending = false;
+  function fxUpdate() {
+    if (!THEMES[theme].map || fxPending) return;
+    fxPending = true;
+    requestAnimationFrame(function () {
+      fxPending = false;
+      var T = THEMES[theme];
+      if (!T.map) return;
+      var W = Math.max(2, Math.round(cv.clientWidth)), H = Math.max(2, Math.round(cv.clientHeight));
+      if (fxCv.width !== W || fxCv.height !== H) { fxCv.width = W; fxCv.height = H; }
+      var g = fxCv.getContext('2d', { willReadFrequently: true });
+      try { coverDraw(g, map.getCanvas(), 0, 0, W, H); tintMap(g, W, H, T.map, T.base); } catch (e) {}
+    });
+  }
+  map.on('render', fxUpdate);
+  var curBase = null;
   function setTheme(th, force) {
     if (!force && th === theme) return;
     var prev = theme;
     theme = th;
-    document.getElementById('poster').setAttribute('data-theme', th);
+    var T = THEMES[th];
+    var posterEl = document.getElementById('poster');
+    posterEl.setAttribute('data-theme', th);
+    posterEl.classList.toggle('fx', !!T.map);
     Array.prototype.forEach.call(document.querySelectorAll('.choice'), function (b) {
       b.setAttribute('aria-pressed', b.getAttribute('data-theme') === th ? 'true' : 'false');
     });
-    if (fogRGB.join() === FOG_DEF[prev].join()) fogRGB = FOG_DEF[th].slice();
+    if (fogRGB.join() === THEMES[prev].fog.join()) fogRGB = T.fog.slice();
     document.getElementById('fogColor').value = hex2(fogRGB);
     if (showFog) buildFog();
+    applyThemeCss();
+    drawFrameDom();
     setWatermark();
-    loadMapStyle(th);
+    if (curBase !== T.base) { curBase = T.base; loadMapStyle(T.base); }
+    buildPalette();
+    refreshList();
+    fxUpdate();
     render();
   }
   Array.prototype.forEach.call(document.querySelectorAll('.choice'), function (b) {
@@ -1890,7 +2158,10 @@
     var q = document.getElementById('q').value.trim();
     if (step === 1 && q && q !== lastQuery) {
       search().then(function (ok) { if (ok) goStep(2, true); });
-    } else goStep(step + 1, true);
+    } else {
+      if (step === 2 && !locked) setLocked(true, true);
+      goStep(step + 1, true);
+    }
   });
   document.getElementById('zoomIn').addEventListener('click', function () { map.zoomIn({ duration: 200 }); });
   document.getElementById('zoomOut').addEventListener('click', function () { map.zoomOut({ duration: 200 }); });
@@ -1934,11 +2205,12 @@
   // ---- Start ----
   var st0 = readHash();
   resizeCanvas();
-  setTheme(st0 ? (st0.th === 'l' ? 'light' : 'dark') : DEFAULT_THEME, true);
+  setTheme(st0 ? themeFromCode(st0.th) : DEFAULT_THEME, true);
   applyLang();
   setArmed(false);
   if (st0 && applyState(st0)) {
     status(t('st.fromlink'));
+    if (OWNER) goStep(5);
   } else {
     setTitle('Berlin', 52.52, 13.405);
     render();
