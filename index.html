@@ -873,13 +873,14 @@
     fxUpdate();
   }
 
-  function drawPois(w, h) {
+  function drawPois(w, h, ext) {
+    ext = ext || 0;
     var s = Math.max(10, w * 0.028);
     for (var i = 0; i < pois.length; i++) {
       var o = pois[i];
       var ic = ICON_BY[o.icon];
       var p = map.project([o.lng, o.lat]);
-      if (p.x + s < 0 || p.y + s < 0 || p.x - s > w || p.y - s > h) continue;
+      if (p.x + s < 0 || p.y + s < -ext || p.x - s > w || p.y - s > h + ext) continue;
       ctx.save();
       ctx.translate(p.x, p.y);
       var BT = THEMES[theme].badge, fc = badgeFill(o.color || ic.color);
@@ -993,7 +994,7 @@
   //                    cssW/cssH: Postergröße am Bildschirm, watermark: false für den Export }
   function composePoster(CW, opts) {
     opts = opts || {};
-    var CH = Math.round(CW * 7 / 5), cw = CW / 100;
+    var CH = Math.round(CW * (opts.aspect || 1.4)), cw = CW / 100, PH = !!opts.phone;
     var c = document.createElement('canvas');
     c.width = CW; c.height = CH;
     var g = c.getContext('2d');
@@ -1034,7 +1035,8 @@
       try {
         g.save();
         g.scale(CW / opts.cssW, CW / opts.cssW);
-        drawPois(opts.cssW, opts.cssH);
+        var dyp = (opts.cssH - (opts.posterH || opts.cssH)) / 2;   // Handy: Karte ist höher als das Poster, Orte bleiben an ihrer Stelle
+        g.save(); g.translate(0, dyp); drawPois(opts.cssW, opts.posterH || opts.cssH, dyp); g.restore();
         drawCrosshair(opts.cssW, opts.cssH);
         g.restore();
       } finally { ctx = savedCtx; }
@@ -1047,7 +1049,7 @@
     // 3. Legende
     if (document.getElementById('optLegend').checked) {
       var named = legendItems();
-      var rowH = 4.8 * cw, y = M + 3 * cw, LG = T.legend;
+      var rowH = 4.8 * cw, y = M + 3 * cw + (PH ? 0.12 * CH : 0), LG = T.legend;
       g.font = '700 ' + (2.5 * cw) + 'px Nunito, Inter, -apple-system, Helvetica, Arial, sans-serif';
       g.textBaseline = 'middle';
       named.forEach(function (it) {
@@ -1072,7 +1074,8 @@
     // 4. Titelleiste
     var title = (document.getElementById('title').textContent || '').toUpperCase();
     var coords = (document.getElementById('coords').textContent || '').toUpperCase();
-    var gh = 34 * cw;
+    var BP = PH ? 0.075 * CH : 0;   // Handy: Platz für Home-Leiste und Sperrbildschirm-Tasten
+    var gh = 34 * cw + BP;
     var gr = g.createLinearGradient(0, CH - M - gh, 0, CH - M);
     var tb = T.title.grad, ta = String(T.title.ga);
     gr.addColorStop(0, 'rgba(' + tb + ',0)');
@@ -1085,7 +1088,7 @@
     g.textAlign = 'center';
     g.lineJoin = 'round';
     g.font = T.title.st + '900 ' + (11 * cw * f) + 'px ' + T.title.fam;
-    var ty = CH - M - 9.8 * cw;
+    var ty = CH - M - BP - 9.8 * cw;
     var outline = T.title.out;
     if (T.title.glow) { g.shadowColor = T.title.glow; g.shadowBlur = 2 * cw; }
     g.fillStyle = outline;
@@ -1098,7 +1101,7 @@
     g.fillText(title, CW / 2, ty);
     g.font = '500 ' + (2.6 * cw) + 'px Inter, -apple-system, Helvetica, Arial, sans-serif';
     g.fillStyle = T.title.sub;
-    spaced(g, coords, CW / 2, CH - M - 4 * cw, 0.35 * 2.6 * cw);
+    spaced(g, coords, CW / 2, CH - M - BP - 4 * cw, 0.35 * 2.6 * cw);
     // Quellenangabe (Lizenzpflicht für OpenStreetMap-Daten)
     // Quellenangabe: sehr klein, dezent grau, unten rechts
     var attr = MAPTILER_KEY ? '© OpenStreetMap-Mitwirkende · © MapTiler' : '© OpenStreetMap-Mitwirkende';
@@ -1666,9 +1669,11 @@
       return Math.min(gl.getParameter(gl.MAX_RENDERBUFFER_SIZE), gl.getParameter(gl.MAX_TEXTURE_SIZE));
     } catch (e) { return 4096; }
   }
-  function exportPoster(EW) {
+  function exportPoster(EW, phone) {
     var posterEl = document.getElementById('poster');
-    var cssW = posterEl.clientWidth, cssH = posterEl.clientHeight;
+    var cssW = posterEl.clientWidth, posterH = posterEl.clientHeight;
+    var aspect = phone ? PHONE.h / PHONE.w : 1.4;
+    var cssH = phone ? Math.round(cssW * aspect) : posterH;   // Handy: höheres Bild, die Karte zeigt oben und unten mehr
     var maxS = maxGlSize();
     var limit = Math.floor(maxS / (cssH / cssW));
     var capped = EW > limit;
@@ -1697,7 +1702,7 @@
         if (done || !em.loaded()) return;
         done = true;
         try {
-          var out = composePoster(EW, { mapSrc: em.getCanvas(), hq: true, cssW: cssW, cssH: cssH, watermark: false });
+          var out = composePoster(EW, { mapSrc: em.getCanvas(), hq: true, cssW: cssW, cssH: cssH, posterH: posterH, aspect: aspect, phone: !!phone, watermark: false });
           cleanup();
           resolve({ canvas: out, width: EW, capped: capped });
         } catch (err2) { cleanup(); reject(err2); }
@@ -1707,7 +1712,7 @@
   // ---- Export aller drei Größen als ZIP (nur lokal beim Anbieter sichtbar) ----
   // Druckgrößen mit 300 dpi auf der langen Seite der Breite (A4 2480, A3 3508, A2 4961 Pixel). Das Poster hat das Seitenverhältnis 5:7.
   var EXPORT_SIZES = [['A4', 2480], ['A3', 3508], ['A2', 4961], ['handy', 1290]];
-  var PHONE = { w: 1290, h: 2796 };   // Handy-Hintergrund: ganzes Poster mittig auf dunklem Grund
+  var PHONE = { w: 1290, h: 2796 };   // Handy-Hintergrund (iPhone Pro Max / 15 Seitenverhältnis), eigenes Hochformat mit mehr Karte
   var CRC_T = null;
   function crc32(u8) {
     if (!CRC_T) { CRC_T = new Uint32Array(256); for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; CRC_T[n] = c >>> 0; } }
@@ -1752,17 +1757,9 @@
       if (i >= EXPORT_SIZES.length) return Promise.resolve();
       btn.textContent = 'Erzeuge ' + (i + 1) + ' von ' + EXPORT_SIZES.length + ' …';
       status('Datei ' + (i + 1) + ' von ' + EXPORT_SIZES.length + ' (' + EXPORT_SIZES[i][0] + ') wird erzeugt, das dauert einige Sekunden.');
-      return exportPoster(EXPORT_SIZES[i][1]).then(function (r) {
+      return exportPoster(EXPORT_SIZES[i][1], EXPORT_SIZES[i][0] === 'handy').then(function (r) {
         if (r.capped) cappedNames.push(EXPORT_SIZES[i][0] + ' (' + r.width + ' px)');
         var cv = r.canvas;
-        if (EXPORT_SIZES[i][0] === 'handy') {
-          var pc = document.createElement('canvas'); pc.width = PHONE.w; pc.height = PHONE.h;
-          var pg = pc.getContext('2d');
-          pg.fillStyle = 'rgb(' + fogRGB.join(',') + ')'; pg.fillRect(0, 0, PHONE.w, PHONE.h);
-          var ph = Math.round(PHONE.w * cv.height / cv.width);
-          pg.drawImage(cv, 0, Math.round((PHONE.h - ph) / 2), PHONE.w, ph);
-          cv.width = cv.height = 1; cv = pc;
-        }
         return canvasPng(cv).then(function (data) {
           files.push({ name: 'mein-revier-' + slug + '-' + EXPORT_SIZES[i][0] + '.png', data: data });
           cv.width = cv.height = 1;   // Speicher freigeben
